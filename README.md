@@ -1,11 +1,11 @@
 # Relayer for Tornado mixer
 ## Setup
 1. `npm i`
-2. `cp env.json.example env.json`
-3. Modify `env.json` as needed
+2. `cp .env.example .env`
+3. Modify `.env` as needed
 
 ## Run
-1. `node index.js`
+1. `npm run start`
 2. `curl -X POST -H 'content-type:application/json' --data '<PROOF>' http://127.0.0.1:8000/relay`
 Relayer should return a transaction hash.
 
