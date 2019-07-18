@@ -4,6 +4,8 @@
   "description": "Relayer for Tornado mixer. https://tornado.cash",
   "main": "index.js",
   "scripts": {
+    "start": "node index.js",
+    "eslint": "npx eslint .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alexey Pertsev <alexey@peppersec.com> (https://peppersec.com)",
@@ -13,5 +15,8 @@
     "node-fetch": "^2.6.0",
     "web3": "^1.0.0-beta.55",
     "web3-utils": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^6.0.1"
   }
 }
