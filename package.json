@@ -1,0 +1,17 @@
+{
+  "name": "relay",
+  "version": "1.0.0",
+  "description": "Relayer for Tornado mixer. https://tornado.cash",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Alexey Pertsev <alexey@peppersec.com> (https://peppersec.com)",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.17.1",
+    "node-fetch": "^2.6.0",
+    "web3": "^1.0.0-beta.55",
+    "web3-utils": "^1.0.0"
+  }
+}
