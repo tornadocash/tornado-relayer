@@ -5,7 +5,7 @@ const express = require('express')
 const app = express()
 app.use(express.json())
 
-const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./env.json')
+const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./config')
 
 const Web3 = require('web3')
 const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })

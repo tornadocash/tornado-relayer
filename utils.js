@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 const { isHexStrict } = require('web3-utils')
-const { gasOracleUrls } = require('./env.json')
+const { gasOracleUrls } = require('./config')
 
 async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
   oracleIndex = (oracleIndex + 1) % gasOracleUrls.length
