@@ -9,3 +9,8 @@ services:
       VIRTUAL_HOST: relayer.tornado.cash
       LETSENCRYPT_HOST: relayer.tornado.cash
     env_file: ./.env
+
+networks:
+  default:
+    external:
+      name: frontend_default
