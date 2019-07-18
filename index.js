@@ -1,19 +1,19 @@
-const { fetchGasPrice, isValidProof } = require('./utils')
 const { numberToHex, toWei, toHex } = require('web3-utils')
-
+const Web3 = require('web3')
 const express = require('express')
+
 const app = express()
 app.use(express.json())
 
 const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./config')
+const { fetchGasPrice, isValidProof } = require('./utils')
 
-const Web3 = require('web3')
 const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
 const account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey)
 web3.eth.accounts.wallet.add('0x' + privateKey)
 web3.eth.defaultAccount = account.address
 
-const mixerABI = require('./mixerABI.json')
+const mixerABI = require('./mixerABI.json') 
 const mixer = new web3.eth.Contract(mixerABI, mixerAddress)
 const gasPrices = { fast: defaultGasPrice }
 

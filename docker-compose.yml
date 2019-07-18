@@ -1,0 +1,12 @@
+version: '2'
+
+services:
+  relayer:
+    image: relayer
+    build: ./
+    restart: always
+    ports:
+      - 8000:8000
+    environment:
+      - NODE_ENV=production
+    env_file: ./.env
