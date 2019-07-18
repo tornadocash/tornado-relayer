@@ -42,6 +42,11 @@ app.post('/relay', async (req, resp) => {
     if (isSpent) {
       throw new Error('The note has been spent')
     }
+    const root = publicSignals[0]
+    const isKnownRoot = await mixer.methods.isKnownRoot(root).call()
+    if (!isKnownRoot) {
+      throw new Error('The merkle root is too old or invalid')
+    }
     const gas = await mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).estimateGas()
     const result = mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).send({
       gas: numberToHex(gas + 50000),
