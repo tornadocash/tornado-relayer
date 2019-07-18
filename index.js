@@ -4,6 +4,11 @@ const express = require('express')
 
 const app = express()
 app.use(express.json())
+app.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*"); // update to match the domain you will make the request from
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./config')
 const { fetchGasPrice, isValidProof } = require('./utils')
@@ -54,7 +59,7 @@ app.post('/relay', async (req, resp) => {
       // TODO: nonce
     })
     result.once('transactionHash', function(hash){
-      resp.send({ transaction: hash })
+      resp.json({ txHash: hash })
     }).on('error', function(e){
       console.log(e)
       resp.status(400).send('Proof is malformed')
