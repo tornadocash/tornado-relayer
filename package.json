@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "eslint": "npx eslint .",
+    "eslint": "npx eslint --ignore-path .gitignore .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Alexey Pertsev <alexey@peppersec.com> (https://peppersec.com)",
