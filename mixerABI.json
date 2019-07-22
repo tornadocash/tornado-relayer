@@ -218,13 +218,13 @@
     "anonymous": false,
     "inputs": [
       {
-        "indexed": false,
-        "name": "from",
-        "type": "address"
+        "indexed": true,
+        "name": "commitment",
+        "type": "uint256"
       },
       {
         "indexed": false,
-        "name": "commitment",
+        "name": "leafIndex",
         "type": "uint256"
       }
     ],
@@ -251,23 +251,6 @@
       }
     ],
     "name": "Withdraw",
-    "type": "event"
-  },
-  {
-    "anonymous": false,
-    "inputs": [
-      {
-        "indexed": false,
-        "name": "leaf",
-        "type": "uint256"
-      },
-      {
-        "indexed": false,
-        "name": "leaf_index",
-        "type": "uint32"
-      }
-    ],
-    "name": "LeafAdded",
     "type": "event"
   },
   {

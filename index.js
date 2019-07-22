@@ -24,7 +24,7 @@ const gasPrices = { fast: defaultGasPrice }
 
 app.get('/', function (req, res) {
   // just for testing purposes
-  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}`)
+  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}. Mixer address is ${mixerAddress}`)
 })
 
 app.post('/relay', async (req, resp) => {
