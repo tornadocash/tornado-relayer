@@ -10,7 +10,7 @@ app.use(function(req, res, next) {
   next()
 })
 
-const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice, desiredFee } = require('./config')
+const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./config')
 const { fetchGasPrice, isValidProof } = require('./utils')
 
 const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
@@ -31,27 +31,28 @@ app.post('/relay', async (req, resp) => {
   const { valid , reason } = isValidProof(req.body)
   if (!valid) {
     console.log('Proof is invalid:', reason)
-    return resp.status(400).send('Proof is invalid')
+    return resp.status(400).json({ error: 'Proof is invalid' })
   }
 
   let { pi_a, pi_b, pi_c, publicSignals } = req.body
 
   const fee = toBN(publicSignals[3])
-  if (fee.lt(toBN(desiredFee))) {
+  const desiredFee = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
+  if (fee.lt(desiredFee)) {
     console.log('Fee is too low')
-    return resp.status(400).send('Fee is too low')
+    return resp.status(400).json({ error: 'Fee is too low. Try to resend.' })
   }
 
   try {
     const nullifier = publicSignals[1]
     const isSpent = await mixer.methods.isSpent(nullifier).call()
     if (isSpent) {
-      throw new Error('The note has been spent')
+      return resp.status(400).json({ error: 'The note has been spent.' })
     }
     const root = publicSignals[0]
     const isKnownRoot = await mixer.methods.isKnownRoot(root).call()
     if (!isKnownRoot) {
-      throw new Error('The merkle root is too old or invalid')
+      return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
     const gas = await mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).estimateGas()
     const result = mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).send({
@@ -63,11 +64,11 @@ app.post('/relay', async (req, resp) => {
       resp.json({ txHash: hash })
     }).on('error', function(e){
       console.log(e)
-      resp.status(400).send('Proof is malformed')
+      return resp.status(400).json({ error: 'Proof is malformed.' })
     })
   } catch (e) {
     console.log(e)
-    resp.status(400).send('Proof is malformed or spent')
+    return resp.status(400).json({ error: 'Proof is malformed or spent.' })
   }
 })
 
