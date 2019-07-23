@@ -6,6 +6,6 @@ module.exports = {
   privateKey: process.env.PRIVATE_KEY,
   mixerAddress: process.env.MIXER_ADDRESS,
   desiredFee: process.env.DESIRED_FEE || 10000000000000000, // 0.01 ETH
-  defaultGasPrice: 1,
+  defaultGasPrice: 2,
   gasOracleUrls: ['https://www.etherchain.org/api/gasPriceOracle', 'https://gasprice.poa.network/']
 }
