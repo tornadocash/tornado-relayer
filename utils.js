@@ -78,4 +78,8 @@ function isValidProof(proof) {
   return { valid: true }
 }
 
-module.exports = { fetchGasPrice, isValidProof }
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
+module.exports = { fetchGasPrice, isValidProof, sleep }
