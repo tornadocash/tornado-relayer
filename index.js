@@ -4,6 +4,16 @@ const express = require('express')
 
 const app = express()
 app.use(express.json())
+
+app.use((err, req, res, next) => {
+  if (err) {
+    console.log('Invalid Request data')
+    res.send('Invalid Request data')
+  } else {
+    next()
+  }
+})
+
 app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
