@@ -84,7 +84,7 @@ app.post('/relay', async (req, resp) => {
 
 app.listen(8000)
 
-if (netId === 1) {
+if (Number(netId) === 1) {
   fetchGasPrice({ gasPrices })
   console.log('Gas price oracle started.')
 }
