@@ -7,4 +7,5 @@ RUN npm install
 COPY . .
 
 EXPOSE 8000
+HEALTHCHECK CMD curl -f http://localhost:8000/
 CMD ["npm", "run", "start"]

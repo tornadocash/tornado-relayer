@@ -10,6 +10,13 @@ services:
       LETSENCRYPT_HOST: relayer.tornado.cash
     env_file: ./.env
 
+  monitor:
+    image: arefaslani/docker-telegram-notifier
+    restart: always
+    volumes:
+     - /var/run/docker.sock:/var/run/docker.sock
+    env_file: ./.env
+
 networks:
   default:
     external:
