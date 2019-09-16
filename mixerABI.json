@@ -5,6 +5,7 @@
     "name": "filled_subtrees",
     "outputs": [
       {
+        "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
       }
@@ -17,6 +18,7 @@
     "constant": true,
     "inputs": [
       {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -24,6 +26,7 @@
     "name": "nullifierHashes",
     "outputs": [
       {
+        "internalType": "bool",
         "name": "",
         "type": "bool"
       }
@@ -35,11 +38,12 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "transferValue",
+    "name": "verifier",
     "outputs": [
       {
+        "internalType": "contract IVerifier",
         "name": "",
-        "type": "uint256"
+        "type": "address"
       }
     ],
     "payable": false,
@@ -52,6 +56,7 @@
     "name": "roots",
     "outputs": [
       {
+        "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
       }
@@ -64,6 +69,7 @@
     "constant": true,
     "inputs": [
       {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -71,6 +77,7 @@
     "name": "commitments",
     "outputs": [
       {
+        "internalType": "bool",
         "name": "",
         "type": "bool"
       }
@@ -85,6 +92,7 @@
     "name": "zeros",
     "outputs": [
       {
+        "internalType": "uint256[]",
         "name": "",
         "type": "uint256[]"
       }
@@ -99,6 +107,7 @@
     "name": "levels",
     "outputs": [
       {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -109,12 +118,44 @@
   },
   {
     "constant": true,
+    "inputs": [],
+    "name": "operator",
+    "outputs": [
+      {
+        "internalType": "address payable",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isDepositsEnabled",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
     "inputs": [
       {
+        "internalType": "uint256",
         "name": "left",
         "type": "uint256"
       },
       {
+        "internalType": "uint256",
         "name": "right",
         "type": "uint256"
       }
@@ -122,6 +163,7 @@
     "name": "hashLeftRight",
     "outputs": [
       {
+        "internalType": "uint256",
         "name": "mimc_hash",
         "type": "uint256"
       }
@@ -136,6 +178,7 @@
     "name": "next_index",
     "outputs": [
       {
+        "internalType": "uint32",
         "name": "",
         "type": "uint32"
       }
@@ -150,6 +193,7 @@
     "name": "current_root",
     "outputs": [
       {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -162,6 +206,7 @@
     "constant": true,
     "inputs": [
       {
+        "internalType": "uint256",
         "name": "root",
         "type": "uint256"
       }
@@ -169,6 +214,7 @@
     "name": "isKnownRoot",
     "outputs": [
       {
+        "internalType": "bool",
         "name": "",
         "type": "bool"
       }
@@ -183,6 +229,22 @@
     "name": "getLastRoot",
     "outputs": [
       {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "mixDenomination",
+    "outputs": [
+      {
+        "internalType": "uint256",
         "name": "",
         "type": "uint256"
       }
@@ -194,20 +256,29 @@
   {
     "inputs": [
       {
+        "internalType": "address",
         "name": "_verifier",
         "type": "address"
       },
       {
-        "name": "_transferValue",
+        "internalType": "uint256",
+        "name": "_mixDenomination",
         "type": "uint256"
       },
       {
+        "internalType": "uint8",
         "name": "_merkleTreeHeight",
         "type": "uint8"
       },
       {
+        "internalType": "uint256",
         "name": "_emptyElement",
         "type": "uint256"
+      },
+      {
+        "internalType": "address payable",
+        "name": "_operator",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -219,16 +290,19 @@
     "inputs": [
       {
         "indexed": true,
+        "internalType": "uint256",
         "name": "commitment",
         "type": "uint256"
       },
       {
         "indexed": false,
+        "internalType": "uint256",
         "name": "leafIndex",
         "type": "uint256"
       },
       {
         "indexed": false,
+        "internalType": "uint256",
         "name": "timestamp",
         "type": "uint256"
       }
@@ -241,16 +315,25 @@
     "inputs": [
       {
         "indexed": false,
+        "internalType": "address",
         "name": "to",
         "type": "address"
       },
       {
         "indexed": false,
+        "internalType": "uint256",
         "name": "nullifierHash",
         "type": "uint256"
       },
       {
+        "indexed": true,
+        "internalType": "address",
+        "name": "relayer",
+        "type": "address"
+      },
+      {
         "indexed": false,
+        "internalType": "uint256",
         "name": "fee",
         "type": "uint256"
       }
@@ -262,6 +345,7 @@
     "constant": false,
     "inputs": [
       {
+        "internalType": "uint256",
         "name": "commitment",
         "type": "uint256"
       }
@@ -276,20 +360,24 @@
     "constant": false,
     "inputs": [
       {
+        "internalType": "uint256[2]",
         "name": "a",
         "type": "uint256[2]"
       },
       {
+        "internalType": "uint256[2][2]",
         "name": "b",
         "type": "uint256[2][2]"
       },
       {
+        "internalType": "uint256[2]",
         "name": "c",
         "type": "uint256[2]"
       },
       {
+        "internalType": "uint256[5]",
         "name": "input",
-        "type": "uint256[4]"
+        "type": "uint256[5]"
       }
     ],
     "name": "withdraw",
@@ -299,9 +387,34 @@
     "type": "function"
   },
   {
+    "constant": false,
+    "inputs": [],
+    "name": "toggleDeposits",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address payable",
+        "name": "_newAccount",
+        "type": "address"
+      }
+    ],
+    "name": "changeOperator",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
     "constant": true,
     "inputs": [
       {
+        "internalType": "uint256",
         "name": "nullifier",
         "type": "uint256"
       }
@@ -309,6 +422,7 @@
     "name": "isSpent",
     "outputs": [
       {
+        "internalType": "bool",
         "name": "",
         "type": "bool"
       }

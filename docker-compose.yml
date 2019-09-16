@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-      VIRTUAL_HOST: relayer.tornado.cash
-      LETSENCRYPT_HOST: relayer.tornado.cash
+      VIRTUAL_HOST: kovan.tornado.cash
+      LETSENCRYPT_HOST: kovan.tornado.cash
     env_file: ./.env
 
   monitor:

@@ -60,7 +60,7 @@ function isValidProof(proof) {
     return { valid: false, reason: 'Corrupted pi_c' }
   }
 
-  if (proof.publicSignals.length !== 4) {
+  if (proof.publicSignals.length !== 5) {
     return { valid: false, reason: 'Corrupted publicSignals' }
   }
 

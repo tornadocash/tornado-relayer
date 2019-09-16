@@ -38,6 +38,7 @@ app.get('/', function (req, res) {
 })
 
 app.post('/relay', async (req, resp) => {
+  console.log(JSON.stringify(req.body, null, 2))
   const { valid , reason } = isValidProof(req.body)
   if (!valid) {
     console.log('Proof is invalid:', reason)
