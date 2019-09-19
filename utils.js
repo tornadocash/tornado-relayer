@@ -1,6 +1,6 @@
 const fetch = require('node-fetch')
 const { isHexStrict, hexToNumberString } = require('web3-utils')
-const { gasOracleUrls, ethdaiAddress } = require('./config')
+const { gasOracleUrls, ethdaiAddress, mixers } = require('./config')
 const oracleABI = require('./abis/ETHDAIOracle.json')
 
 async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
@@ -90,8 +90,17 @@ function isValidProof(proof) {
   return { valid: true }
 }
 
+function isKnownContract(contract) {
+  for (let i = 0; i < mixers.length; i++) {
+    if (mixers[i].address === contract) {
+      return { valid: true, currency: mixers[i].currency }
+    }
+  }
+  return { valid: false }
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-module.exports = { fetchGasPrice, isValidProof, sleep, fetchDAIprice }
+module.exports = { fetchGasPrice, isValidProof, sleep, fetchDAIprice, isKnownContract }

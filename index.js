@@ -20,8 +20,8 @@ app.use(function(req, res, next) {
   next()
 })
 
-const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./config')
-const { fetchGasPrice, isValidProof, fetchDAIprice } = require('./utils')
+const { netId, rpcUrl, privateKey, mixers, defaultGasPrice } = require('./config')
+const { fetchGasPrice, isValidProof, fetchDAIprice, isKnownContract } = require('./utils')
 
 const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
 const account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey)
@@ -29,33 +29,46 @@ web3.eth.accounts.wallet.add('0x' + privateKey)
 web3.eth.defaultAccount = account.address
 
 const mixerABI = require('./abis/mixerABI.json') 
-const mixer = new web3.eth.Contract(mixerABI, mixerAddress)
 const gasPrices = { fast: defaultGasPrice }
 const ethPriceInDai = toWei('200')
 
 app.get('/', function (req, res) {
   // just for testing purposes
-  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}. Mixer address is ${mixerAddress}`)
+  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}. Mixer addresses are ${mixers}`)
 })
 
 app.post('/relay', async (req, resp) => {
-  console.log(JSON.stringify(req.body, null, 2))
-  const { valid , reason } = isValidProof(req.body)
+  let { valid , reason } = isValidProof(req.body.proof)
   if (!valid) {
     console.log('Proof is invalid:', reason)
     return resp.status(400).json({ error: 'Proof is invalid' })
   }
+  let currency
+  ( { valid, currency } = isKnownContract(req.body.contract))
 
-  let { pi_a, pi_b, pi_c, publicSignals } = req.body
+  let { pi_a, pi_b, pi_c, publicSignals } = req.body.proof
 
   const fee = toBN(publicSignals[3])
-  const desiredFee = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
+  const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
+  let desiredFee
+  switch (currency) {
+    case 'eth': {
+      desiredFee = expense
+      break
+    }
+    case 'dai': {
+      desiredFee = expense.mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
+      break
+    }
+  }
+
   if (fee.lt(desiredFee)) {
     console.log('Fee is too low')
     return resp.status(400).json({ error: 'Fee is too low. Try to resend.' })
   }
 
   try {
+    const mixer = new web3.eth.Contract(mixerABI, req.body.contract)
     const nullifier = publicSignals[1]
     const isSpent = await mixer.methods.isSpent(nullifier).call()
     if (isSpent) {
