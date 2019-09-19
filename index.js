@@ -1,4 +1,4 @@
-const { numberToHex, toWei, toHex, toBN } = require('web3-utils')
+const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
 const Web3 = require('web3')
 const express = require('express')
 
@@ -34,7 +34,8 @@ const ethPriceInDai = toWei('200')
 
 app.get('/', function (req, res) {
   // just for testing purposes
-  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}. Mixer addresses are ${mixers}`)
+  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}. 
+    Mixer addresses are ${JSON.stringify(mixers)}`)
 })
 
 app.post('/relay', async (req, resp) => {
@@ -43,12 +44,23 @@ app.post('/relay', async (req, resp) => {
     console.log('Proof is invalid:', reason)
     return resp.status(400).json({ error: 'Proof is invalid' })
   }
+
   let currency
   ( { valid, currency } = isKnownContract(req.body.contract))
+  if (!valid) {
+    console.log('Contract does not exist:', req.body.contract)
+    return resp.status(400).json({ error: 'This relayer does not support the token' })
+  }
 
   let { pi_a, pi_b, pi_c, publicSignals } = req.body.proof
+  
+  const relayer = toChecksumAddress(`0x${publicSignals[3].slice(26)}`)
+  if (relayer !== web3.eth.defaultAccount) {
+    console.log('This proof is for different relayer:', relayer)
+    return resp.status(400).json({ error: 'Relayer address is invalid' })
+  }
 
-  const fee = toBN(publicSignals[3])
+  const fee = toBN(publicSignals[4])
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
   let desiredFee
   switch (currency) {
