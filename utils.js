@@ -1,6 +1,7 @@
 const fetch = require('node-fetch')
-const { isHexStrict } = require('web3-utils')
-const { gasOracleUrls } = require('./config')
+const { isHexStrict, hexToNumberString } = require('web3-utils')
+const { gasOracleUrls, ethdaiAddress } = require('./config')
+const oracleABI = require('./abis/ETHDAIOracle.json')
 
 async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
   oracleIndex = (oracleIndex + 1) % gasOracleUrls.length
@@ -27,6 +28,17 @@ async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
     setTimeout(() => fetchGasPrice({ gasPrices, oracleIndex }), 15000)
   } catch (e) {
     setTimeout(() => fetchGasPrice({ gasPrices, oracleIndex }), 15000)
+  }
+}
+
+async function fetchDAIprice({ ethPriceInDai, web3 }) {
+  try {
+    const ethDaiInstance = web3.eth.Contract(oracleABI, ethdaiAddress)
+    const price = await ethDaiInstance.methods.getMedianPrice().call()
+    ethPriceInDai = hexToNumberString(price)
+    setTimeout(() => fetchDAIprice({ ethPriceInDai, web3 }), 1000 * 30)
+  } catch(e) {
+    setTimeout(() => fetchDAIprice({ ethPriceInDai, web3 }), 1000 * 30)
   }
 }
 
@@ -82,4 +94,4 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-module.exports = { fetchGasPrice, isValidProof, sleep }
+module.exports = { fetchGasPrice, isValidProof, sleep, fetchDAIprice }

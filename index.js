@@ -21,16 +21,17 @@ app.use(function(req, res, next) {
 })
 
 const { netId, rpcUrl, privateKey, mixerAddress, defaultGasPrice } = require('./config')
-const { fetchGasPrice, isValidProof } = require('./utils')
+const { fetchGasPrice, isValidProof, fetchDAIprice } = require('./utils')
 
 const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
 const account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey)
 web3.eth.accounts.wallet.add('0x' + privateKey)
 web3.eth.defaultAccount = account.address
 
-const mixerABI = require('./mixerABI.json') 
+const mixerABI = require('./abis/mixerABI.json') 
 const mixer = new web3.eth.Contract(mixerABI, mixerAddress)
 const gasPrices = { fast: defaultGasPrice }
+const ethPriceInDai = toWei('200')
 
 app.get('/', function (req, res) {
   // just for testing purposes
@@ -87,5 +88,6 @@ app.listen(8000)
 
 if (Number(netId) === 1) {
   fetchGasPrice({ gasPrices })
+  fetchDAIprice({ ethPriceInDai, web3 })
   console.log('Gas price oracle started.')
 }
