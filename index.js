@@ -61,15 +61,19 @@ app.post('/relay', async (req, resp) => {
   }
 
   const fee = toBN(publicSignals[4])
+  const refund = toBN(publicSignals[5])
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
   let desiredFee
   switch (currency) {
     case 'eth': {
+      if (refund !== 0) {
+        return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
+      }
       desiredFee = expense
       break
     }
     case 'dai': {
-      desiredFee = expense.mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
+      desiredFee = expense.add(refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
       break
     }
   }
@@ -91,8 +95,9 @@ app.post('/relay', async (req, resp) => {
     if (!isKnownRoot) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
-    const gas = await mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).estimateGas()
+    const gas = await mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).estimateGas({ value: refund })
     const result = mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).send({
+      value: refund,
       gas: numberToHex(gas + 50000),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
       // TODO: nonce
