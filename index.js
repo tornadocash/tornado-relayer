@@ -52,7 +52,7 @@ app.post('/relay', async (req, resp) => {
     return resp.status(400).json({ error: 'This relayer does not support the token' })
   }
 
-  let { pi_a, pi_b, pi_c, publicSignals } = req.body.proof
+  let { proof, publicSignals } = req.body.proof
   
   const relayer = toChecksumAddress(`0x${publicSignals[3].slice(26)}`)
   if (relayer !== web3.eth.defaultAccount) {
@@ -95,8 +95,8 @@ app.post('/relay', async (req, resp) => {
     if (!isKnownRoot) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
-    const gas = await mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).estimateGas({ value: refund })
-    const result = mixer.methods.withdraw(pi_a, pi_b, pi_c, publicSignals).send({
+    const gas = await mixer.methods.withdraw(proof, publicSignals).estimateGas({ value: refund })
+    const result = mixer.methods.withdraw(proof, publicSignals).send({
       value: refund,
       gas: numberToHex(gas + 50000),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
