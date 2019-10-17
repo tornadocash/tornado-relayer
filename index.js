@@ -66,7 +66,7 @@ app.post('/relay', async (req, resp) => {
   let desiredFee
   switch (currency) {
     case 'eth': {
-      if (refund !== 0) {
+      if (!refund.isZero()) {
         return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
       }
       desiredFee = expense
