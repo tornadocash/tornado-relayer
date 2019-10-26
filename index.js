@@ -1,4 +1,6 @@
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
+const { netId, rpcUrl, privateKey, mixers, defaultGasPrice } = require('./config')
+const { fetchGasPrice, isValidProof, fetchDAIprice, isKnownContract } = require('./utils')
 const Web3 = require('web3')
 const express = require('express')
 
@@ -19,9 +21,6 @@ app.use(function(req, res, next) {
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
   next()
 })
-
-const { netId, rpcUrl, privateKey, mixers, defaultGasPrice } = require('./config')
-const { fetchGasPrice, isValidProof, fetchDAIprice, isKnownContract } = require('./utils')
 
 const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
 const account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey)
