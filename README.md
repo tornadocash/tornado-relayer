@@ -1,4 +1,5 @@
 # Relayer for Tornado mixer [![Build Status](https://travis-ci.org/peppersec/tornado-mixer-relayer.svg?branch=master)](https://travis-ci.org/peppersec/tornado-mixer-relayer)
+
 ## Setup
 1. `npm i`
 2. `cp .env.example .env`
@@ -8,6 +9,14 @@
 1. `npm run start`
 2. `curl -X POST -H 'content-type:application/json' --data '<PROOF>' http://127.0.0.1:8000/relay`
 Relayer should return a transaction hash.
+
+## Running in Docker
+
+To run a relayer in Docker simply run this command: 
+
+```sh
+docker run -d -e NET_ID=<...> -e RPC_URL=<...> -e PRIVATE_KEY=<...> -e ETH_MIXER_ADDRESS=<...> -e DAI_MIXER_ADDRESS=<...> peppersec/tornado-mixer-relayer
+```
 
 ## Proof example
 ```json
@@ -30,6 +39,6 @@ Relayer should return a transaction hash.
       "0x00000000000000000000000003ebd0748aa4d1457cf479cce56309641e0a98f5",
       "0x0000000000000000000000000000000000000000000000000000000000000000"
     ]
-  },
+  }
 }
 ```
