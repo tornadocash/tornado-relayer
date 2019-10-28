@@ -33,8 +33,11 @@ const ethPriceInDai = toWei('200')
 
 app.get('/', function (req, res) {
   // just for testing purposes
-  res.send(`Tornado mixer relayer. Gas Price is ${JSON.stringify(gasPrices)}. 
-    Mixer addresses are ${JSON.stringify(mixers)}`)
+  res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the /status for settings')
+})
+
+app.get('/status', function (req, res) {
+  res.json({ relayerAddress: web3.eth.defaultAccount, gasPrices, netId })
 })
 
 app.post('/relay', async (req, resp) => {
