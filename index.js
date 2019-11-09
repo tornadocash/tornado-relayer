@@ -37,7 +37,7 @@ app.get('/', function (req, res) {
 })
 
 app.get('/status', function (req, res) {
-  res.json({ relayerAddress: web3.eth.defaultAccount, gasPrices, netId })
+  res.json({ relayerAddress: web3.eth.defaultAccount, gasPrices, netId, ethPriceInDai })
 })
 
 app.post('/relay', async (req, resp) => {
