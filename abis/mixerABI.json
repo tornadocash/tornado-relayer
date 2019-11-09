@@ -1,26 +1,11 @@
 [
   {
     "constant": true,
-    "inputs": [],
-    "name": "filled_subtrees",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "",
-        "type": "uint256"
+        "type": "bytes32"
       }
     ],
     "name": "nullifierHashes",
@@ -52,13 +37,84 @@
   },
   {
     "constant": true,
-    "inputs": [],
-    "name": "roots",
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_left",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_right",
+        "type": "bytes32"
+      }
+    ],
+    "name": "hashLeftRight",
     "outputs": [
       {
-        "internalType": "uint256[]",
+        "internalType": "bytes32",
         "name": "",
-        "type": "uint256[]"
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "pure",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "FIELD_SIZE",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "isVerifierUpdateDisabled",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "levels",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "operator",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
       }
     ],
     "payable": false,
@@ -69,9 +125,30 @@
     "constant": true,
     "inputs": [
       {
-        "internalType": "uint256",
+        "internalType": "bytes32",
+        "name": "_root",
+        "type": "bytes32"
+      }
+    ],
+    "name": "isKnownRoot",
+    "outputs": [
+      {
+        "internalType": "bool",
         "name": "",
-        "type": "uint256"
+        "type": "bool"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "name": "commitments",
@@ -89,22 +166,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "zeros",
-    "outputs": [
-      {
-        "internalType": "uint256[]",
-        "name": "",
-        "type": "uint256[]"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "levels",
+    "name": "denomination",
     "outputs": [
       {
         "internalType": "uint256",
@@ -119,63 +181,7 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "operator",
-    "outputs": [
-      {
-        "internalType": "address payable",
-        "name": "",
-        "type": "address"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "isDepositsEnabled",
-    "outputs": [
-      {
-        "internalType": "bool",
-        "name": "",
-        "type": "bool"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "left",
-        "type": "uint256"
-      },
-      {
-        "internalType": "uint256",
-        "name": "right",
-        "type": "uint256"
-      }
-    ],
-    "name": "hashLeftRight",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "mimc_hash",
-        "type": "uint256"
-      }
-    ],
-    "payable": false,
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "constant": true,
-    "inputs": [],
-    "name": "next_index",
+    "name": "currentRootIndex",
     "outputs": [
       {
         "internalType": "uint32",
@@ -190,7 +196,79 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "current_root",
+    "name": "getLastRoot",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "roots",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ROOT_HISTORY_SIZE",
+    "outputs": [
+      {
+        "internalType": "uint32",
+        "name": "",
+        "type": "uint32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "name": "zeros",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "payable": false,
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": true,
+    "inputs": [],
+    "name": "ZERO_VALUE",
     "outputs": [
       {
         "internalType": "uint256",
@@ -204,14 +282,8 @@
   },
   {
     "constant": true,
-    "inputs": [
-      {
-        "internalType": "uint256",
-        "name": "root",
-        "type": "uint256"
-      }
-    ],
-    "name": "isKnownRoot",
+    "inputs": [],
+    "name": "isDepositsDisabled",
     "outputs": [
       {
         "internalType": "bool",
@@ -225,13 +297,19 @@
   },
   {
     "constant": true,
-    "inputs": [],
-    "name": "getLastRoot",
-    "outputs": [
+    "inputs": [
       {
         "internalType": "uint256",
         "name": "",
         "type": "uint256"
+      }
+    ],
+    "name": "filledSubtrees",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
       }
     ],
     "payable": false,
@@ -241,12 +319,12 @@
   {
     "constant": true,
     "inputs": [],
-    "name": "mixDenomination",
+    "name": "nextIndex",
     "outputs": [
       {
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "",
-        "type": "uint256"
+        "type": "uint32"
       }
     ],
     "payable": false,
@@ -256,27 +334,22 @@
   {
     "inputs": [
       {
-        "internalType": "address",
+        "internalType": "contract IVerifier",
         "name": "_verifier",
         "type": "address"
       },
       {
         "internalType": "uint256",
-        "name": "_mixDenomination",
+        "name": "_denomination",
         "type": "uint256"
       },
       {
-        "internalType": "uint8",
+        "internalType": "uint32",
         "name": "_merkleTreeHeight",
-        "type": "uint8"
+        "type": "uint32"
       },
       {
-        "internalType": "uint256",
-        "name": "_emptyElement",
-        "type": "uint256"
-      },
-      {
-        "internalType": "address payable",
+        "internalType": "address",
         "name": "_operator",
         "type": "address"
       }
@@ -290,15 +363,15 @@
     "inputs": [
       {
         "indexed": true,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "commitment",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "uint32",
         "name": "leafIndex",
-        "type": "uint256"
+        "type": "uint32"
       },
       {
         "indexed": false,
@@ -321,9 +394,9 @@
       },
       {
         "indexed": false,
-        "internalType": "uint256",
+        "internalType": "bytes32",
         "name": "nullifierHash",
-        "type": "uint256"
+        "type": "bytes32"
       },
       {
         "indexed": true,
@@ -338,16 +411,16 @@
         "type": "uint256"
       }
     ],
-    "name": "Withdraw",
+    "name": "Withdrawal",
     "type": "event"
   },
   {
     "constant": false,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "commitment",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "_commitment",
+        "type": "bytes32"
       }
     ],
     "name": "deposit",
@@ -360,63 +433,54 @@
     "constant": false,
     "inputs": [
       {
-        "internalType": "uint256[2]",
-        "name": "a",
-        "type": "uint256[2]"
+        "internalType": "bytes",
+        "name": "_proof",
+        "type": "bytes"
       },
       {
-        "internalType": "uint256[2][2]",
-        "name": "b",
-        "type": "uint256[2][2]"
+        "internalType": "bytes32",
+        "name": "_root",
+        "type": "bytes32"
       },
       {
-        "internalType": "uint256[2]",
-        "name": "c",
-        "type": "uint256[2]"
+        "internalType": "bytes32",
+        "name": "_nullifierHash",
+        "type": "bytes32"
       },
       {
-        "internalType": "uint256[5]",
-        "name": "input",
-        "type": "uint256[5]"
+        "internalType": "address payable",
+        "name": "_recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "address payable",
+        "name": "_relayer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_fee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_refund",
+        "type": "uint256"
       }
     ],
     "name": "withdraw",
     "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [],
-    "name": "toggleDeposits",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
-    "type": "function"
-  },
-  {
-    "constant": false,
-    "inputs": [
-      {
-        "internalType": "address payable",
-        "name": "_newAccount",
-        "type": "address"
-      }
-    ],
-    "name": "changeOperator",
-    "outputs": [],
-    "payable": false,
-    "stateMutability": "nonpayable",
+    "payable": true,
+    "stateMutability": "payable",
     "type": "function"
   },
   {
     "constant": true,
     "inputs": [
       {
-        "internalType": "uint256",
-        "name": "nullifier",
-        "type": "uint256"
+        "internalType": "bytes32",
+        "name": "_nullifierHash",
+        "type": "bytes32"
       }
     ],
     "name": "isSpent",
@@ -429,6 +493,60 @@
     ],
     "payable": false,
     "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "bool",
+        "name": "_state",
+        "type": "bool"
+      }
+    ],
+    "name": "toggleDeposits",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_newVerifier",
+        "type": "address"
+      }
+    ],
+    "name": "updateVerifier",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [],
+    "name": "disableVerifierUpdate",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "constant": false,
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_newOperator",
+        "type": "address"
+      }
+    ],
+    "name": "changeOperator",
+    "outputs": [],
+    "payable": false,
+    "stateMutability": "nonpayable",
     "type": "function"
   }
 ]
