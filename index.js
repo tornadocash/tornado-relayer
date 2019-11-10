@@ -100,8 +100,9 @@ app.post('/relay', async (req, resp) => {
     if (!isKnownRoot) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
-    const gas = await mixer.methods.withdraw(proof, ...publicSignals).estimateGas({ value: args.refund })
+    const gas = await mixer.methods.withdraw(proof, ...publicSignals).estimateGas({ from: web3.eth.defaultAccount, value: args.refund })
     const result = mixer.methods.withdraw(proof, ...publicSignals).send({
+      from: web3.eth.defaultAccount,
       value: args.refund,
       gas: numberToHex(gas + 50000),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
