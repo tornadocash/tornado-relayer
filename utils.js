@@ -42,34 +42,36 @@ async function fetchDAIprice({ ethPriceInDai, web3 }) {
   }
 }
 
-function isValidProof(proof) {
+function isValidProof(data) {
   // validator expects `websnarkUtils.toSolidityInput(proof)` output
 
-  if (!(proof.proof && proof.publicSignals)) {
+  if (!(data.proof && data.publicSignals)) {
     return { valid: false, reason: 'One of inputs is empty. There must be proof and publicSignals' }
   }
 
-  Object.keys(proof).forEach(key => {
-    if (!Array.isArray(proof[key])) {
-      return { valid: false, reason: `Corrupted ${key}` }
-    }
-  })
-
-  if (proof.proof.length !== 8) {
+  if (!isHexStrict(data.proof) || data.proof.length !== 2 + 2 * 8 * 32) {
     return { valid: false, reason: 'Corrupted proof' }
   }
 
-  if (proof.publicSignals.length !== 6) {
+  if (data.publicSignals.length !== 6) {
     return { valid: false, reason: 'Corrupted publicSignals' }
   }
 
-  for (let [key, input] of Object.entries(proof)) {
-    for (let i = 0; i < input.length; i++ ) {
-      if (!isHexStrict(input[i]) || input[i].length !== 66) {
-        return { valid: false, reason: `Corrupted ${key}` }
-      }
+  for(let signal of data.publicSignals) {
+    if (!isHexStrict(signal)) {
+      return { valid: false, reason: 'Corrupted publicSignals' }
     }
   }
+
+  if (data.publicSignals[0].length !== 66 ||
+      data.publicSignals[1].length !== 66 ||
+      data.publicSignals[2].length !== 42 ||
+      data.publicSignals[3].length !== 42 ||
+      data.publicSignals[4].length !== 66 ||
+      data.publicSignals[5].length !== 66) {
+    return { valid: false, reason: 'Corrupted publicSignals' }
+  }
+
   return { valid: true }
 }
 

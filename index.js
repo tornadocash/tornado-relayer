@@ -37,14 +37,14 @@ app.get('/', function (req, res) {
 })
 
 app.get('/status', function (req, res) {
-  res.json({ relayerAddress: web3.eth.defaultAccount, gasPrices, netId })
+  res.json({ relayerAddress: web3.eth.defaultAccount, gasPrices, netId, ethPriceInDai })
 })
 
 app.post('/relay', async (req, resp) => {
   let { valid , reason } = isValidProof(req.body.proof)
   if (!valid) {
     console.log('Proof is invalid:', reason)
-    return resp.status(400).json({ error: 'Proof is invalid' })
+    return resp.status(400).json({ error: 'Proof format is invalid' })
   }
 
   let currency
@@ -55,51 +55,55 @@ app.post('/relay', async (req, resp) => {
   }
 
   let { proof, publicSignals } = req.body.proof
-  
-  const relayer = toChecksumAddress(`0x${publicSignals[3].slice(26)}`)
-  if (relayer !== web3.eth.defaultAccount) {
-    console.log('This proof is for different relayer:', relayer)
+  const args = {
+    root: publicSignals[0],
+    nullifierHash: publicSignals[1],
+    recipient: toChecksumAddress(publicSignals[2]),
+    relayer: toChecksumAddress(publicSignals[3]),
+    fee: toBN(publicSignals[4]),
+    refund: toBN(publicSignals[5]),
+  }
+
+  if (args.relayer !== web3.eth.defaultAccount) {
+    console.log('This proof is for different relayer:', args.relayer)
     return resp.status(400).json({ error: 'Relayer address is invalid' })
   }
 
-  const fee = toBN(publicSignals[4])
-  const refund = toBN(publicSignals[5])
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
   let desiredFee
   switch (currency) {
     case 'eth': {
-      if (!refund.isZero()) {
+      if (!args.refund.isZero()) {
         return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
       }
       desiredFee = expense
       break
     }
     case 'dai': {
-      desiredFee = expense.add(refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
+      desiredFee = expense.add(args.refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
       break
     }
   }
 
-  if (fee.lt(desiredFee)) {
+  if (args.fee.lt(desiredFee)) {
     console.log('Fee is too low')
     return resp.status(400).json({ error: 'Fee is too low. Try to resend.' })
   }
 
   try {
     const mixer = new web3.eth.Contract(mixerABI, req.body.contract)
-    const nullifier = publicSignals[1]
-    const isSpent = await mixer.methods.isSpent(nullifier).call()
+    const isSpent = await mixer.methods.isSpent(args.nullifierHash).call()
     if (isSpent) {
       return resp.status(400).json({ error: 'The note has been spent.' })
     }
-    const root = publicSignals[0]
-    const isKnownRoot = await mixer.methods.isKnownRoot(root).call()
+    const isKnownRoot = await mixer.methods.isKnownRoot(args.root).call()
     if (!isKnownRoot) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
-    const gas = await mixer.methods.withdraw(proof, publicSignals).estimateGas({ value: refund })
-    const result = mixer.methods.withdraw(proof, publicSignals).send({
-      value: refund,
+    const gas = await mixer.methods.withdraw(proof, ...publicSignals).estimateGas({ from: web3.eth.defaultAccount, value: args.refund })
+    const result = mixer.methods.withdraw(proof, ...publicSignals).send({
+      from: web3.eth.defaultAccount,
+      value: args.refund,
       gas: numberToHex(gas + 50000),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
       // TODO: nonce
