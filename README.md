@@ -7,6 +7,7 @@
 
 ## Deploy Kovan
 1. `cp .env.example deploy/kovan/.env`
+2. `cd deploy/kovan`
 2. Modify `.env` as needed
 3. `docker-compose -p kovan up -d`
 
