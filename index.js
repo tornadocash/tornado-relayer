@@ -1,5 +1,5 @@
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
-const { netId, rpcUrl, privateKey, mixers, defaultGasPrice } = require('./config')
+const { netId, rpcUrl, privateKey, defaultGasPrice } = require('./config')
 const { fetchGasPrice, isValidProof, fetchDAIprice, isKnownContract } = require('./utils')
 const Web3 = require('web3')
 const express = require('express')
