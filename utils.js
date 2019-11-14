@@ -42,34 +42,43 @@ async function fetchDAIprice({ ethPriceInDai, web3 }) {
   }
 }
 
-function isValidProof(data) {
+function isValidProof(proof) {
   // validator expects `websnarkUtils.toSolidityInput(proof)` output
 
-  if (!(data.proof && data.publicSignals)) {
-    return { valid: false, reason: 'One of inputs is empty. There must be proof and publicSignals' }
+  if (!(proof)) {
+    return { valid: false, reason: 'The proof is empty.' }
   }
 
-  if (!isHexStrict(data.proof) || data.proof.length !== 2 + 2 * 8 * 32) {
+  if (!isHexStrict(proof) || proof.length !== 2 + 2 * 8 * 32) {
     return { valid: false, reason: 'Corrupted proof' }
   }
 
-  if (data.publicSignals.length !== 6) {
-    return { valid: false, reason: 'Corrupted publicSignals' }
+  return { valid: true }
+}
+
+function isValidArgs(args) {
+
+  if (!(args)) {
+    return { valid: false, reason: 'Args are empty' }
   }
 
-  for(let signal of data.publicSignals) {
+  if (args.length !== 6) {
+    return { valid: false, reason: 'Length of args is lower than 6' }
+  }
+
+  for(let signal of args) {
     if (!isHexStrict(signal)) {
-      return { valid: false, reason: 'Corrupted publicSignals' }
+      return { valid: false, reason: `Corrupted signal ${signal}` }
     }
   }
 
-  if (data.publicSignals[0].length !== 66 ||
-      data.publicSignals[1].length !== 66 ||
-      data.publicSignals[2].length !== 42 ||
-      data.publicSignals[3].length !== 42 ||
-      data.publicSignals[4].length !== 66 ||
-      data.publicSignals[5].length !== 66) {
-    return { valid: false, reason: 'Corrupted publicSignals' }
+  if (args[0].length !== 66 ||
+      args[1].length !== 66 ||
+      args[2].length !== 42 ||
+      args[3].length !== 42 ||
+      args[4].length !== 66 ||
+      args[5].length !== 66) {
+    return { valid: false, reason: 'The length one of the signals is incorrect' }
   }
 
   return { valid: true }
@@ -88,4 +97,4 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-module.exports = { fetchGasPrice, isValidProof, sleep, fetchDAIprice, isKnownContract }
+module.exports = { fetchGasPrice, isValidProof, isValidArgs, sleep, fetchDAIprice, isKnownContract }

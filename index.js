@@ -1,6 +1,6 @@
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
-const { netId, rpcUrl, privateKey, defaultGasPrice } = require('./config')
-const { fetchGasPrice, isValidProof, fetchDAIprice, isKnownContract } = require('./utils')
+const { netId, rpcUrl, privateKey, mixers, defaultGasPrice } = require('./config')
+const { fetchGasPrice, isValidProof, isValidArgs, fetchDAIprice, isKnownContract } = require('./utils')
 const Web3 = require('web3')
 const express = require('express')
 
@@ -37,35 +37,41 @@ app.get('/', function (req, res) {
 })
 
 app.get('/status', function (req, res) {
-  res.json({ relayerAddress: web3.eth.defaultAccount, gasPrices, netId, ethPriceInDai })
+  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPriceInDai })
 })
 
 app.post('/relay', async (req, resp) => {
-  let { valid , reason } = isValidProof(req.body.proof)
+  const { proof, args, contract } = req.body
+  let { valid , reason } = isValidProof(proof)
   if (!valid) {
     console.log('Proof is invalid:', reason)
     return resp.status(400).json({ error: 'Proof format is invalid' })
   }
 
-  let currency
-  ( { valid, currency } = isKnownContract(req.body.contract))
+  ({ valid , reason } = isValidArgs(args))
   if (!valid) {
-    console.log('Contract does not exist:', req.body.contract)
+    console.log('Args are invalid:', reason)
+    return resp.status(400).json({ error: 'Withdraw arguments are invalid' })
+  }
+
+  let currency
+  ( { valid, currency } = isKnownContract(contract))
+  if (!valid) {
+    console.log('Contract does not exist:', contract)
     return resp.status(400).json({ error: 'This relayer does not support the token' })
   }
 
-  let { proof, publicSignals } = req.body.proof
-  const args = {
-    root: publicSignals[0],
-    nullifierHash: publicSignals[1],
-    recipient: toChecksumAddress(publicSignals[2]),
-    relayer: toChecksumAddress(publicSignals[3]),
-    fee: toBN(publicSignals[4]),
-    refund: toBN(publicSignals[5]),
-  }
+  const [ root, nullifierHash, recipient, relayer, fee, refund ] = [
+    args[0],
+    args[1],
+    toChecksumAddress(args[2]),
+    toChecksumAddress(args[3]),
+    toBN(args[4]),
+    toBN(args[5])
+  ]
 
-  if (args.relayer !== web3.eth.defaultAccount) {
-    console.log('This proof is for different relayer:', args.relayer)
+  if (relayer !== web3.eth.defaultAccount) {
+    console.log('This proof is for different relayer:', relayer)
     return resp.status(400).json({ error: 'Relayer address is invalid' })
   }
 
@@ -73,43 +79,56 @@ app.post('/relay', async (req, resp) => {
   let desiredFee
   switch (currency) {
     case 'eth': {
-      if (!args.refund.isZero()) {
+      if (!refund.isZero()) {
         return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
       }
       desiredFee = expense
       break
     }
     case 'dai': {
-      desiredFee = expense.add(args.refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
+      desiredFee = expense.add(refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
       break
     }
   }
 
-  if (args.fee.lt(desiredFee)) {
+  if (fee.lt(desiredFee)) {
     console.log('Fee is too low')
     return resp.status(400).json({ error: 'Fee is too low. Try to resend.' })
   }
 
   try {
     const mixer = new web3.eth.Contract(mixerABI, req.body.contract)
-    const isSpent = await mixer.methods.isSpent(args.nullifierHash).call()
+    const isSpent = await mixer.methods.isSpent(nullifierHash).call()
     if (isSpent) {
       return resp.status(400).json({ error: 'The note has been spent.' })
     }
-    const isKnownRoot = await mixer.methods.isKnownRoot(args.root).call()
+    const isKnownRoot = await mixer.methods.isKnownRoot(root).call()
     if (!isKnownRoot) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
-    const gas = await mixer.methods.withdraw(proof, ...publicSignals).estimateGas({ from: web3.eth.defaultAccount, value: args.refund })
-    const result = mixer.methods.withdraw(proof, ...publicSignals).send({
+    const withdrawArgs = [
+      proof,
+      root,
+      nullifierHash,
+      recipient,
+      relayer,
+      fee.toString(),
+      refund.toString()
+    ]
+    const gas = await mixer.methods.withdraw(...withdrawArgs).estimateGas({ 
       from: web3.eth.defaultAccount,
-      value: args.refund,
+      value: refund 
+    })
+    const result = mixer.methods.withdraw(...withdrawArgs).send({
+      from: web3.eth.defaultAccount,
+      value: refund,
       gas: numberToHex(gas + 50000),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
       // TODO: nonce
     })
-    result.once('transactionHash', function(hash){
-      resp.json({ txHash: hash })
+    result.once('transactionHash', function(txHash){
+      resp.json({ txHash })
+      console.log(`A new successfuly sent tx ${txHash} for the ${recipient}`)
     }).on('error', function(e){
       console.log(e)
       return resp.status(400).json({ error: 'Proof is malformed.' })
@@ -127,3 +146,10 @@ if (Number(netId) === 1) {
   fetchDAIprice({ ethPriceInDai, web3 })
   console.log('Gas price oracle started.')
 }
+
+console.log('Relayer started')
+console.log(`relayerAddress: ${web3.eth.defaultAccount}`)
+console.log(`mixers: ${JSON.stringify(mixers)}`)
+console.log(`gasPrices: ${JSON.stringify(gasPrices)}`)
+console.log(`netId: ${netId}`)
+console.log(`ethPriceInDai: ${ethPriceInDai}`)
