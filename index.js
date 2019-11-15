@@ -1,6 +1,6 @@
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
-const { netId, rpcUrl, privateKey, mixers, defaultGasPrice } = require('./config')
-const { fetchGasPrice, isValidProof, isValidArgs, fetchDAIprice, isKnownContract } = require('./utils')
+const { netId, rpcUrl, privateKey, mixers, defaultGasPrice, port } = require('./config')
+const { fetchGasPrice, isValidProof, isValidArgs, fetchDAIprice, isKnownContract, isEnoughFee } = require('./utils')
 const Web3 = require('web3')
 const express = require('express')
 
@@ -70,30 +70,13 @@ app.post('/relay', async (req, resp) => {
     toBN(args[5])
   ]
 
+  if (currency === 'eth' && !refund.isZero()) {
+    return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
+  }
+
   if (relayer !== web3.eth.defaultAccount) {
     console.log('This proof is for different relayer:', relayer)
     return resp.status(400).json({ error: 'Relayer address is invalid' })
-  }
-
-  const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN('1000000'))
-  let desiredFee
-  switch (currency) {
-    case 'eth': {
-      if (!refund.isZero()) {
-        return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
-      }
-      desiredFee = expense
-      break
-    }
-    case 'dai': {
-      desiredFee = expense.add(refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
-      break
-    }
-  }
-
-  if (fee.lt(desiredFee)) {
-    console.log('Fee is too low')
-    return resp.status(400).json({ error: 'Fee is too low. Try to resend.' })
   }
 
   try {
@@ -106,6 +89,7 @@ app.post('/relay', async (req, resp) => {
     if (!isKnownRoot) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
+
     const withdrawArgs = [
       proof,
       root,
@@ -115,14 +99,23 @@ app.post('/relay', async (req, resp) => {
       fee.toString(),
       refund.toString()
     ]
-    const gas = await mixer.methods.withdraw(...withdrawArgs).estimateGas({ 
+    let gas = await mixer.methods.withdraw(...withdrawArgs).estimateGas({ 
       from: web3.eth.defaultAccount,
       value: refund 
     })
+
+    gas += 50000
+
+    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, refund, ethPriceInDai, fee })
+    if (!isEnough) {
+      console.log(`Wrong fee: ${reason}`)
+      return resp.status(400).json({ error: reason })
+    }
+
     const result = mixer.methods.withdraw(...withdrawArgs).send({
       from: web3.eth.defaultAccount,
       value: refund,
-      gas: numberToHex(gas + 50000),
+      gas: numberToHex(gas),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
       // TODO: nonce
     })
@@ -139,7 +132,7 @@ app.post('/relay', async (req, resp) => {
   }
 })
 
-app.listen(8000)
+app.listen(port || 8000)
 
 if (Number(netId) === 1) {
   fetchGasPrice({ gasPrices })
@@ -147,7 +140,7 @@ if (Number(netId) === 1) {
   console.log('Gas price oracle started.')
 }
 
-console.log('Relayer started')
+console.log('Relayer started on port', port || 8000)
 console.log(`relayerAddress: ${web3.eth.defaultAccount}`)
 console.log(`mixers: ${JSON.stringify(mixers)}`)
 console.log(`gasPrices: ${JSON.stringify(gasPrices)}`)

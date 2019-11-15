@@ -1,5 +1,5 @@
 const fetch = require('node-fetch')
-const { isHexStrict, hexToNumberString } = require('web3-utils')
+const { isHexStrict, hexToNumberString, toBN, toWei } = require('web3-utils')
 const { gasOracleUrls, ethdaiAddress, mixers } = require('./config')
 const oracleABI = require('./abis/ETHDAIOracle.json')
 
@@ -97,4 +97,23 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-module.exports = { fetchGasPrice, isValidProof, isValidArgs, sleep, fetchDAIprice, isKnownContract }
+function isEnoughFee({ gas, gasPrices, currency, refund, ethPriceInDai, fee }) {
+  const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN(gas))
+  let desiredFee
+  switch (currency) {
+    case 'eth': {
+      desiredFee = expense
+      break
+    }
+    case 'dai': {
+      desiredFee = expense.add(refund).mul(toBN(ethPriceInDai)).div(toBN(10 ** 18))
+      break
+    }
+  }
+  if (fee.lt(desiredFee)) {
+    return { isEnough: false, reason: 'Not enough fee' }
+  } 
+  return { isEnough: true }
+}
+
+module.exports = { fetchGasPrice, isValidProof, isValidArgs, sleep, fetchDAIprice, isKnownContract, isEnoughFee }

@@ -14,5 +14,6 @@ module.exports = {
   } ],
   defaultGasPrice: 2,
   gasOracleUrls: ['https://www.etherchain.org/api/gasPriceOracle', 'https://gasprice.poa.network/'],
-  ethdaiAddress: '0x7Ef645705cb7D401C5CD91a395cfcc3Db3C93689'
+  ethdaiAddress: '0x7Ef645705cb7D401C5CD91a395cfcc3Db3C93689',
+  port: process.env.APP_PORT
 }
