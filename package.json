@@ -4,13 +4,14 @@
   "description": "Relayer for Tornado mixer. https://tornado.cash",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "node src/index.js",
     "eslint": "npx eslint --ignore-path .gitignore .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "Alexey Pertsev <alexey@peppersec.com> (https://peppersec.com)",
+  "author": "tornado.cash",
   "license": "MIT",
   "dependencies": {
+    "coingecko-api": "^1.0.6",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "node-fetch": "^2.6.0",

@@ -1,47 +1,15 @@
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
-const { netId, rpcUrl, privateKey, mixers, defaultGasPrice, port } = require('./config')
-const { fetchGasPrice, isValidProof, isValidArgs, fetchDAIprice, isKnownContract, isEnoughFee } = require('./utils')
-const Web3 = require('web3')
-const express = require('express')
+const mixerABI = require('../abis/mixerABI.json') 
+const { 
+  isValidProof, isValidArgs, isKnownContract, isEnoughFee
+} = require('./utils')
 
-const app = express()
-app.use(express.json())
+const { web3, fetcher } = require('./instances')
 
-app.use((err, req, res, next) => {
-  if (err) {
-    console.log('Invalid Request data')
-    res.send('Invalid Request data')
-  } else {
-    next()
-  }
-})
-
-app.use(function(req, res, next) {
-  res.header('Access-Control-Allow-Origin', '*')
-  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
-  next()
-})
-
-const web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
-const account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey)
-web3.eth.accounts.wallet.add('0x' + privateKey)
-web3.eth.defaultAccount = account.address
-
-const mixerABI = require('./abis/mixerABI.json') 
-const gasPrices = { fast: defaultGasPrice }
-const ethPriceInDai = toWei('200')
-
-app.get('/', function (req, res) {
-  // just for testing purposes
-  res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the /status for settings')
-})
-
-app.get('/status', function (req, res) {
-  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPriceInDai })
-})
-
-app.post('/relay', async (req, resp) => {
+async function relay (req, resp) {
   const { proof, args, contract } = req.body
+  console.log(proof, args, contract)
+  const gasPrices = fetcher.gasPrices
   let { valid , reason } = isValidProof(proof)
   if (!valid) {
     console.log('Proof is invalid:', reason)
@@ -69,7 +37,7 @@ app.post('/relay', async (req, resp) => {
     toBN(args[4]),
     toBN(args[5])
   ]
-
+  console.log('root, nullifierHash, recipient, relayer, fee, refund', fee.toString(), refund)
   if (currency === 'eth' && !refund.isZero()) {
     return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
   }
@@ -105,8 +73,8 @@ app.post('/relay', async (req, resp) => {
     })
 
     gas += 50000
-
-    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, refund, ethPriceInDai, fee })
+    const ethPrices = fetcher.ethPrices
+    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, refund, ethPrices, fee })
     if (!isEnough) {
       console.log(`Wrong fee: ${reason}`)
       return resp.status(400).json({ error: reason })
@@ -130,19 +98,6 @@ app.post('/relay', async (req, resp) => {
     console.log(e)
     return resp.status(400).json({ error: 'Proof is malformed or spent.' })
   }
-})
-
-app.listen(port || 8000)
-
-if (Number(netId) === 1) {
-  fetchGasPrice({ gasPrices })
-  fetchDAIprice({ ethPriceInDai, web3 })
-  console.log('Gas price oracle started.')
 }
 
-console.log('Relayer started on port', port || 8000)
-console.log(`relayerAddress: ${web3.eth.defaultAccount}`)
-console.log(`mixers: ${JSON.stringify(mixers)}`)
-console.log(`gasPrices: ${JSON.stringify(gasPrices)}`)
-console.log(`netId: ${netId}`)
-console.log(`ethPriceInDai: ${ethPriceInDai}`)
+module.exports = relay
