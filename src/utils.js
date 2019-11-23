@@ -65,11 +65,14 @@ function isEnoughFee({ gas, gasPrices, currency, refund, ethPrices, fee }) {
       break
     }
     case 'dai': {
-      desiredFee = expense.add(refund).mul(toBN(ethPrices.dai)).div(toBN(10 ** 18))
+      desiredFee = 
+        expense.add(refund)
+          .mul(toBN(10 ** 18))
+          .div(toBN(ethPrices.dai))
       break
     }
   }
-  console.log('desired fee', desiredFee)
+  console.log('desired fee', desiredFee.toString())
   if (fee.lt(desiredFee)) {
     return { isEnough: false, reason: 'Not enough fee' }
   } 

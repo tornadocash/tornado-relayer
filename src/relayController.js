@@ -8,7 +8,6 @@ const { web3, fetcher } = require('./instances')
 
 async function relay (req, resp) {
   const { proof, args, contract } = req.body
-  console.log(proof, args, contract)
   const gasPrices = fetcher.gasPrices
   let { valid , reason } = isValidProof(proof)
   if (!valid) {
@@ -37,7 +36,7 @@ async function relay (req, resp) {
     toBN(args[4]),
     toBN(args[5])
   ]
-  console.log('root, nullifierHash, recipient, relayer, fee, refund', fee.toString(), refund)
+  console.log('fee, refund', fee.toString(), refund.toString())
   if (currency === 'eth' && !refund.isZero()) {
     return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
   }
