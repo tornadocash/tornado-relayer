@@ -34,12 +34,9 @@ app.get('/status', function (req, res) {
 app.post('/relay', relayController)
 
 app.listen(port || 8000)
-
-if (Number(netId) === 1) {
-  console.log('Gas price oracle started.')
-  fetcher.fetchGasPrice()
-  fetcher.fetchPrices()
-}
+console.log('Gas price oracle started.')
+fetcher.fetchGasPrice()
+fetcher.fetchPrices()
 
 console.log('Relayer started on port', port || 8000)
 console.log(`relayerAddress: ${web3.eth.defaultAccount}`)
