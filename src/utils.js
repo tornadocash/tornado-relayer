@@ -1,5 +1,5 @@
 const { isHexStrict, toBN, toWei } = require('web3-utils')
-const { mixers } = require('../config')
+const { mixers, relayerServiceFee } = require('../config')
 
 function isValidProof(proof) {
   // validator expects `websnarkUtils.toSolidityInput(proof)` output
@@ -46,7 +46,7 @@ function isValidArgs(args) {
 function isKnownContract(contract) {
   for (let i = 0; i < mixers.length; i++) {
     if (mixers[i].address === contract) {
-      return { valid: true, currency: mixers[i].currency }
+      return { valid: true, currency: mixers[i].currency, amount: mixers[i].amount }
     }
   }
   return { valid: false }
@@ -56,12 +56,14 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
-function isEnoughFee({ gas, gasPrices, currency, refund, ethPrices, fee }) {
+function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee }) {
+  // TODO tokens can have less then 18 decimals
+  const feePercent = toBN(toWei(amount)).mul(toBN(relayerServiceFee)).div(toBN('1000'))
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN(gas))
   let desiredFee
   switch (currency) {
     case 'eth': {
-      desiredFee = expense
+      desiredFee = expense.add(feePercent)
       break
     }
     case 'dai': {
@@ -69,10 +71,11 @@ function isEnoughFee({ gas, gasPrices, currency, refund, ethPrices, fee }) {
         expense.add(refund)
           .mul(toBN(10 ** 18))
           .div(toBN(ethPrices.dai))
+      desiredFee = desiredFee.add(feePercent)
       break
     }
   }
-  console.log('desired fee', desiredFee.toString())
+  console.log('desired fee, feePercent', desiredFee.toString(), feePercent.toString())
   if (fee.lt(desiredFee)) {
     return { isEnough: false, reason: 'Not enough fee' }
   } 

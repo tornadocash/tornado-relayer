@@ -21,8 +21,8 @@ async function relay (req, resp) {
     return resp.status(400).json({ error: 'Withdraw arguments are invalid' })
   }
 
-  let currency
-  ( { valid, currency } = isKnownContract(contract))
+  let currency, amount
+  ( { valid, currency, amount } = isKnownContract(contract))
   if (!valid) {
     console.log('Contract does not exist:', contract)
     return resp.status(400).json({ error: 'This relayer does not support the token' })
@@ -73,7 +73,7 @@ async function relay (req, resp) {
 
     gas += 50000
     const ethPrices = fetcher.ethPrices
-    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, refund, ethPrices, fee })
+    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee })
     if (!isEnough) {
       console.log(`Wrong fee: ${reason}`)
       return resp.status(400).json({ error: reason })

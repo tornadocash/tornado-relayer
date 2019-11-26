@@ -1,5 +1,5 @@
 const express = require('express')
-const { netId, mixers, port } = require('../config')
+const { netId, mixers, port, relayerServiceFee } = require('../config')
 const relayController = require('./relayController')
 const { fetcher, web3 } = require('./instances')
 
@@ -28,7 +28,7 @@ app.get('/', function (req, res) {
 
 app.get('/status', function (req, res) {
   const { ethPrices, gasPrices } = fetcher
-  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPrices })
+  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPrices, relayerServiceFee })
 })
 
 app.post('/relay', relayController)
@@ -44,3 +44,4 @@ console.log(`mixers: ${JSON.stringify(mixers)}`)
 console.log(`gasPrices: ${JSON.stringify(fetcher.gasPrices)}`)
 console.log(`netId: ${netId}`)
 console.log(`ethPrices: ${JSON.stringify(fetcher.ethPrices)}`)
+console.log(`Service fee: ${relayerServiceFee / 10}%`)
