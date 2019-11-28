@@ -94,7 +94,7 @@ async function relay (req, resp) {
       return resp.status(400).json({ error: 'Proof is malformed.' })
     })
   } catch (e) {
-    console.log(e)
+    console.error(e.message, 'estimate gas failed')
     return resp.status(400).json({ error: 'Proof is malformed or spent.' })
   }
 }
