@@ -58,7 +58,7 @@ function sleep(ms) {
 
 function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee }) {
   // TODO tokens can have less then 18 decimals
-  const feePercent = toBN(toWei(amount)).mul(toBN(Number(relayerServiceFee) * 10)).div(toBN('1000'))
+  const feePercent = toBN(toWei(amount)).mul(toBN(relayerServiceFee * 10)).div(toBN('1000'))
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN(gas))
   let desiredFee
   switch (currency) {

@@ -19,5 +19,5 @@ module.exports = {
   port: process.env.APP_PORT,
   //dai
   tokens: ['0x6b175474e89094c44da98b954eedeac495271d0f'],
-  relayerServiceFee: process.env.RELAYER_FEE
+  relayerServiceFee: Number(process.env.RELAYER_FEE)
 }
