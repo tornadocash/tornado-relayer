@@ -1,7 +1,9 @@
 const express = require('express')
-const { netId, mixers, port, relayerServiceFee } = require('../config')
+const { netId, port, relayerServiceFee } = require('../config')
 const relayController = require('./relayController')
 const { fetcher, web3 } = require('./instances')
+const { getMixers } = require('./utils')
+const mixers = getMixers()
 
 const app = express()
 app.use(express.json())

@@ -1,8 +1,8 @@
 const CoinGecko = require('coingecko-api') 
 const fetch = require('node-fetch')
-const { gasOracleUrls, defaultGasPrice } = require('../config')
 const { toWei } = require('web3-utils')
-const { tokens } = require('../config')
+const { gasOracleUrls, defaultGasPrice } = require('../config')
+const { getMainnetTokens } = require('./utils')
  
 
 class Fetcher {
@@ -16,19 +16,17 @@ class Fetcher {
     }
   }
   async fetchPrices() {
+    const { tokenAddresses, currencyLookup } = getMainnetTokens()
     try {
       const CoinGeckoClient = new CoinGecko()
       const price = await CoinGeckoClient.simple.fetchTokenPrice({
-        contract_addresses: tokens,
+        contract_addresses: tokenAddresses,
         vs_currencies: 'eth',
         assetPlatform: 'ethereum'
       })
-      const addressToSymbol = {
-        '0x6b175474e89094c44da98b954eedeac495271d0f': 'dai'
-      }
       this.ethPrices = Object.entries(price.data).reduce((acc, token) => {
         if (token[1].eth) {
-          acc[addressToSymbol[token[0]]] = toWei(token[1].eth.toString())
+          acc[currencyLookup[token[0]]] = toWei(token[1].eth.toString())
         }
         return acc
       }, {})

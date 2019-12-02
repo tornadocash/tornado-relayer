@@ -4,6 +4,7 @@
 1. `npm i`
 2. `cp .env.example .env`
 3. Modify `.env` as needed
+4. If you want to change contracts' addresses go to [config.js](./config.js) file.
 
 ## Deploy Kovan
 1. `cp .env.example deploy/kovan/.env`

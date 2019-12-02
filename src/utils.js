@@ -1,5 +1,5 @@
 const { isHexStrict, toBN, toWei } = require('web3-utils')
-const { mixers, relayerServiceFee } = require('../config')
+const { netId, mixers, relayerServiceFee } = require('../config')
 
 function isValidProof(proof) {
   // validator expects `websnarkUtils.toSolidityInput(proof)` output
@@ -44,9 +44,12 @@ function isValidArgs(args) {
 }
 
 function isKnownContract(contract) {
-  for (let i = 0; i < mixers.length; i++) {
-    if (mixers[i].address === contract) {
-      return { valid: true, currency: mixers[i].currency, amount: mixers[i].amount }
+  const mixers = getMixers()
+  for (let currency of Object.keys(mixers)) {
+    for (let amount of Object.keys(mixers[currency].mixerAddress)) {
+      if (mixers[currency].mixerAddress[amount] === contract) {
+        return { valid: true, currency, amount }
+      }
     }
   }
   return { valid: false }
@@ -82,4 +85,21 @@ function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee 
   return { isEnough: true }
 }
 
-module.exports = { isValidProof, isValidArgs, sleep, isKnownContract, isEnoughFee }
+function getMainnetTokens() {
+  const tokens = mixers['netId1']
+  const tokenAddresses = []
+  const currencyLookup = {}
+  Object.entries(tokens).map(([currency, data]) => {
+    if (currency !== 'eth') {
+      tokenAddresses.push(data.tokenAddress)
+      currencyLookup[data.tokenAddress] = currency
+    }
+  })
+  return { tokenAddresses, currencyLookup }
+}
+
+function getMixers() {
+  return mixers[`netId${netId}`]
+}
+
+module.exports = { isValidProof, isValidArgs, sleep, isKnownContract, isEnoughFee, getMixers, getMainnetTokens }
