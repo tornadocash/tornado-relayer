@@ -64,7 +64,12 @@ class Fetcher {
     }
   }
   async fetchNonce() {
-    config.nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
+    try {
+      config.nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
+    } catch(e) {
+      console.error('fetchNonce failed', e.message)
+      setTimeout(this.fetchNonce, 3000)
+    }
   }
 }
 
