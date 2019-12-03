@@ -91,7 +91,7 @@ async function relay (req, resp) {
       console.log(`A new successfully sent tx ${txHash} for the ${recipient}`)
     }).on('error', function(e){
       config.nonce--
-      console.log(e)
+      console.error('on transactionHash error', e.message)
       return resp.status(400).json({ error: 'Proof is malformed.' })
     })
   } catch (e) {
