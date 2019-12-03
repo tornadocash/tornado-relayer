@@ -3,6 +3,7 @@ const fetch = require('node-fetch')
 const { toWei } = require('web3-utils')
 const { gasOracleUrls, defaultGasPrice } = require('../config')
 const { getMainnetTokens } = require('./utils')
+const config = require ('../config')
  
 
 class Fetcher {
@@ -61,6 +62,9 @@ class Fetcher {
     } catch (e) {
       setTimeout(() => this.fetchGasPrice({ oracleIndex }), 15000)
     }
+  }
+  async fetchNonce() {
+    config.nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
   }
 }
 

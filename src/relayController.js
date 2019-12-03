@@ -1,8 +1,9 @@
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
-const mixerABI = require('../abis/mixerABI.json') 
+const mixerABI = require('../abis/mixerABI.json')
 const { 
   isValidProof, isValidArgs, isKnownContract, isEnoughFee
 } = require('./utils')
+const config = require('../config')
 
 const { web3, fetcher } = require('./instances')
 
@@ -57,16 +58,7 @@ async function relay (req, resp) {
       return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
     }
 
-    const withdrawArgs = [
-      proof,
-      root,
-      nullifierHash,
-      recipient,
-      relayer,
-      fee.toString(),
-      refund.toString()
-    ]
-    let gas = await mixer.methods.withdraw(...withdrawArgs).estimateGas({ 
+    let gas = await mixer.methods.withdraw(proof, ...args).estimateGas({
       from: web3.eth.defaultAccount,
       value: refund 
     })
@@ -79,22 +71,31 @@ async function relay (req, resp) {
       return resp.status(400).json({ error: reason })
     }
 
-    const result = mixer.methods.withdraw(...withdrawArgs).send({
+    const data = mixer.methods.withdraw(proof, ...args).encodeABI()
+    const tx = {
       from: web3.eth.defaultAccount,
-      value: refund,
+      value: numberToHex(refund),
       gas: numberToHex(gas),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
-      // TODO: nonce
-    })
+      to: mixer._address,
+      netId: config.netId,
+      data,
+      nonce: config.nonce
+    }
+    config.nonce++
+    let signedTx = await web3.eth.accounts.signTransaction(tx, config.privateKey)
+    let result = web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+
     result.once('transactionHash', function(txHash){
       resp.json({ txHash })
-      console.log(`A new successfuly sent tx ${txHash} for the ${recipient}`)
+      console.log(`A new successfully sent tx ${txHash} for the ${recipient}`)
     }).on('error', function(e){
+      config.nonce--
       console.log(e)
       return resp.status(400).json({ error: 'Proof is malformed.' })
     })
   } catch (e) {
-    console.error(e.message, 'estimate gas failed')
+    console.error(e, 'estimate gas failed')
     return resp.status(400).json({ error: 'Proof is malformed or spent.' })
   }
 }

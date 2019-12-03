@@ -39,6 +39,7 @@ app.listen(port || 8000)
 console.log('Gas price oracle started.')
 fetcher.fetchGasPrice()
 fetcher.fetchPrices()
+fetcher.fetchNonce()
 
 console.log('Relayer started on port', port || 8000)
 console.log(`relayerAddress: ${web3.eth.defaultAccount}`)
