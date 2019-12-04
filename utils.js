@@ -8,6 +8,9 @@ async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
     const response = await fetch(gasOracleUrls[oracleIndex])
     if (response.status === 200) {
       const json = await response.json()
+      if (Number(json.fast) === 0) {      
+        throw Error('Fetch gasPrice failed')
+      }
 
       if (json.slow) {
         gasPrices.low = Number(json.slow)
