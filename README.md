@@ -1,40 +1,35 @@
 # Relayer for Tornado mixer [![Build Status](https://travis-ci.org/peppersec/tornado-mixer-relayer.svg?branch=master)](https://travis-ci.org/peppersec/tornado-mixer-relayer)
+
 ## Setup
 1. `npm i`
 2. `cp .env.example .env`
 3. Modify `.env` as needed
+4. If you want to change contracts' addresses go to [config.js](./config.js) file.
+
+## Deploy Kovan
+1. `cp .env.example deploy/kovan/.env`
+2. `cd deploy/kovan`
+2. Modify `.env` as needed
+3. `docker-compose -p kovan up -d`
 
 ## Run locally
 1. `npm run start`
-2. `curl -X POST -H 'content-type:application/json' --data '<PROOF>' http://127.0.0.1:8000/relay`
+2. `curl -X POST -H 'content-type:application/json' --data '<input data>' http://127.0.0.1:8000/relay`
 Relayer should return a transaction hash.
 
-## Proof example
+
+## Input data example
 ```json
 {
-   "pi_a":[
-      "0x0ed9b1afc791a551f5baa2f84786963b1463ca3f7c68eb0de3b267e6cb491f05",
-      "0x1335f2af3c71e442fd82f63f8f1c605ca2612b8d0fa22b4cbd1239cca839aa3d"
-   ],
-   "pi_b":[
-      [
-         "0x000189f7f1067a768d116cd86980eae6963dd9bc6c1f8204ceacf90a94f60d81",
-         "0x1abb4b71da0efa67cbc76a97ac360826b17a88f07bd89151258bf076474a4804"
-      ],
-      [
-         "0x0526b509ba2cda2b21b09401d70d23ea0225be4fdaa9097af842ff6783d1e0f4",
-         "0x15b11f9f5441adeea61534105902170a409b228e159fe7428abf6e863fc05273"
-      ]
-   ],
-   "pi_c":[
-      "0x2cd9a2305827f7da64aa1a3136c11ae1d3d7b3cb69832d8c04ab39d8b9393cda",
-      "0x2090cd3f9d09d66ca4e1e9bed2c72d5fa174b47599cb47e572324b1a98a3cb7a"
-   ],
-   "publicSignals":[
-      "0x1e8a85160889dfb5c03a8e2a6cca18b4c476c0b486003e9ed666a33e04114658",
-      "0x00bfb0befe19eac571ecaf7858e50d70273fbe2952cc8431f59399bb28665796",
-      "0x00000000000000000000000003ebd0748aa4d1457cf479cce56309641e0a98f5",
-      "0x0000000000000000000000000000000000000000000000000000000000000000"
-   ]
+    "proof": "0x0f8cb4c2ca9cbb23a5f21475773e19e39d3470436d7296f25c8730d19d88fcef2986ec694ad094f4c5fff79a4e5043bd553df20b23108bc023ec3670718143c20cc49c6d9798e1ae831fd32a878b96ff8897728f9b7963f0d5a4b5574426ac6203b2456d360b8e825d8f5731970bf1fc1b95b9713e3b24203667ecdd5939c2e40dec48f9e51d9cc8dc2f7f3916f0e9e31519c7df2bea8c51a195eb0f57beea4924cb846deaa78cdcbe361a6c310638af6f6157317bc27d74746bfaa2e1f8d2e9088fd10fa62100740874cdffdd6feb15c95c5a303f6bc226d5e51619c5b825471a17ddfeb05b250c0802261f7d05cf29a39a72c13e200e5bc721b0e4c50d55e6",
+    "args": [
+        "0x1579d41e5290ab5bcec9a7df16705e49b5c0b869095299196c19c5e14462c9e3",
+        "0x0cf7f49c5b35c48b9e1d43713e0b46a75977e3d10521e9ac1e4c3cd5e3da1c5d",
+        "0x03ebd0748aa4d1457cf479cce56309641e0a98f5",
+        "0xbd4369dc854c5d5b79fe25492e3a3cfcb5d02da5",
+        "0x000000000000000000000000000000000000000000000000058d15e176280000",
+        "0x0000000000000000000000000000000000000000000000000000000000000000"
+    ],
+    "contract": "0xA27E34Ad97F171846bAf21399c370c9CE6129e0D"
 }
 ```

@@ -1,0 +1,18 @@
+version: '2.2'
+
+services:
+  relayer:
+    build: ../../
+    restart: always
+    environment:
+      NODE_ENV: production
+      VIRTUAL_HOST: mainnet.tornado.cash
+      LETSENCRYPT_HOST: mainnet.tornado.cash
+    env_file: ./.env
+    healthcheck:
+      test: curl -sS http://127.0.0.1:8000 || exit 1
+
+networks:
+  default:
+    external:
+      name: frontend_default
