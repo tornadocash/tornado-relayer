@@ -5,7 +5,9 @@ const { gasOracleUrls } = require('./config')
 async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
   oracleIndex = (oracleIndex + 1) % gasOracleUrls.length
   try {
-    const response = await fetch(gasOracleUrls[oracleIndex])
+    const url = gasOracleUrls[oracleIndex]
+    const delimiter = url === 'https://ethgasstation.info/json/ethgasAPI.json' ? 10 : 1
+    const response = await fetch(url)
     if (response.status === 200) {
       const json = await response.json()
       if (Number(json.fast) === 0) {      
@@ -13,16 +15,16 @@ async function fetchGasPrice({ gasPrices, oracleIndex = 0 }) {
       }
 
       if (json.slow) {
-        gasPrices.low = Number(json.slow)
+        gasPrices.low = Number(json.slow) / delimiter
       }
       if (json.safeLow) {
-        gasPrices.low = Number(json.safeLow)
+        gasPrices.low = Number(json.safeLow) / delimiter
       }
       if (json.standard) {
-        gasPrices.standard = Number(json.standard)
+        gasPrices.standard = Number(json.standard) / delimiter
       }
       if (json.fast) {
-        gasPrices.fast = Number(json.fast)
+        gasPrices.fast = Number(json.fast) / delimiter
       }
     } else {
       throw Error('Fetch gasPrice failed')

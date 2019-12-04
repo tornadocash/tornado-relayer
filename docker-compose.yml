@@ -6,16 +6,16 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-      VIRTUAL_HOST: relayer.tornado.cash
-      LETSENCRYPT_HOST: relayer.tornado.cash
+      VIRTUAL_HOST: mainnet.tornado.cash
+      LETSENCRYPT_HOST: mainnet.tornado.cash
     env_file: ./.env
 
-  monitor:
-    image: arefaslani/docker-telegram-notifier
-    restart: always
-    volumes:
-     - /var/run/docker.sock:/var/run/docker.sock
-    env_file: ./.env
+  # monitor:
+  #   image: arefaslani/docker-telegram-notifier
+  #   restart: always
+  #   volumes:
+  #    - /var/run/docker.sock:/var/run/docker.sock
+  #   env_file: ./.env
 
 networks:
   default:
