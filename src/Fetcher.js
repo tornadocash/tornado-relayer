@@ -66,6 +66,7 @@ class Fetcher {
   async fetchNonce() {
     try {
       config.nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
+      console.log(`Current nonce: ${config.nonce}%`)
     } catch(e) {
       console.error('fetchNonce failed', e.message)
       setTimeout(this.fetchNonce, 3000)
