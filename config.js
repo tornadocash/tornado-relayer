@@ -50,7 +50,7 @@ module.exports = {
     }
   },
   defaultGasPrice: 2,
-  gasOracleUrls: ['https://www.etherchain.org/api/gasPriceOracle', 'https://gasprice.poa.network/'],
+  gasOracleUrls: ['https://ethgasstation.info/json/ethgasAPI.json', 'https://gasprice.poa.network/'],
   port: process.env.APP_PORT,
   relayerServiceFee: Number(process.env.RELAYER_FEE)
 }
