@@ -3,7 +3,6 @@ services:
   kovan:
     image: tornadocash/relayer
     restart: always
-    env_file: ./.env.kovan
     environment:
       VIRTUAL_HOST: example.duckdns.org
       LETSENCRYPT_HOST: example.duckdns.org
