@@ -17,7 +17,7 @@ Relayer should return a transaction hash.
 ## Deploy as a Docker container
 1. `cp .env.example .env`
 2. Modify `.env` as needed
-3. `docker run -d --env-file .env -p 80:8000 tornadocash/relayer:v2`
+3. `docker run -d --env-file .env -p 80:8000 tornadocash/relayer`
 
 ## Input data example
 ```json
