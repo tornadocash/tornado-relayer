@@ -1,4 +1,4 @@
-# Relayer for Tornado mixer [![Build Status](https://travis-ci.org/peppersec/tornado-mixer-relayer.svg?branch=master)](https://travis-ci.org/peppersec/tornado-mixer-relayer)
+# Relayer for Tornado mixer [![Build Status](https://travis-ci.org/tornadocash/relayer.svg?branch=master)](https://travis-ci.org/tornadocash/relayer) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tornadocash/relayer.svg)](https://hub.docker.com/r/tornadocash/relayer/builds)
 
 ## Setup
 1. `npm i`
