@@ -1,22 +1,23 @@
 # Relayer for Tornado mixer [![Build Status](https://travis-ci.org/tornadocash/relayer.svg?branch=master)](https://travis-ci.org/tornadocash/relayer) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tornadocash/relayer.svg)](https://hub.docker.com/r/tornadocash/relayer/builds)
 
-## Setup
+## Run locally
 1. `npm i`
 2. `cp .env.example .env`
 3. Modify `.env` as needed
-4. If you want to change contracts' addresses go to [config.js](./config.js) file.
-
-## Deploy Kovan
-1. `cp .env.example deploy/kovan/.env`
-2. `cd deploy/kovan`
-2. Modify `.env` as needed
-3. `docker-compose -p kovan up -d`
-
-## Run locally
-1. `npm run start`
-2. `curl -X POST -H 'content-type:application/json' --data '<input data>' http://127.0.0.1:8000/relay`
+4. `npm run start`
+5. Go to `http://127.0.0.1:8000`
+6. In order to execute withdraw request, you can run following command 
+```bash
+curl -X POST -H 'content-type:application/json' --data '<input data>' http://127.0.0.1:8000/relay
+```
 Relayer should return a transaction hash.
 
+*Note.* If you want to change contracts' addresses go to [config.js](./config.js) file.
+
+## Deploy as a Docker container
+1. `cp .env.example .env`
+2. Modify `.env` as needed
+3. `docker run -d --env-file .env -p 80:8000 tornadocash/relayer`
 
 ## Input data example
 ```json

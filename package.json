@@ -2,9 +2,9 @@
   "name": "relay",
   "version": "1.0.0",
   "description": "Relayer for Tornado mixer. https://tornado.cash",
-  "main": "src/index.js",
+  "main": "app.js",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node app.js",
     "eslint": "npx eslint --ignore-path .gitignore .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },

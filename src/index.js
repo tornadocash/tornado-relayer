@@ -25,7 +25,7 @@ app.use(function(req, res, next) {
 
 app.get('/', function (req, res) {
   // just for testing purposes
-  res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the /status for settings')
+  res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/status>/status</a> for settings')
 })
 
 app.get('/status', function (req, res) {

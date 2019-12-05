@@ -38,22 +38,27 @@ class Fetcher {
   }
   async fetchGasPrice({ oracleIndex = 0 } = {}) {
     oracleIndex = (oracleIndex + 1) % gasOracleUrls.length
+    const url = gasOracleUrls[oracleIndex]
+    const delimiter = url === 'https://ethgasstation.info/json/ethgasAPI.json' ? 10 : 1
     try {
-      const response = await fetch(gasOracleUrls[oracleIndex])
+      const response = await fetch(url)
       if (response.status === 200) {
         const json = await response.json()
+        if (Number(json.fast) === 0) {
+          throw new Error('Fetch gasPrice failed')
+        }
   
         if (json.slow) {
-          this.gasPrices.low = Number(json.slow)
+          this.gasPrices.low = Number(json.slow) / delimiter
         }
         if (json.safeLow) {
-          this.gasPrices.low = Number(json.safeLow)
+          this.gasPrices.low = Number(json.safeLow) / delimiter
         }
         if (json.standard) {
-          this.gasPrices.standard = Number(json.standard)
+          this.gasPrices.standard = Number(json.standard) / delimiter
         }
         if (json.fast) {
-          this.gasPrices.fast = Number(json.fast)
+          this.gasPrices.fast = Number(json.fast) / delimiter
         }
       } else {
         throw Error('Fetch gasPrice failed')
