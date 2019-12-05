@@ -1,0 +1,32 @@
+version: '2'
+services:
+  kovan:
+    image: tornadocash/relayer
+    restart: always
+    env_file: ./.env.kovan
+    environment:
+      VIRTUAL_HOST: example.duckdns.org
+      LETSENCRYPT_HOST: example.duckdns.org
+      NET_ID: 42
+      RPC_URL: https://kovan.infura.io
+      PRIVATE_KEY:
+      # 2.5 means 2.5%
+      RELAYER_FEE: 2.5
+  nginx:
+    image: jwilder/nginx-proxy
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - /etc/nginx/certs
+      - /etc/nginx/vhost.d
+      - /usr/share/nginx/html
+      - /var/run/docker.sock:/tmp/docker.sock:ro
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    restart: always
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro

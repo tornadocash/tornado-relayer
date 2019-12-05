@@ -14,10 +14,26 @@ Relayer should return a transaction hash.
 
 *Note.* If you want to change contracts' addresses go to [config.js](./config.js) file.
 
-## Deploy as a Docker container
+## Deploy with docker-compose
+
+docker-compose.yml contains a stack that will automatically provision SSL certificates for your domain name and will add a https redirect to port 80.
+
+1. Download docker-compose.yml
+2. Change environment variables for `kovan` containers as appropriate
+    * add `PRIVATE_KEY` for your relayer address
+    * set `VIRTUAL_HOST` and `LETSENCRYPT_HOST` to your domain and add DNS record pointing to your relayer ip address
+    * customize `RELAYER_FEE`
+    * update `RPC_URL` if needed
+3. Run `docker-compose up -d`
+
+## Run as a Docker container
+
 1. `cp .env.example .env`
 2. Modify `.env` as needed
 3. `docker run -d --env-file .env -p 80:8000 tornadocash/relayer`
+
+In that case you will need to add https termination yourself because browsers with default settings will prevent https 
+tornado.cash UI from submitting your request over http connection
 
 ## Input data example
 ```json
