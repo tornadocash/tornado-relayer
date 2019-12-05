@@ -6,8 +6,8 @@ services:
     restart: always
     environment:
       NODE_ENV: production
-      VIRTUAL_HOST: mainnet.tornado.cash
-      LETSENCRYPT_HOST: mainnet.tornado.cash
+      VIRTUAL_HOST: <YOUR_SUBDOMAIN>.tornado.cash
+      LETSENCRYPT_HOST: <YOUR_SUBDOMAIN>.tornado.cash
     env_file: ./.env
 
 networks:
