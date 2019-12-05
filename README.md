@@ -1,4 +1,4 @@
-# Relayer for Tornado mixer [![Build Status](https://travis-ci.org/tornadocash/relayer.svg?branch=master)](https://travis-ci.org/tornadocash/relayer) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tornadocash/relayer.svg)](https://hub.docker.com/r/tornadocash/relayer/builds)
+# Relayer for Tornado Cash [![Build Status](https://travis-ci.org/tornadocash/relayer.svg?branch=master)](https://travis-ci.org/tornadocash/relayer) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tornadocash/relayer.svg)](https://hub.docker.com/r/tornadocash/relayer/builds)
 
 ## Run locally
 1. `npm i`
@@ -50,3 +50,8 @@ tornado.cash UI from submitting your request over http connection
     "contract": "0xA27E34Ad97F171846bAf21399c370c9CE6129e0D"
 }
 ```
+
+
+Disclaimer:
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
