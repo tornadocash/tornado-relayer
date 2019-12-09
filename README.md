@@ -20,7 +20,7 @@ docker-compose.yml contains a stack that will automatically provision SSL certif
 
 1. Download docker-compose.yml
 2. Change environment variables for `kovan` containers as appropriate
-    * add `PRIVATE_KEY` for your relayer address
+    * add `PRIVATE_KEY` for your relayer address (without 0x prefix)
     * set `VIRTUAL_HOST` and `LETSENCRYPT_HOST` to your domain and add DNS record pointing to your relayer ip address
     * customize `RELAYER_FEE`
     * update `RPC_URL` if needed
