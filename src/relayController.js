@@ -1,15 +1,26 @@
+const Queue = require('bull')
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
 const mixerABI = require('../abis/mixerABI.json')
 const { 
   isValidProof, isValidArgs, isKnownContract, isEnoughFee
 } = require('./utils')
 const config = require('../config')
+const { redisClient, redisOpts } = require('./redis')
 
 const { web3, fetcher } = require('./instances')
+const withdrawQueue = new Queue('withdraw', redisOpts)
 
-async function relay (req, resp) {
+async function relayController(req, resp) {
+  let requestJob
+  let respLambda = (job, { msg, status }) => {
+    console.log('response', job.id, requestJob.id)
+    if(requestJob.id === job.id) {
+      resp.status(status).json(msg)
+      withdrawQueue.removeListener('completed', respLambda)
+    }
+  }
+  withdrawQueue.on('completed', respLambda)
   const { proof, args, contract } = req.body
-  const gasPrices = fetcher.gasPrices
   let { valid , reason } = isValidProof(proof)
   if (!valid) {
     console.log('Proof is invalid:', reason)
@@ -47,15 +58,38 @@ async function relay (req, resp) {
     return resp.status(400).json({ error: 'Relayer address is invalid' })
   }
 
+  await redisClient.set('foo', 'bar')
+  requestJob = await withdrawQueue.add({ 
+    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), recipient
+  }, { removeOnComplete: true })
+  console.log('id', requestJob.id)
+}
+
+withdrawQueue.process(async function(job, done){
+  console.log(Date.now(), ' withdraw started', job.id)
+  const gasPrices = fetcher.gasPrices
+  const { contract, nullifierHash, root, proof, args, refund, currency, amount, fee, recipient } = job.data
+  // job.data contains the custom data passed when the job was created
+  // job.id contains id of this job.
   try {
-    const mixer = new web3.eth.Contract(mixerABI, req.body.contract)
+    const mixer = new web3.eth.Contract(mixerABI, contract)
     const isSpent = await mixer.methods.isSpent(nullifierHash).call()
     if (isSpent) {
-      return resp.status(400).json({ error: 'The note has been spent.' })
+      done(null, {
+        status: 400,
+        msg: {
+          error: 'The note has been spent.'
+        }
+      })
     }
     const isKnownRoot = await mixer.methods.isKnownRoot(root).call()
     if (!isKnownRoot) {
-      return resp.status(400).json({ error: 'The merkle root is too old or invalid.' })
+      done(null, {
+        status: 400,
+        msg: {
+          error: 'The merkle root is too old or invalid.'
+        }
+      })
     }
 
     let gas = await mixer.methods.withdraw(proof, ...args).estimateGas({
@@ -65,13 +99,18 @@ async function relay (req, resp) {
 
     gas += 50000
     const ethPrices = fetcher.ethPrices
-    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee })
+    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee: toBN(fee) })
     if (!isEnough) {
       console.log(`Wrong fee: ${reason}`)
-      return resp.status(400).json({ error: reason })
+      done(null, {
+        status: 400,
+        msg: { error: reason }
+      })
     }
 
     const data = mixer.methods.withdraw(proof, ...args).encodeABI()
+    let nonce = Number(await redisClient.get('nonce'))
+    console.log('nonce', nonce)
     const tx = {
       from: web3.eth.defaultAccount,
       value: numberToHex(refund),
@@ -80,24 +119,50 @@ async function relay (req, resp) {
       to: mixer._address,
       netId: config.netId,
       data,
-      nonce: config.nonce
+      nonce
     }
-    config.nonce++
-    let signedTx = await web3.eth.accounts.signTransaction(tx, config.privateKey)
-    let result = web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-
-    result.once('transactionHash', function(txHash){
-      resp.json({ txHash })
-      console.log(`A new successfully sent tx ${txHash} for the ${recipient}`)
-    }).on('error', function(e){
-      config.nonce--
-      console.error('on transactionHash error', e.message)
-      return resp.status(400).json({ error: 'Proof is malformed.' })
-    })
+    nonce += 1
+    await redisClient.set('nonce', nonce)
+    sendTx(tx, done)
   } catch (e) {
     console.error(e, 'estimate gas failed')
-    return resp.status(400).json({ error: 'Proof is malformed or spent.' })
+    done(null, {
+      status: 400,
+      msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
+    })
   }
-}
+})
 
-module.exports = relay
+async function sendTx(tx, done, retryAttempt = 1) {
+
+  let signedTx = await web3.eth.accounts.signTransaction(tx, config.privateKey)
+  let result = web3.eth.sendSignedTransaction(signedTx.rawTransaction)
+
+  result.once('transactionHash', function(txHash){
+    done(null, {
+      status: 200,
+      msg: { txHash }
+    })
+    console.log(`A new successfully sent tx ${txHash}`)
+  }).on('error', async function(e){
+    console.log('error', e.message)
+    if(e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.' 
+    || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.') {
+      console.log('nonce too low, retrying')
+      if(retryAttempt <= 10) {
+        retryAttempt++
+        const newNonce = tx.nonce + 1
+        tx.nonce = newNonce
+        await redisClient.set('nonce', newNonce)
+        sendTx(tx, done, retryAttempt)
+        return
+      }
+    }
+    console.error('on transactionHash error', e.message)
+    done(null, {
+      status: 400,
+      msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
+    })
+  })
+}
+module.exports = relayController

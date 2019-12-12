@@ -4,7 +4,7 @@ const relayController = require('./relayController')
 const { fetcher, web3 } = require('./instances')
 const { getMixers } = require('./utils')
 const mixers = getMixers()
-
+const { redisClient } = require('./redis')
 const app = express()
 app.use(express.json())
 
@@ -28,9 +28,10 @@ app.get('/', function (req, res) {
   res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/status>/status</a> for settings')
 })
 
-app.get('/status', function (req, res) {
+app.get('/status', async function (req, res) {
+  let nonce = await redisClient.get('nonce')
   const { ethPrices, gasPrices } = fetcher
-  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPrices, relayerServiceFee })
+  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPrices, relayerServiceFee, nonce })
 })
 
 app.post('/relay', relayController)

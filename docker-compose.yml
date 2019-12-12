@@ -9,9 +9,10 @@ services:
       NET_ID: 42
       RPC_URL: https://kovan.infura.io
       # without 0x prefix
-      PRIVATE_KEY:
+      PRIVATE_KEY: 
       # 2.5 means 2.5%
       RELAYER_FEE: 2.5
+      REDIS_URL: redis://redis:6379
   nginx:
     image: jwilder/nginx-proxy
     restart: always
@@ -30,3 +31,6 @@ services:
       - nginx
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
+  redis:
+    image: redis
+    restart: always
