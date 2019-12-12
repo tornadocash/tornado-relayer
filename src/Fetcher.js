@@ -3,8 +3,7 @@ const fetch = require('node-fetch')
 const { toWei } = require('web3-utils')
 const { gasOracleUrls, defaultGasPrice } = require('../config')
 const { getMainnetTokens } = require('./utils')
-const config = require ('../config')
- 
+const { redisClient } = require('./redis')
 
 class Fetcher {
   constructor(web3) {
@@ -70,8 +69,9 @@ class Fetcher {
   }
   async fetchNonce() {
     try {
-      config.nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
-      console.log(`Current nonce: ${config.nonce}`)
+      const nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
+      await redisClient.set('nonce', nonce)
+      console.log(`Current nonce: ${nonce}`)
     } catch(e) {
       console.error('fetchNonce failed', e.message)
       setTimeout(this.fetchNonce, 3000)
