@@ -10,16 +10,17 @@ const { redisClient, redisOpts } = require('./redis')
 const { web3, fetcher } = require('./instances')
 const withdrawQueue = new Queue('withdraw', redisOpts)
 
+const reponseCbs = {}
+let respLambda = (job, { msg, status }) => {
+  const resp = reponseCbs[job.id]
+  resp.status(status).json(msg)
+  delete reponseCbs[job.id]
+}
+withdrawQueue.on('completed', respLambda)
+
 async function relayController(req, resp) {
   let requestJob
-  let respLambda = (job, { msg, status }) => {
-    console.log('response', job.id, requestJob.id)
-    if(requestJob.id === job.id) {
-      resp.status(status).json(msg)
-      withdrawQueue.removeListener('completed', respLambda)
-    }
-  }
-  withdrawQueue.on('completed', respLambda)
+  
   const { proof, args, contract } = req.body
   let { valid , reason } = isValidProof(proof)
   if (!valid) {
@@ -60,15 +61,16 @@ async function relayController(req, resp) {
 
   await redisClient.set('foo', 'bar')
   requestJob = await withdrawQueue.add({ 
-    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), recipient
+    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString()
   }, { removeOnComplete: true })
-  console.log('id', requestJob.id)
+  reponseCbs[requestJob.id] = resp
 }
 
 withdrawQueue.process(async function(job, done){
   console.log(Date.now(), ' withdraw started', job.id)
   const gasPrices = fetcher.gasPrices
-  const { contract, nullifierHash, root, proof, args, refund, currency, amount, fee, recipient } = job.data
+  const { contract, nullifierHash, root, proof, args, refund, currency, amount, fee } = job.data
+  // cb()
   // job.data contains the custom data passed when the job was created
   // job.id contains id of this job.
   try {
