@@ -24,6 +24,7 @@ docker-compose.yml contains a stack that will automatically provision SSL certif
     * set `VIRTUAL_HOST` and `LETSENCRYPT_HOST` to your domain and add DNS record pointing to your relayer ip address
     * customize `RELAYER_FEE`
     * update `RPC_URL` if needed
+    * update `REDIS_URL` if needed
 3. Run `docker-compose up -d`
 
 ## Run as a Docker container
