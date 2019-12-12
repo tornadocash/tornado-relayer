@@ -1,4 +1,8 @@
 version: '2'
+
+volumes:
+  redis:
+
 services:
   kovan:
     image: tornadocash/relayer
@@ -13,6 +17,8 @@ services:
       # 2.5 means 2.5%
       RELAYER_FEE: 2.5
       REDIS_URL: redis://redis:6379
+    depends_on:
+      - redis
   nginx:
     image: jwilder/nginx-proxy
     restart: always
@@ -34,3 +40,5 @@ services:
   redis:
     image: redis
     restart: always
+    volumes: 
+      - redis:/data
