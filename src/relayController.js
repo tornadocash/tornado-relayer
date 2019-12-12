@@ -49,7 +49,7 @@ async function relayController(req, resp) {
     toBN(args[4]),
     toBN(args[5])
   ]
-  console.log('fee, refund', fee.toString(), refund.toString())
+  console.log('fee, refund', fee.toString(), refund.toString(), recipient)
   if (currency === 'eth' && !refund.isZero()) {
     return resp.status(400).json({ error: 'Cannot send refund for eth currency.' })
   }
