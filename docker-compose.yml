@@ -13,7 +13,24 @@ services:
       PRIVATE_KEY:
       # 2.5 means 2.5%
       RELAYER_FEE: 2.5
-      REDIS_URL: redis
+      REDIS_URL: redis://redis/0
+      nginx_proxy_read_timeout: 600
+    depends_on:
+      - redis
+
+  mainnet:
+    image: tornadocash/relayer
+    restart: always
+    environment:
+      VIRTUAL_HOST: example2.duckdns.org
+      LETSENCRYPT_HOST: example2.duckdns.org
+      NET_ID: 1
+      RPC_URL: https://mainnet.infura.io
+      # without 0x prefix
+      PRIVATE_KEY:
+      # 2.5 means 2.5%
+      RELAYER_FEE: 2.5
+      REDIS_URL: redis://redis/1
       nginx_proxy_read_timeout: 600
     depends_on:
       - redis
