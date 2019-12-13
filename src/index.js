@@ -36,7 +36,8 @@ app.get('/status', async function (req, res) {
 
 app.post('/relay', relayController)
 
-app.listen(port || 8000)
+let server = app.listen(port || 8000)
+server.setTimeout(600000)
 console.log('Gas price oracle started.')
 fetcher.fetchGasPrice()
 fetcher.fetchPrices()
