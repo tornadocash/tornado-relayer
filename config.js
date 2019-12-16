@@ -9,7 +9,7 @@ module.exports = {
     netId1: {
       dai: {
         mixerAddress: {
-          '100': undefined,
+          '100': '0xD4B88Df4D29F5CedD6857912842cff3b20C8Cfa3',
           '500': undefined,
           '1000': undefined,
           '5000': undefined
@@ -20,8 +20,8 @@ module.exports = {
       eth: {
         mixerAddress: {
           '0.1': '0x12D66f87A04A9E220743712cE6d9bB1B5616B8Fc',
-          '1': undefined,
-          '10': undefined,
+          '1': '0x47CE0C6eD5B0Ce3d3A51fdb1C52DC66a7c3c2936',
+          '10': '0x910Cbd523D972eb0a6f4cAe4618aD62622b39DbF',
           '100': undefined
         },
         decimals: 18
@@ -30,7 +30,7 @@ module.exports = {
     netId42: {
       dai: {
         mixerAddress: {
-          '100': '0x5D4538D2b07cD8Eb7b93c33B327f3E01A42e68d8',
+          '100': '0x7832f65F4030113C007538f29AbC6C13241d4478',
           '500': undefined,
           '1000': undefined,
           '5000': undefined
@@ -40,9 +40,9 @@ module.exports = {
       },
       eth: {
         mixerAddress: {
-          '0.1': '0xB7F60Bf8b969CE4B95Bb50a671860D99478C81Ee',
-          '1': '0x27e94B8cfa33EA2b47E209Ba69804d44642B3545',
-          '10': undefined,
+          '0.1': '0x8b3f5393bA08c24cc7ff5A66a832562aAB7bC95f',
+          '1': '0xD6a6AC46d02253c938B96D12BE439F570227aE8E',
+          '10': '0xe1BE96331391E519471100c3c1528B66B8F4e5a7',
           '100': undefined
         },
         decimals: 18
