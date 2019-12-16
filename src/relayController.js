@@ -61,7 +61,7 @@ async function relayController(req, resp) {
 
   await redisClient.set('foo', 'bar')
   requestJob = await withdrawQueue.add({ 
-    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), refund
+    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), refund: refund.toString()
   }, { removeOnComplete: true })
   reponseCbs[requestJob.id] = resp
 }
