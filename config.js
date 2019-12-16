@@ -19,7 +19,7 @@ module.exports = {
       },
       eth: {
         mixerAddress: {
-          '0.1': undefined,
+          '0.1': '0x12d66f87a04a9e220743712ce6d9bb1b5616b8fc',
           '1': undefined,
           '10': undefined,
           '100': undefined
