@@ -61,7 +61,7 @@ async function relayController(req, resp) {
 
   await redisClient.set('foo', 'bar')
   requestJob = await withdrawQueue.add({ 
-    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString()
+    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), refund
   }, { removeOnComplete: true })
   reponseCbs[requestJob.id] = resp
 }
@@ -70,7 +70,7 @@ withdrawQueue.process(async function(job, done){
   console.log(Date.now(), ' withdraw started', job.id)
   const gasPrices = fetcher.gasPrices
   const { contract, nullifierHash, root, proof, args, refund, currency, amount, fee } = job.data
-  // cb()
+  console.log(JSON.stringify(job.data))
   // job.data contains the custom data passed when the job was created
   // job.id contains id of this job.
   try {
