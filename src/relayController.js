@@ -101,7 +101,7 @@ withdrawQueue.process(async function(job, done){
 
     gas += 50000
     const ethPrices = fetcher.ethPrices
-    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee: toBN(fee) })
+    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, amount, refund: toBN(refund), ethPrices, fee: toBN(fee) })
     if (!isEnough) {
       console.log(`Wrong fee: ${reason}`)
       done(null, {
