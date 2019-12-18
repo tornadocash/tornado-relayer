@@ -1,5 +1,5 @@
 const express = require('express')
-const { netId, port, relayerServiceFee } = require('../config')
+const { netId, port, relayerServiceFee, version } = require('../config')
 const relayController = require('./relayController')
 const { fetcher, web3 } = require('./instances')
 const { getMixers } = require('./utils')
@@ -31,7 +31,16 @@ app.get('/', function (req, res) {
 app.get('/status', async function (req, res) {
   let nonce = await redisClient.get('nonce')
   const { ethPrices, gasPrices } = fetcher
-  res.json({ relayerAddress: web3.eth.defaultAccount, mixers, gasPrices, netId, ethPrices, relayerServiceFee, nonce })
+  res.json({ 
+    relayerAddress: web3.eth.defaultAccount,
+    mixers,
+    gasPrices,
+    netId,
+    ethPrices,
+    relayerServiceFee,
+    nonce,
+    version
+  })
 })
 
 app.post('/relay', relayController)
