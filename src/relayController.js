@@ -108,6 +108,7 @@ withdrawQueue.process(async function(job, done){
         status: 400,
         msg: { error: reason }
       })
+      return
     }
 
     const data = mixer.methods.withdraw(proof, ...args).encodeABI()
