@@ -17,6 +17,16 @@ module.exports = {
         tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
         decimals: 18
       },
+      usdc: {
+        mixerAddress: {
+          '100': undefined,
+          '500': undefined,
+          '1000': undefined,
+          '5000': undefined
+        },
+        tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        decimals: 6
+      },
       eth: {
         mixerAddress: {
           '0.1': '0x12D66f87A04A9E220743712cE6d9bB1B5616B8Fc',
@@ -37,6 +47,16 @@ module.exports = {
         },
         tokenAddress: '0x8c158c7e57161dd4d3cb02bf1a3a97fcc78b75fd',
         decimals: 18
+      },
+      usdc: {
+        mixerAddress: {
+          '100': '0x42d096a9194a18DAA2d2D95a70D8dA80DeFFB645',
+          '500': undefined,
+          '1000': undefined,
+          '5000': undefined
+        },
+        tokenAddress: '0x7f5939049c0D7D7dFC484f64600c9306F79a0D3F',
+        decimals: 6
       },
       eth: {
         mixerAddress: {

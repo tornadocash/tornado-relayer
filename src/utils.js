@@ -1,4 +1,4 @@
-const { isHexStrict, toBN, toWei } = require('web3-utils')
+const { isHexStrict, toBN, toWei, BN } = require('web3-utils')
 const { netId, mixers, relayerServiceFee } = require('../config')
 
 function isValidProof(proof) {
@@ -59,9 +59,62 @@ function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms))
 }
 
+function fromDecimals(value, decimals) {
+  value = value.toString()
+  let ether = value.toString()
+  const base = new BN('10').pow(new BN(decimals))
+  const baseLength = base.toString(10).length - 1 || 1
+
+  const negative = ether.substring(0, 1) === '-'
+  if (negative) {
+    ether = ether.substring(1)
+  }
+
+  if (ether === '.') {
+    throw new Error('[ethjs-unit] while converting number ' + value + ' to wei, invalid value')
+  }
+
+  // Split it into a whole and fractional part
+  const comps = ether.split('.')
+  if (comps.length > 2) {
+    throw new Error(
+      '[ethjs-unit] while converting number ' + value + ' to wei,  too many decimal points'
+    )
+  }
+
+  let whole = comps[0]
+  let fraction = comps[1]
+
+  if (!whole) {
+    whole = '0'
+  }
+  if (!fraction) {
+    fraction = '0'
+  }
+  if (fraction.length > baseLength) {
+    throw new Error(
+      '[ethjs-unit] while converting number ' + value + ' to wei, too many decimal places'
+    )
+  }
+
+  while (fraction.length < baseLength) {
+    fraction += '0'
+  }
+
+  whole = new BN(whole)
+  fraction = new BN(fraction)
+  let wei = whole.mul(base).add(fraction)
+
+  if (negative) {
+    wei = wei.mul(negative)
+  }
+
+  return new BN(wei.toString(10), 10)
+}
+
 function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee }) {
-  // TODO tokens can have less then 18 decimals
-  const feePercent = toBN(toWei(amount)).mul(toBN(relayerServiceFee * 10)).div(toBN('1000'))
+  const { decimals } = mixers[`netId${netId}`][currency]
+  const feePercent = toBN(fromDecimals(amount, decimals)).mul(toBN(relayerServiceFee * 10)).div(toBN('1000'))
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN(gas))
   let desiredFee
   switch (currency) {
@@ -69,16 +122,16 @@ function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee 
       desiredFee = expense.add(feePercent)
       break
     }
-    case 'dai': {
+    default: {
       desiredFee = 
         expense.add(refund)
-          .mul(toBN(10 ** 18))
-          .div(toBN(ethPrices.dai))
+          .mul(toBN(10 ** decimals))
+          .div(toBN(ethPrices[currency]))
       desiredFee = desiredFee.add(feePercent)
       break
     }
   }
-  console.log('desired fee, feePercent', desiredFee.toString(), feePercent.toString())
+  console.log('sent fee, desired fee, feePercent', fee.toString(), desiredFee.toString(), feePercent.toString())
   if (fee.lt(desiredFee)) {
     return { isEnough: false, reason: 'Not enough fee' }
   } 
