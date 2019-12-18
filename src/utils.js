@@ -92,7 +92,7 @@ function getMainnetTokens() {
   Object.entries(tokens).map(([currency, data]) => {
     if (currency !== 'eth') {
       tokenAddresses.push(data.tokenAddress)
-      currencyLookup[data.tokenAddress] = currency
+      currencyLookup[data.tokenAddress.toLowerCase()] = currency
     }
   })
   return { tokenAddresses, currencyLookup }
