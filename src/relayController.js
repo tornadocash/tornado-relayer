@@ -83,6 +83,7 @@ withdrawQueue.process(async function(job, done){
           error: 'The note has been spent.'
         }
       })
+      return
     }
     const isKnownRoot = await mixer.methods.isKnownRoot(root).call()
     if (!isKnownRoot) {
@@ -92,6 +93,7 @@ withdrawQueue.process(async function(job, done){
           error: 'The merkle root is too old or invalid.'
         }
       })
+      return
     }
 
     let gas = await mixer.methods.withdraw(proof, ...args).estimateGas({
