@@ -18,6 +18,17 @@ module.exports = {
         tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
         decimals: 18
       },
+      cdai: {
+        mixerAddress: {
+          '5000': undefined,
+          '50000': undefined,
+          '500000': undefined,
+          '5000000': undefined
+        },
+        tokenAddress: '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643',
+        symbol: 'cDAI',
+        decimals: 8
+      },
       usdc: {
         mixerAddress: {
           '100': undefined,
@@ -46,6 +57,16 @@ module.exports = {
           '100': undefined
         },
         decimals: 18
+      },
+      usdt: {
+        mixerAddress: {
+          '100': undefined,
+          '1000': undefined,
+          '10000': undefined,
+          '100000': undefined
+        },
+        tokenAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7',
+        decimals: 6
       }
     },
     netId42: {
@@ -58,6 +79,16 @@ module.exports = {
         },
         tokenAddress: '0x4F96Fe3b7A6Cf9725f59d353F723c1bDb64CA6Aa',
         decimals: 18
+      },
+      cdai: {
+        mixerAddress: {
+          '5000': '0x6Fc9386ABAf83147b3a89C36D422c625F44121C8',
+          '50000': '0x7182EA067e0f050997444FCb065985Fd677C16b6',
+          '500000': '0xC22ceFd90fbd1FdEeE554AE6Cc671179BC3b10Ae',
+          '5000000': undefined
+        },
+        tokenAddress: '0xe7bc397dbd069fc7d0109c0636d06888bb50668c',
+        decimals: 8
       },
       usdc: {
         mixerAddress: {
@@ -87,6 +118,16 @@ module.exports = {
           '100': '0xd037E0Ac98Dab2fCb7E296c69C6e52767Ae5414D'
         },
         decimals: 18
+      },
+      usdt: {
+        mixerAddress: {
+          '100': '0x327853Da7916a6A0935563FB1919A48843036b42',
+          '1000': '0x531AA4DF5858EA1d0031Dad16e3274609DE5AcC0',
+          '10000': '0x0958275F0362cf6f07D21373aEE0cf37dFe415dD',
+          '100000': undefined
+        },
+        tokenAddress: '0x03c5f29e9296006876d8df210bcffd7ea5db1cf1',
+        decimals: 6
       }
     }
   },
