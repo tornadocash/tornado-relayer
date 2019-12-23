@@ -1,37 +1,50 @@
-const CoinGecko = require('coingecko-api') 
 const fetch = require('node-fetch')
-const { toWei } = require('web3-utils')
-const { gasOracleUrls, defaultGasPrice } = require('../config')
-const { getMainnetTokens } = require('./utils')
+const Web3 = require('Web3')
+const { gasOracleUrls, defaultGasPrice, oracleRpcUrl, oracleAddress } = require('../config')
+const { getArgsForOracle } = require('./utils')
 const { redisClient } = require('./redis')
+const priceOracleABI = require('../abis/PriceOracle.abi.json')
 
 class Fetcher {
   constructor(web3) {
     this.web3 = web3
+    this.oracleWeb3 = new Web3(oracleRpcUrl)
+    this.oracle = new this.oracleWeb3.eth.Contract(priceOracleABI, oracleAddress)
     this.ethPrices = {
-      dai: '6700000000000000' // 0.0067
+      dai: '6700000000000000', // 0.0067
+      cdai: '157380000000000',
+      cusdc: '164630000000000',
+      usdc: '7878580000000000',
+      usdt: '7864940000000000'
     }
+    this.tokenAddresses
+    this.oneUintAmount
+    this.parts
+    this.currencyLookup
     this.gasPrices = {
       fast: defaultGasPrice
     }
+
+    const { tokenAddresses, oneUintAmount, parts, currencyLookup } = getArgsForOracle()
+    this.tokenAddresses = tokenAddresses
+    this.oneUintAmount = oneUintAmount
+    this.parts = parts
+    this.currencyLookup = currencyLookup
   }
   async fetchPrices() {
-    const { tokenAddresses, currencyLookup } = getMainnetTokens()
     try {
-      const CoinGeckoClient = new CoinGecko()
-      const price = await CoinGeckoClient.simple.fetchTokenPrice({
-        contract_addresses: tokenAddresses,
-        vs_currencies: 'eth',
-        assetPlatform: 'ethereum'
-      })
-      this.ethPrices = Object.entries(price.data).reduce((acc, token) => {
-        if (token[1].eth) {
-          acc[currencyLookup[token[0]]] = toWei(token[1].eth.toString())
-        }
+      let prices = await this.oracle.methods.getPricesInETH(
+        this.tokenAddresses,
+        this.oneUintAmount,
+        this.parts
+      ).call()
+      this.ethPrices = prices.reduce((acc, price, i) => {
+        acc[this.currencyLookup[this.tokenAddresses[i]]] = price
         return acc
       }, {})
       setTimeout(() => this.fetchPrices(), 1000 * 30)
     } catch(e) {
+      console.error('fetchPrices', e)
       setTimeout(() => this.fetchPrices(), 1000 * 30)
     }
   }

@@ -477,11 +477,6 @@ cluster-key-slot@^1.1.0:
   resolved "https://registry.yarnpkg.com/cluster-key-slot/-/cluster-key-slot-1.1.0.tgz#30474b2a981fb12172695833052bc0d01336d10d"
   integrity sha512-2Nii8p3RwAPiFwsnZvukotvow2rIHM+yQ6ZcBXGHdniadkYGZYiGmkHJIbZPIV9nfv7m/U1IPMVVcAhoWFeklw==
 
-coingecko-api@^1.0.6:
-  version "1.0.6"
-  resolved "https://registry.yarnpkg.com/coingecko-api/-/coingecko-api-1.0.6.tgz#ecc42eb96fb1cc721e319c3d06244a642394ab34"
-  integrity sha512-6oJ3aB9F4AlsHQQ4F5N9753FGmMQrr12aGJl79KSfdNOFJ7wvFLSqsBoOBzgYJEab3hJ7cCWnmo2dMJs6KsA3A==
-
 color-convert@^1.9.0:
   version "1.9.3"
   resolved "https://registry.yarnpkg.com/color-convert/-/color-convert-1.9.3.tgz#bb71850690e1f136567de629d2d5471deda4c1e8"

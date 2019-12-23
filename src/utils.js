@@ -138,21 +138,29 @@ function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee 
   return { isEnough: true }
 }
 
-function getMainnetTokens() {
+function getArgsForOracle() {
   const tokens = mixers['netId1']
   const tokenAddresses = []
+  const oneUintAmount = []
+  const parts = [] // this is probably should be removed
   const currencyLookup = {}
   Object.entries(tokens).map(([currency, data]) => {
     if (currency !== 'eth') {
       tokenAddresses.push(data.tokenAddress)
-      currencyLookup[data.tokenAddress.toLowerCase()] = currency
+      oneUintAmount.push(
+        toBN('10')
+          .pow(toBN(data.decimals.toString()))
+          .toString()
+      )
+      parts.push('1')
+      currencyLookup[data.tokenAddress] = currency
     }
   })
-  return { tokenAddresses, currencyLookup }
+  return { tokenAddresses, oneUintAmount, parts, currencyLookup }
 }
 
 function getMixers() {
   return mixers[`netId${netId}`]
 }
 
-module.exports = { isValidProof, isValidArgs, sleep, isKnownContract, isEnoughFee, getMixers, getMainnetTokens }
+module.exports = { isValidProof, isValidArgs, sleep, isKnownContract, isEnoughFee, getMixers, getArgsForOracle }
