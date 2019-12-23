@@ -6,7 +6,7 @@ module.exports = {
   redisUrl: process.env.REDIS_URL,
   rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
-  oracleAddress: '0x5c4c5622670423b8ee5F3A02F505D139fbAfb618',
+  oracleAddress: '0xB5eE7907FF5f4c1FC9086Fc117E6c397431F39ad',
   privateKey: process.env.PRIVATE_KEY,
   mixers: {
     netId1: {

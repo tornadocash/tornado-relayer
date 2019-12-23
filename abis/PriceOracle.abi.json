@@ -11,11 +11,6 @@
 				"internalType": "uint256[]",
 				"name": "oneUnitAmounts",
 				"type": "uint256[]"
-			},
-			{
-				"internalType": "uint256[]",
-				"name": "parts",
-				"type": "uint256[]"
 			}
 		],
 		"name": "getPricesInETH",

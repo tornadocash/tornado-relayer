@@ -142,7 +142,6 @@ function getArgsForOracle() {
   const tokens = mixers['netId1']
   const tokenAddresses = []
   const oneUintAmount = []
-  const parts = [] // this is probably should be removed
   const currencyLookup = {}
   Object.entries(tokens).map(([currency, data]) => {
     if (currency !== 'eth') {
@@ -152,11 +151,10 @@ function getArgsForOracle() {
           .pow(toBN(data.decimals.toString()))
           .toString()
       )
-      parts.push('1')
       currencyLookup[data.tokenAddress] = currency
     }
   })
-  return { tokenAddresses, oneUintAmount, parts, currencyLookup }
+  return { tokenAddresses, oneUintAmount, currencyLookup }
 }
 
 function getMixers() {

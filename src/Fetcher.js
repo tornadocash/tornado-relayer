@@ -19,25 +19,21 @@ class Fetcher {
     }
     this.tokenAddresses
     this.oneUintAmount
-    this.parts
     this.currencyLookup
     this.gasPrices = {
       fast: defaultGasPrice
     }
 
-    const { tokenAddresses, oneUintAmount, parts, currencyLookup } = getArgsForOracle()
+    const { tokenAddresses, oneUintAmount, currencyLookup } = getArgsForOracle()
     this.tokenAddresses = tokenAddresses
     this.oneUintAmount = oneUintAmount
-    this.parts = parts
     this.currencyLookup = currencyLookup
   }
   async fetchPrices() {
     try {
-      let prices = await this.oracle.methods.getPricesInETH(
-        this.tokenAddresses,
-        this.oneUintAmount,
-        this.parts
-      ).call()
+      let prices = await this.oracle.methods
+        .getPricesInETH(this.tokenAddresses, this.oneUintAmount)
+        .call()
       this.ethPrices = prices.reduce((acc, price, i) => {
         acc[this.currencyLookup[this.tokenAddresses[i]]] = price
         return acc
