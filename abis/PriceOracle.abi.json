@@ -1,0 +1,28 @@
+[
+	{
+		"constant": true,
+		"inputs": [
+			{
+				"internalType": "contract IERC20[]",
+				"name": "fromTokens",
+				"type": "address[]"
+			},
+			{
+				"internalType": "uint256[]",
+				"name": "oneUnitAmounts",
+				"type": "uint256[]"
+			}
+		],
+		"name": "getPricesInETH",
+		"outputs": [
+			{
+				"internalType": "uint256[]",
+				"name": "prices",
+				"type": "uint256[]"
+			}
+		],
+		"payable": false,
+		"stateMutability": "view",
+		"type": "function"
+	}
+]
