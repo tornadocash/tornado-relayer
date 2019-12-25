@@ -152,7 +152,8 @@ async function sendTx(tx, done, retryAttempt = 1) {
   }).on('error', async function(e){
     console.log('error', e.message)
     if(e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.' 
-    || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.') {
+    || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.'
+    || e.message === 'Returned error: nonce too low') {
       console.log('nonce too low, retrying')
       if(retryAttempt <= 10) {
         retryAttempt++
