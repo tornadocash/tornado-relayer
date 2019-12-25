@@ -17,7 +17,7 @@ module.exports = {
           '1000': undefined,
           '5000': undefined
         },
-        tokenAddress: '0x6b175474e89094c44da98b954eedeac495271d0f',
+        tokenAddress: '0x6B175474E89094C44Da98b954EedeAC495271d0F',
         decimals: 18
       },
       cdai: {
@@ -27,7 +27,7 @@ module.exports = {
           '500000': undefined,
           '5000000': undefined
         },
-        tokenAddress: '0x5d3a536e4d6dbd6114cc1ead35777bab948e3643',
+        tokenAddress: '0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643',
         symbol: 'cDAI',
         decimals: 8
       },
@@ -38,7 +38,7 @@ module.exports = {
           '1000': undefined,
           '5000': undefined
         },
-        tokenAddress: '0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48',
+        tokenAddress: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',
         decimals: 6
       },
       cusdc: {
@@ -89,7 +89,7 @@ module.exports = {
           '500000': '0xC22ceFd90fbd1FdEeE554AE6Cc671179BC3b10Ae',
           '5000000': undefined
         },
-        tokenAddress: '0xe7bc397dbd069fc7d0109c0636d06888bb50668c',
+        tokenAddress: '0xe7bc397DBd069fC7d0109C0636d06888bb50668c',
         decimals: 8
       },
       usdc: {
@@ -128,7 +128,7 @@ module.exports = {
           '10000': '0x0958275F0362cf6f07D21373aEE0cf37dFe415dD',
           '100000': undefined
         },
-        tokenAddress: '0x03c5f29e9296006876d8df210bcffd7ea5db1cf1',
+        tokenAddress: '0x03c5F29e9296006876d8DF210BCFfD7EA5Db1Cf1',
         decimals: 6
       }
     }
