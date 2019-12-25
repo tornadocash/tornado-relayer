@@ -1,5 +1,5 @@
 const fetch = require('node-fetch')
-const Web3 = require('Web3')
+const Web3 = require('web3')
 const { gasOracleUrls, defaultGasPrice, oracleRpcUrl, oracleAddress } = require('../config')
 const { getArgsForOracle } = require('./utils')
 const { redisClient } = require('./redis')
