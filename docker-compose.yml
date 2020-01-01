@@ -17,7 +17,12 @@ services:
       nginx_proxy_read_timeout: 600
     depends_on:
       - redis
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "10"
+        
   mainnet:
     image: tornadocash/relayer
     restart: always
@@ -34,14 +39,24 @@ services:
       nginx_proxy_read_timeout: 600
     depends_on:
       - redis
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "10"
+        
   redis:
     image: redis
     restart: always
     command: [redis-server, --appendonly, 'yes']
     volumes:
       - redis:/data
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "10"
+        
   nginx:
     image: nginx:alpine
     container_name: nginx
@@ -58,7 +73,12 @@ services:
       co.elastic.logs/module: nginx
       co.elastic.logs/fileset.stdout: access
       co.elastic.logs/fileset.stderr: error
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "10"
+        
   dockergen:
     image: poma/docker-gen
     container_name: dockergen
@@ -68,7 +88,12 @@ services:
       - nginx
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "10"
+        
   letsencrypt:
     image: jrcs/letsencrypt-nginx-proxy-companion
     container_name: letsencrypt
@@ -78,7 +103,12 @@ services:
     volumes_from:
       - nginx
       - dockergen
-
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "1m"
+        max-file: "10"
+        
 volumes:
   conf:
   vhost:
