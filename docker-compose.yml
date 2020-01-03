@@ -54,10 +54,8 @@ services:
       - vhost:/etc/nginx/vhost.d
       - html:/usr/share/nginx/html
       - certs:/etc/nginx/certs
-    labels:
-      co.elastic.logs/module: nginx
-      co.elastic.logs/fileset.stdout: access
-      co.elastic.logs/fileset.stderr: error
+    logging:
+      driver: none
 
   dockergen:
     image: poma/docker-gen
