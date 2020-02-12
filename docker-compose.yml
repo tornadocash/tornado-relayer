@@ -9,6 +9,8 @@ services:
       LETSENCRYPT_HOST: example.duckdns.org
       NET_ID: 42
       RPC_URL: https://kovan.infura.io
+      # ORACLE_RPC_URL should always point to the mainnet
+      ORACLE_RPC_URL: https://mainnet.infura.io
       # without 0x prefix
       PRIVATE_KEY:
       # 2.5 means 2.5%
@@ -26,6 +28,8 @@ services:
       LETSENCRYPT_HOST: example2.duckdns.org
       NET_ID: 1
       RPC_URL: https://mainnet.infura.io
+      # ORACLE_RPC_URL should always point to the mainnet
+      ORACLE_RPC_URL: https://mainnet.infura.io
       # without 0x prefix
       PRIVATE_KEY:
       # 2.5 means 2.5%
