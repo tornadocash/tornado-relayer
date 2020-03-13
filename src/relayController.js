@@ -59,7 +59,6 @@ async function relayController(req, resp) {
     return resp.status(400).json({ error: 'Relayer address is invalid' })
   }
 
-  await redisClient.set('foo', 'bar')
   requestJob = await withdrawQueue.add({ 
     contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), refund: refund.toString()
   }, { removeOnComplete: true })
