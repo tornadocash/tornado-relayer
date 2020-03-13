@@ -144,8 +144,8 @@ module.exports = {
       }
     }
   },
-  defaultGasPrice: 2,
-  gasOracleUrls: ['https://ethgasstation.info/json/ethgasAPI.json', 'https://gasprice.poa.network/'],
+  defaultGasPrice: 20,
+  gasOracleUrls: ['https://ethgasstation.info/json/ethgasAPI.json', 'https://gas-oracle.zoltu.io/'],
   port: process.env.APP_PORT,
   relayerServiceFee: Number(process.env.RELAYER_FEE)
 }

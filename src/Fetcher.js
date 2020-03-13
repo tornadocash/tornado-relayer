@@ -56,18 +56,14 @@ class Fetcher {
           throw new Error('Fetch gasPrice failed')
         }
   
-        if (json.slow) {
-          this.gasPrices.low = Number(json.slow) / delimiter
-        }
-        if (json.safeLow) {
-          this.gasPrices.low = Number(json.safeLow) / delimiter
-        }
-        if (json.standard) {
-          this.gasPrices.standard = Number(json.standard) / delimiter
-        }
         if (json.fast) {
           this.gasPrices.fast = Number(json.fast) / delimiter
         }
+
+        if (json.percentile_97) {
+          this.gasPrices.fast = parseInt(json.percentile_90) + 1 / delimiter
+        }
+        console.log('gas price fetch', this.gasPrices)
       } else {
         throw Error('Fetch gasPrice failed')
       }
