@@ -114,7 +114,9 @@ function fromDecimals(value, decimals) {
 
 function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee }) {
   const { decimals } = mixers[`netId${netId}`][currency]
-  const feePercent = toBN(fromDecimals(amount, decimals)).mul(toBN(relayerServiceFee * 10)).div(toBN('1000'))
+  const decimalsPoint = Math.floor(relayerServiceFee) === relayerServiceFee ? 0 : relayerServiceFee.toString().split('.')[1].length
+  const roundDecimal = 10 ** decimalsPoint
+  const feePercent = toBN(fromDecimals(amount, decimals)).mul(toBN(relayerServiceFee * roundDecimal)).div(toBN(roundDecimal * 100))
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN(gas))
   let desiredFee
   switch (currency) {
