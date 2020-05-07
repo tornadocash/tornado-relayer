@@ -7,7 +7,7 @@ const {
 const config = require('../config')
 const { redisClient, redisOpts } = require('./redis')
 
-const { web3, fetcher } = require('./instances')
+const { web3, fetcher, sender } = require('./instances')
 const withdrawQueue = new Queue('withdraw', redisOpts)
 
 const reponseCbs = {}
@@ -125,9 +125,22 @@ withdrawQueue.process(async function(job, done){
       data,
       nonce
     }
+    await redisClient.set('tx:' + nonce, JSON.stringify(tx))
     nonce += 1
     await redisClient.set('nonce', nonce)
-    sendTx(tx, done)
+    try {
+      const txHash = await sender.sendTx(tx)
+      done(null, {
+        status: 200,
+        msg: { txHash }
+      })
+    } catch (e) {
+      console.error('on transactionHash error', e.message)
+      done(null, {
+        status: 400,
+        msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
+      })
+    }
   } catch (e) {
     console.error(e, 'estimate gas failed')
     done(null, {
@@ -137,38 +150,4 @@ withdrawQueue.process(async function(job, done){
   }
 })
 
-async function sendTx(tx, done, retryAttempt = 1) {
-
-  let signedTx = await web3.eth.accounts.signTransaction(tx, config.privateKey)
-  let result = web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-
-  result.once('transactionHash', function(txHash){
-    done(null, {
-      status: 200,
-      msg: { txHash }
-    })
-    console.log(`A new successfully sent tx ${txHash}`)
-  }).on('error', async function(e){
-    console.log('error', e.message)
-    if(e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.' 
-    || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.'
-    || e.message === 'Returned error: nonce too low'
-    || e.message === 'Returned error: replacement transaction underpriced') {
-      console.log('nonce too low, retrying')
-      if(retryAttempt <= 10) {
-        retryAttempt++
-        const newNonce = tx.nonce + 1
-        tx.nonce = newNonce
-        await redisClient.set('nonce', newNonce)
-        sendTx(tx, done, retryAttempt)
-        return
-      }
-    }
-    console.error('on transactionHash error', e.message)
-    done(null, {
-      status: 400,
-      msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
-    })
-  })
-}
 module.exports = relayController
