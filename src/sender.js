@@ -1,37 +1,54 @@
 const { redisClient } = require('./redis')
 const config = require('../config')
+const { toBN, toHex, toWei, BN, fromWei } = require('web3-utils')
 
 class Sender {
-  constructor(minedNonce, web3) {
-    this.minedNonce = Number(minedNonce)
+  constructor(web3) {
     this.web3 = web3
+    this.watherInterval = config.watherInterval
+    this.pendingTxTimeout = config.pendingTxTimeout
+    this.gasBumpPercentage = config.gasBumpPercentage
+    this.watcher()
   }
 
-  async main() {
-    const lastNonce = await redisClient.get('nonce')
-    for(let nonce = this.minedNonce; nonce < lastNonce + 1; nonce++) {
-      let tx = await redisClient.get('tx' + nonce)
-      tx = JSON.parse(tx)
-      const isMined = await this.checkTx(tx)
-
+  async watcher() {
+    try {
+      const networkNonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
+      let tx = await redisClient.get('tx:' + networkNonce)
+      if (tx) {
+        tx = JSON.parse(tx)
+        if (Date.now() - tx.date > this.pendingTxTimeout) {
+          const newGasPrice = toBN(tx.gasPrice).mul(toBN(this.gasBumpPercentage)).div(toBN(100))
+          const maxGasPrice = toBN(toWei(config.maxGasPrice))
+          tx.gasPrice = toHex(BN.min(newGasPrice, maxGasPrice))
+          tx.date = Date.now()
+          await redisClient.set('tx:' + tx.nonce, JSON.stringify(tx) )
+          console.log('resubmitting with gas price', fromWei(tx.gasPrice.toString()))
+          this.sendTx(tx, null, 9999)
+        }
+      }
+    } catch(e) {
+      console.error('watcher error:', e)
+    } finally {
+      setTimeout(() => this.watcher(), this.watherInterval)
     }
   }
 
-  async checkTx(tx) {
-    const networkNonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
-    if ()
-  }
-
-  async sendTx(tx, retryAttempt = 1) {
+  async sendTx(tx, done, retryAttempt = 1) {
     let signedTx = await this.web3.eth.accounts.signTransaction(tx, config.privateKey)
     let result = this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
-    let txHash
-    result.once('transactionHash', function(_txHash){
-        console.log(`A new successfully sent tx ${_txHash}`)
-        txHash = _txHash
+
+    result.once('transactionHash', function(txHash){
+      console.log(`A new successfully sent tx ${txHash}`)
+      if (done) {
+        done(null, {
+          status: 200,
+          msg: { txHash }
+        })
+      }
     }).on('error', async function(e){
-      console.log('error', e.message)
-      if(e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.' 
+      console.log(`Error for tx with nonce ${tx.nonce}\n${e.message}`)
+      if(e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.'
       || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.'
       || e.message === 'Returned error: nonce too low'
       || e.message === 'Returned error: replacement transaction underpriced') {
@@ -41,13 +58,18 @@ class Sender {
           const newNonce = tx.nonce + 1
           tx.nonce = newNonce
           await redisClient.set('nonce', newNonce)
-          txHash = this.sendTx(tx, retryAttempt)
+          await redisClient.set('tx:' + newNonce, JSON.stringify(tx))
+          this.sendTx(tx, done, retryAttempt)
           return
         }
       }
-      throw new Error(e.message)
+      if (done) {
+        done(null, {
+          status: 400,
+          msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
+        })
+      }
     })
-    return txHash
   }
 }
 

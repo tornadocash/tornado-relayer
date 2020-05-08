@@ -1,7 +1,7 @@
 const Queue = require('bull')
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
 const mixerABI = require('../abis/mixerABI.json')
-const { 
+const {
   isValidProof, isValidArgs, isKnownContract, isEnoughFee
 } = require('./utils')
 const config = require('../config')
@@ -20,7 +20,7 @@ withdrawQueue.on('completed', respLambda)
 
 async function relayController(req, resp) {
   let requestJob
-  
+
   const { proof, args, contract } = req.body
   let { valid , reason } = isValidProof(proof)
   if (!valid) {
@@ -59,7 +59,7 @@ async function relayController(req, resp) {
     return resp.status(400).json({ error: 'Relayer address is invalid' })
   }
 
-  requestJob = await withdrawQueue.add({ 
+  requestJob = await withdrawQueue.add({
     contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), refund: refund.toString()
   }, { removeOnComplete: true })
   reponseCbs[requestJob.id] = resp
@@ -97,7 +97,7 @@ withdrawQueue.process(async function(job, done){
 
     let gas = await mixer.methods.withdraw(proof, ...args).estimateGas({
       from: web3.eth.defaultAccount,
-      value: refund 
+      value: refund
     })
 
     gas += 50000
@@ -120,27 +120,18 @@ withdrawQueue.process(async function(job, done){
       value: numberToHex(refund),
       gas: numberToHex(gas),
       gasPrice: toHex(toWei(gasPrices.fast.toString(), 'gwei')),
+      // you can use this gasPrice to test watcher
+      // gasPrice: numberToHex(100000000),
       to: mixer._address,
       netId: config.netId,
       data,
       nonce
     }
-    await redisClient.set('tx:' + nonce, JSON.stringify(tx))
+    tx.date = Date.now()
+    await redisClient.set('tx:' + nonce, JSON.stringify(tx) )
     nonce += 1
     await redisClient.set('nonce', nonce)
-    try {
-      const txHash = await sender.sendTx(tx)
-      done(null, {
-        status: 200,
-        msg: { txHash }
-      })
-    } catch (e) {
-      console.error('on transactionHash error', e.message)
-      done(null, {
-        status: 400,
-        msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
-      })
-    }
+    sender.sendTx(tx, done)
   } catch (e) {
     console.error(e, 'estimate gas failed')
     done(null, {
