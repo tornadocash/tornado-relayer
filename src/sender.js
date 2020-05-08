@@ -7,7 +7,7 @@ class Sender {
     this.web3 = web3
     this.watherInterval = config.watherInterval
     this.pendingTxTimeout = config.pendingTxTimeout
-    this.gasBumpPercentage = config.gasBumpPercentage
+    this.gasBumpPercentage = 100 + Number(config.gasBumpPercentage)
     this.watcher()
   }
 
@@ -23,7 +23,7 @@ class Sender {
           tx.gasPrice = toHex(BN.min(newGasPrice, maxGasPrice))
           tx.date = Date.now()
           await redisClient.set('tx:' + tx.nonce, JSON.stringify(tx) )
-          console.log('resubmitting with gas price', fromWei(tx.gasPrice.toString()))
+          console.log('resubmitting with gas price', fromWei(tx.gasPrice.toString(), 'gwei'), ' gwei')
           this.sendTx(tx, null, 9999)
         }
       }
