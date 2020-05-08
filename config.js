@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 module.exports = {
-  version: 2.4,
+  version: 2.5,
   netId: Number(process.env.NET_ID) || 42,
   redisUrl: process.env.REDIS_URL,
   rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
