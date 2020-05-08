@@ -147,5 +147,9 @@ module.exports = {
   defaultGasPrice: 20,
   gasOracleUrls: ['https://ethgasstation.info/json/ethgasAPI.json', 'https://gas-oracle.zoltu.io/'],
   port: process.env.APP_PORT,
-  relayerServiceFee: Number(process.env.RELAYER_FEE)
+  relayerServiceFee: Number(process.env.RELAYER_FEE),
+  maxGasPrice: process.env.MAX_GAS_PRICE,
+  watherInterval: Number(process.env.NONCE_WATCHER_INTERVAL) * 1000,
+  pendingTxTimeout: Number(process.env.ALLOWABLE_PENDING_TX_TIMEOUT) * 1000,
+  gasBumpPercentage: process.env.GAS_PRICE_BUMP_PERCENTAGE
 }
