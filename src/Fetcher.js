@@ -40,7 +40,7 @@ class Fetcher {
       }, {})
       setTimeout(() => this.fetchPrices(), 1000 * 30)
     } catch(e) {
-      console.error('fetchPrices', e)
+      console.error('fetchPrices', e.message)
       setTimeout(() => this.fetchPrices(), 1000 * 30)
     }
   }
@@ -69,6 +69,7 @@ class Fetcher {
       }
       setTimeout(() => this.fetchGasPrice({ oracleIndex }), 15000)
     } catch (e) {
+      console.log('fetchGasPrice', e.message)
       setTimeout(() => this.fetchGasPrice({ oracleIndex }), 15000)
     }
   }
