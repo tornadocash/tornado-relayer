@@ -1,7 +1,7 @@
 require('dotenv').config()
 
 module.exports = {
-  version: '2.2',
+  version: 2.6,
   netId: Number(process.env.NET_ID) || 42,
   redisUrl: process.env.REDIS_URL,
   rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
@@ -144,8 +144,12 @@ module.exports = {
       }
     }
   },
-  defaultGasPrice: 2,
-  gasOracleUrls: ['https://ethgasstation.info/json/ethgasAPI.json', 'https://gasprice.poa.network/'],
+  defaultGasPrice: 20,
+  gasOracleUrls: ['https://ethgasstation.info/json/ethgasAPI.json', 'https://gas-oracle.zoltu.io/'],
   port: process.env.APP_PORT,
-  relayerServiceFee: Number(process.env.RELAYER_FEE)
+  relayerServiceFee: Number(process.env.RELAYER_FEE),
+  maxGasPrice: process.env.MAX_GAS_PRICE || 200,
+  watherInterval: Number(process.env.NONCE_WATCHER_INTERVAL || 30) * 1000,
+  pendingTxTimeout: Number(process.env.ALLOWABLE_PENDING_TX_TIMEOUT || 180) * 1000,
+  gasBumpPercentage: process.env.GAS_PRICE_BUMP_PERCENTAGE || 20
 }
