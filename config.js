@@ -1,12 +1,12 @@
 require('dotenv').config()
 
 module.exports = {
-  version: 2.6,
+  version: 2.7,
   netId: Number(process.env.NET_ID) || 42,
   redisUrl: process.env.REDIS_URL,
   rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
-  oracleAddress: '0xB5eE7907FF5f4c1FC9086Fc117E6c397431F39ad',
+  oracleAddress: '0xA2b8E7ee7c8a18ea561A5CF7C9C365592026E374',
   privateKey: process.env.PRIVATE_KEY,
   mixers: {
     netId1: {
