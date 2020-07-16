@@ -19,15 +19,15 @@ class Sender {
         tx = JSON.parse(tx)
         if (Date.now() - tx.date > this.pendingTxTimeout) {
           const newGasPrice = toBN(tx.gasPrice).mul(toBN(this.gasBumpPercentage)).div(toBN(100))
-          const maxGasPrice = toBN(toWei(config.maxGasPrice))
+          const maxGasPrice = toBN(toWei(config.maxGasPrice.toString()))
           tx.gasPrice = toHex(BN.min(newGasPrice, maxGasPrice))
           tx.date = Date.now()
-          await redisClient.set('tx:' + tx.nonce, JSON.stringify(tx) )
+          await redisClient.set('tx:' + tx.nonce, JSON.stringify(tx))
           console.log('resubmitting with gas price', fromWei(tx.gasPrice.toString(), 'gwei'), ' gwei')
           this.sendTx(tx, null, 9999)
         }
       }
-    } catch(e) {
+    } catch (e) {
       console.error('watcher error:', e)
     } finally {
       setTimeout(() => this.watcher(), this.watherInterval)
@@ -38,7 +38,7 @@ class Sender {
     let signedTx = await this.web3.eth.accounts.signTransaction(tx, config.privateKey)
     let result = this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
 
-    result.once('transactionHash', function(txHash){
+    result.once('transactionHash', (txHash) => {
       console.log(`A new successfully sent tx ${txHash}`)
       if (done) {
         done(null, {
@@ -46,14 +46,14 @@ class Sender {
           msg: { txHash }
         })
       }
-    }).on('error', async function(e){
+    }).on('error', async (e) => {
       console.log(`Error for tx with nonce ${tx.nonce}\n${e.message}`)
-      if(e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.'
-      || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.'
-      || e.message === 'Returned error: nonce too low'
-      || e.message === 'Returned error: replacement transaction underpriced') {
+      if (e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.'
+        || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.'
+        || e.message === 'Returned error: nonce too low'
+        || e.message === 'Returned error: replacement transaction underpriced') {
         console.log('nonce too low, retrying')
-        if(retryAttempt <= 10) {
+        if (retryAttempt <= 10) {
           retryAttempt++
           const newNonce = tx.nonce + 1
           tx.nonce = newNonce

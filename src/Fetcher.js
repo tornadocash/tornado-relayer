@@ -1,6 +1,5 @@
-const fetch = require('node-fetch')
 const Web3 = require('web3')
-const { gasOracleUrls, defaultGasPrice, oracleRpcUrl, oracleAddress } = require('../config')
+const { defaultGasPrice, oracleRpcUrl, oracleAddress } = require('../config')
 const { getArgsForOracle } = require('./utils')
 const { redisClient } = require('./redis')
 const priceOracleABI = require('../abis/PriceOracle.abi.json')
@@ -39,38 +38,9 @@ class Fetcher {
         return acc
       }, {})
       setTimeout(() => this.fetchPrices(), 1000 * 30)
-    } catch(e) {
+    } catch (e) {
       console.error('fetchPrices', e.message)
       setTimeout(() => this.fetchPrices(), 1000 * 30)
-    }
-  }
-  async fetchGasPrice({ oracleIndex = 0 } = {}) {
-    oracleIndex = (oracleIndex + 1) % gasOracleUrls.length
-    const url = gasOracleUrls[oracleIndex]
-    const delimiter = url === 'https://ethgasstation.info/json/ethgasAPI.json' ? 10 : 1
-    try {
-      const response = await fetch(url)
-      if (response.status === 200) {
-        const json = await response.json()
-        if (Number(json.fast) === 0) {
-          throw new Error('Fetch gasPrice failed')
-        }
-
-        if (json.fast) {
-          this.gasPrices.fast = Number(json.fast) / delimiter
-        }
-
-        if (json.percentile_97) {
-          this.gasPrices.fast = parseInt(json.percentile_90) + 1 / delimiter
-        }
-        // console.log('gas price fetch', this.gasPrices)
-      } else {
-        throw Error('Fetch gasPrice failed')
-      }
-      setTimeout(() => this.fetchGasPrice({ oracleIndex }), 15000)
-    } catch (e) {
-      console.log('fetchGasPrice', e.message)
-      setTimeout(() => this.fetchGasPrice({ oracleIndex }), 15000)
     }
   }
   async fetchNonce() {
@@ -78,7 +48,7 @@ class Fetcher {
       const nonce = await this.web3.eth.getTransactionCount(this.web3.eth.defaultAccount)
       await redisClient.set('nonce', nonce)
       console.log(`Current nonce: ${nonce}`)
-    } catch(e) {
+    } catch (e) {
       console.error('fetchNonce failed', e.message)
       setTimeout(this.fetchNonce, 3000)
     }

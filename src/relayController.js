@@ -7,7 +7,7 @@ const {
 const config = require('../config')
 const { redisClient, redisOpts } = require('./redis')
 
-const { web3, fetcher, sender } = require('./instances')
+const { web3, fetcher, sender, gasPriceOracle } = require('./instances')
 const withdrawQueue = new Queue('withdraw', redisOpts)
 
 const reponseCbs = {}
@@ -22,26 +22,26 @@ async function relayController(req, resp) {
   let requestJob
 
   const { proof, args, contract } = req.body
-  let { valid , reason } = isValidProof(proof)
+  let { valid, reason } = isValidProof(proof)
   if (!valid) {
     console.log('Proof is invalid:', reason)
     return resp.status(400).json({ error: 'Proof format is invalid' })
   }
 
-  ({ valid , reason } = isValidArgs(args))
+  ({ valid, reason } = isValidArgs(args))
   if (!valid) {
     console.log('Args are invalid:', reason)
     return resp.status(400).json({ error: 'Withdraw arguments are invalid' })
   }
 
   let currency, amount
-  ( { valid, currency, amount } = isKnownContract(contract))
+  ({ valid, currency, amount } = isKnownContract(contract))
   if (!valid) {
     console.log('Contract does not exist:', contract)
     return resp.status(400).json({ error: 'This relayer does not support the token' })
   }
 
-  const [ root, nullifierHash, recipient, relayer, fee, refund ] = [
+  const [root, nullifierHash, recipient, relayer, fee, refund] = [
     args[0],
     args[1],
     toChecksumAddress(args[2]),
@@ -65,9 +65,9 @@ async function relayController(req, resp) {
   reponseCbs[requestJob.id] = resp
 }
 
-withdrawQueue.process(async function(job, done){
+withdrawQueue.process(async function (job, done) {
   console.log(Date.now(), ' withdraw started', job.id)
-  const gasPrices = fetcher.gasPrices
+  const gasPrices = await gasPriceOracle.gasPrices()
   const { contract, nullifierHash, root, proof, args, refund, currency, amount, fee } = job.data
   console.log(JSON.stringify(job.data))
   // job.data contains the custom data passed when the job was created
@@ -128,7 +128,7 @@ withdrawQueue.process(async function(job, done){
       nonce
     }
     tx.date = Date.now()
-    await redisClient.set('tx:' + nonce, JSON.stringify(tx) )
+    await redisClient.set('tx:' + nonce, JSON.stringify(tx))
     nonce += 1
     await redisClient.set('nonce', nonce)
     sender.sendTx(tx, done)
