@@ -37,8 +37,15 @@ app.get('/', function (req, res) {
   res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/status>/status</a> for settings')
 })
 
+
 app.get('/status', async function (req, res) {
   let nonce = await redisClient.get('nonce')
+  let latestBlock = null
+  try {
+    latestBlock = await web3.eth.getBlockNumber()
+  } catch(e) {
+    console.error('Problem with RPC', e)
+  }
   const { ethPrices } = fetcher
   res.json({
     relayerAddress: web3.eth.defaultAccount,
@@ -48,7 +55,8 @@ app.get('/status', async function (req, res) {
     ethPrices,
     relayerServiceFee,
     nonce,
-    version
+    version,
+    latestBlock
   })
 })
 
