@@ -34,16 +34,17 @@ app.use(function (req, res, next) {
 
 app.get('/', function (req, res) {
   // just for testing purposes
-  res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/status>/status</a> for settings')
+  res.send(
+    'This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/status>/status</a> for settings'
+  )
 })
-
 
 app.get('/status', async function (req, res) {
   let nonce = await redisClient.get('nonce')
   let latestBlock = null
   try {
     latestBlock = await web3.eth.getBlockNumber()
-  } catch(e) {
+  } catch (e) {
     console.error('Problem with RPC', e)
   }
   const { ethPrices } = fetcher
@@ -74,7 +75,12 @@ console.log(`mixers: ${JSON.stringify(mixers)}`)
 console.log(`netId: ${netId}`)
 console.log(`ethPrices: ${JSON.stringify(fetcher.ethPrices)}`)
 
-const { GAS_PRICE_BUMP_PERCENTAGE, ALLOWABLE_PENDING_TX_TIMEOUT, NONCE_WATCHER_INTERVAL, MAX_GAS_PRICE } = process.env
+const {
+  GAS_PRICE_BUMP_PERCENTAGE,
+  ALLOWABLE_PENDING_TX_TIMEOUT,
+  NONCE_WATCHER_INTERVAL,
+  MAX_GAS_PRICE
+} = process.env
 if (!NONCE_WATCHER_INTERVAL) {
   console.log(`NONCE_WATCHER_INTERVAL is not set. Using default value ${watherInterval / 1000} sec`)
 }

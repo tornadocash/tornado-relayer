@@ -30,9 +30,7 @@ class Fetcher {
   }
   async fetchPrices() {
     try {
-      let prices = await this.oracle.methods
-        .getPricesInETH(this.tokenAddresses, this.oneUintAmount)
-        .call()
+      let prices = await this.oracle.methods.getPricesInETH(this.tokenAddresses, this.oneUintAmount).call()
       this.ethPrices = prices.reduce((acc, price, i) => {
         acc[this.currencyLookup[this.tokenAddresses[i]]] = price
         return acc

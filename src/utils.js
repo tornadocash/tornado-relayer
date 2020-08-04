@@ -4,7 +4,7 @@ const { netId, mixers, relayerServiceFee } = require('../config')
 function isValidProof(proof) {
   // validator expects `websnarkUtils.toSolidityInput(proof)` output
 
-  if (!(proof)) {
+  if (!proof) {
     return { valid: false, reason: 'The proof is empty.' }
   }
 
@@ -16,8 +16,7 @@ function isValidProof(proof) {
 }
 
 function isValidArgs(args) {
-
-  if (!(args)) {
+  if (!args) {
     return { valid: false, reason: 'Args are empty' }
   }
 
@@ -25,18 +24,20 @@ function isValidArgs(args) {
     return { valid: false, reason: 'Length of args is lower than 6' }
   }
 
-  for(let signal of args) {
+  for (let signal of args) {
     if (!isHexStrict(signal)) {
       return { valid: false, reason: `Corrupted signal ${signal}` }
     }
   }
 
-  if (args[0].length !== 66 ||
-      args[1].length !== 66 ||
-      args[2].length !== 42 ||
-      args[3].length !== 42 ||
-      args[4].length !== 66 ||
-      args[5].length !== 66) {
+  if (
+    args[0].length !== 66 ||
+    args[1].length !== 66 ||
+    args[2].length !== 42 ||
+    args[3].length !== 42 ||
+    args[4].length !== 66 ||
+    args[5].length !== 66
+  ) {
     return { valid: false, reason: 'The length one of the signals is incorrect' }
   }
 
@@ -56,7 +57,7 @@ function isKnownContract(contract) {
 }
 
 function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 function fromDecimals(value, decimals) {
@@ -77,9 +78,7 @@ function fromDecimals(value, decimals) {
   // Split it into a whole and fractional part
   const comps = ether.split('.')
   if (comps.length > 2) {
-    throw new Error(
-      '[ethjs-unit] while converting number ' + value + ' to wei,  too many decimal points'
-    )
+    throw new Error('[ethjs-unit] while converting number ' + value + ' to wei,  too many decimal points')
   }
 
   let whole = comps[0]
@@ -92,9 +91,7 @@ function fromDecimals(value, decimals) {
     fraction = '0'
   }
   if (fraction.length > baseLength) {
-    throw new Error(
-      '[ethjs-unit] while converting number ' + value + ' to wei, too many decimal places'
-    )
+    throw new Error('[ethjs-unit] while converting number ' + value + ' to wei, too many decimal places')
   }
 
   while (fraction.length < baseLength) {
@@ -114,9 +111,15 @@ function fromDecimals(value, decimals) {
 
 function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee }) {
   const { decimals } = mixers[`netId${netId}`][currency]
-  const decimalsPoint = Math.floor(relayerServiceFee) === relayerServiceFee ? 0 : relayerServiceFee.toString().split('.')[1].length
+  const decimalsPoint =
+    Math.floor(relayerServiceFee) === relayerServiceFee
+      ? 0
+      : relayerServiceFee.toString().split('.')[1].length
+
   const roundDecimal = 10 ** decimalsPoint
-  const feePercent = toBN(fromDecimals(amount, decimals)).mul(toBN(relayerServiceFee * roundDecimal)).div(toBN(roundDecimal * 100))
+  const feePercent = toBN(fromDecimals(amount, decimals))
+    .mul(toBN(relayerServiceFee * roundDecimal))
+    .div(toBN(roundDecimal * 100))
   const expense = toBN(toWei(gasPrices.fast.toString(), 'gwei')).mul(toBN(gas))
   let desiredFee
   switch (currency) {
@@ -125,18 +128,23 @@ function isEnoughFee({ gas, gasPrices, currency, amount, refund, ethPrices, fee 
       break
     }
     default: {
-      desiredFee = 
-        expense.add(refund)
-          .mul(toBN(10 ** decimals))
-          .div(toBN(ethPrices[currency]))
+      desiredFee = expense
+        .add(refund)
+        .mul(toBN(10 ** decimals))
+        .div(toBN(ethPrices[currency]))
       desiredFee = desiredFee.add(feePercent)
       break
     }
   }
-  console.log('sent fee, desired fee, feePercent', fee.toString(), desiredFee.toString(), feePercent.toString())
+  console.log(
+    'sent fee, desired fee, feePercent',
+    fee.toString(),
+    desiredFee.toString(),
+    feePercent.toString()
+  )
   if (fee.lt(desiredFee)) {
     return { isEnough: false, reason: 'Not enough fee' }
-  } 
+  }
   return { isEnough: true }
 }
 
@@ -148,11 +156,7 @@ function getArgsForOracle() {
   Object.entries(tokens).map(([currency, data]) => {
     if (currency !== 'eth') {
       tokenAddresses.push(data.tokenAddress)
-      oneUintAmount.push(
-        toBN('10')
-          .pow(toBN(data.decimals.toString()))
-          .toString()
-      )
+      oneUintAmount.push(toBN('10').pow(toBN(data.decimals.toString())).toString())
       currencyLookup[data.tokenAddress] = currency
     }
   })
@@ -163,4 +167,12 @@ function getMixers() {
   return mixers[`netId${netId}`]
 }
 
-module.exports = { isValidProof, isValidArgs, sleep, isKnownContract, isEnoughFee, getMixers, getArgsForOracle }
+module.exports = {
+  isValidProof,
+  isValidArgs,
+  sleep,
+  isKnownContract,
+  isEnoughFee,
+  getMixers,
+  getArgsForOracle
+}

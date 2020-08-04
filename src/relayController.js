@@ -1,9 +1,7 @@
 const Queue = require('bull')
 const { numberToHex, toWei, toHex, toBN, toChecksumAddress } = require('web3-utils')
 const mixerABI = require('../abis/mixerABI.json')
-const {
-  isValidProof, isValidArgs, isKnownContract, isEnoughFee
-} = require('./utils')
+const { isValidProof, isValidArgs, isKnownContract, isEnoughFee } = require('./utils')
 const config = require('../config')
 const { redisClient, redisOpts } = require('./redis')
 
@@ -28,14 +26,15 @@ async function relayController(req, resp) {
     return resp.status(400).json({ error: 'Proof format is invalid' })
   }
 
-  ({ valid, reason } = isValidArgs(args))
+  // eslint-disable-next-line no-extra-semi
+  ;({ valid, reason } = isValidArgs(args))
   if (!valid) {
     console.log('Args are invalid:', reason)
     return resp.status(400).json({ error: 'Withdraw arguments are invalid' })
   }
 
   let currency, amount
-  ({ valid, currency, amount } = isKnownContract(contract))
+  ;({ valid, currency, amount } = isKnownContract(contract))
   if (!valid) {
     console.log('Contract does not exist:', contract)
     return resp.status(400).json({ error: 'This relayer does not support the token' })
@@ -59,9 +58,20 @@ async function relayController(req, resp) {
     return resp.status(400).json({ error: 'Relayer address is invalid' })
   }
 
-  requestJob = await withdrawQueue.add({
-    contract, nullifierHash, root, proof, args, currency, amount, fee: fee.toString(), refund: refund.toString()
-  }, { removeOnComplete: true })
+  requestJob = await withdrawQueue.add(
+    {
+      contract,
+      nullifierHash,
+      root,
+      proof,
+      args,
+      currency,
+      amount,
+      fee: fee.toString(),
+      refund: refund.toString()
+    },
+    { removeOnComplete: true }
+  )
   reponseCbs[requestJob.id] = resp
 }
 
@@ -102,7 +112,15 @@ withdrawQueue.process(async function (job, done) {
 
     gas += 50000
     const ethPrices = fetcher.ethPrices
-    const { isEnough, reason } = isEnoughFee({ gas, gasPrices, currency, amount, refund: toBN(refund), ethPrices, fee: toBN(fee) })
+    const { isEnough, reason } = isEnoughFee({
+      gas,
+      gasPrices,
+      currency,
+      amount,
+      refund: toBN(refund),
+      ethPrices,
+      fee: toBN(fee)
+    })
     if (!isEnough) {
       console.log(`Wrong fee: ${reason}`)
       done(null, {

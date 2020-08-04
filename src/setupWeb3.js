@@ -8,7 +8,7 @@ function setup() {
     web3.eth.accounts.wallet.add('0x' + privateKey)
     web3.eth.defaultAccount = account.address
     return web3
-  } catch(e) {
+  } catch (e) {
     console.error('web3 failed')
   }
 }

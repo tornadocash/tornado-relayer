@@ -38,38 +38,43 @@ class Sender {
     let signedTx = await this.web3.eth.accounts.signTransaction(tx, config.privateKey)
     let result = this.web3.eth.sendSignedTransaction(signedTx.rawTransaction)
 
-    result.once('transactionHash', (txHash) => {
-      console.log(`A new successfully sent tx ${txHash}`)
-      if (done) {
-        done(null, {
-          status: 200,
-          msg: { txHash }
-        })
-      }
-    }).on('error', async (e) => {
-      console.log(`Error for tx with nonce ${tx.nonce}\n${e.message}`)
-      if (e.message === 'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.'
-        || e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.'
-        || e.message === 'Returned error: nonce too low'
-        || e.message === 'Returned error: replacement transaction underpriced') {
-        console.log('nonce too low, retrying')
-        if (retryAttempt <= 10) {
-          retryAttempt++
-          const newNonce = tx.nonce + 1
-          tx.nonce = newNonce
-          await redisClient.set('nonce', newNonce)
-          await redisClient.set('tx:' + newNonce, JSON.stringify(tx))
-          this.sendTx(tx, done, retryAttempt)
-          return
+    result
+      .once('transactionHash', (txHash) => {
+        console.log(`A new successfully sent tx ${txHash}`)
+        if (done) {
+          done(null, {
+            status: 200,
+            msg: { txHash }
+          })
         }
-      }
-      if (done) {
-        done(null, {
-          status: 400,
-          msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
-        })
-      }
-    })
+      })
+      .on('error', async (e) => {
+        console.log(`Error for tx with nonce ${tx.nonce}\n${e.message}`)
+        if (
+          e.message ===
+            'Returned error: Transaction gas price supplied is too low. There is another transaction with same nonce in the queue. Try increasing the gas price or incrementing the nonce.' ||
+          e.message === 'Returned error: Transaction nonce is too low. Try incrementing the nonce.' ||
+          e.message === 'Returned error: nonce too low' ||
+          e.message === 'Returned error: replacement transaction underpriced'
+        ) {
+          console.log('nonce too low, retrying')
+          if (retryAttempt <= 10) {
+            retryAttempt++
+            const newNonce = tx.nonce + 1
+            tx.nonce = newNonce
+            await redisClient.set('nonce', newNonce)
+            await redisClient.set('tx:' + newNonce, JSON.stringify(tx))
+            this.sendTx(tx, done, retryAttempt)
+            return
+          }
+        }
+        if (done) {
+          done(null, {
+            status: 400,
+            msg: { error: 'Internal Relayer Error. Please use a different relayer service' }
+          })
+        }
+      })
   }
 }
 
