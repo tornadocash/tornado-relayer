@@ -19,7 +19,7 @@ class Sender {
         tx = JSON.parse(tx)
         if (Date.now() - tx.date > this.pendingTxTimeout) {
           const newGasPrice = toBN(tx.gasPrice).mul(toBN(this.gasBumpPercentage)).div(toBN(100))
-          const maxGasPrice = toBN(toWei(config.maxGasPrice.toString()))
+          const maxGasPrice = toBN(toWei(config.maxGasPrice.toString(), 'Gwei'))
           tx.gasPrice = toHex(BN.min(newGasPrice, maxGasPrice))
           tx.date = Date.now()
           await redisClient.set('tx:' + tx.nonce, JSON.stringify(tx))
