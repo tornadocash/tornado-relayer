@@ -26,6 +26,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
+      - name: Set vars
+        id: vars
+        run: |
+          echo "::set-output name=version::$(echo ${GITHUB_REF#refs/tags/v})"
+          echo "::set-output name=repo_name::$(echo ${GITHUB_REPOSITORY#*/})"
+
+      - name: Check package.json version vs tag
+        run: |
+          [ ${{ steps.vars.outputs.version }} = $(grep '"version":' package.json | grep -o "[0-9.]*") ] || (echo "Git tag doesn't match version in package.json" && false)
+
       - name: Build and push Docker image
         uses: docker/build-push-action@v1.1.0
         with:
@@ -41,6 +51,17 @@ jobs:
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: 🚀 Published [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}) version [${{ steps.vars.outputs.version }}](https://www.npmjs.com/package/${{ steps.vars.outputs.repo_name }}/v/${{ steps.vars.outputs.version }}) to npm
+          message: 🚀 Published a [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}) version ${{ steps.vars.outputs.version }} to docker hub
+          debug: true
+          format: markdown
+
+      - name: Telegram Message Notify
+        uses: appleboy/telegram-action@0.0.7
+        with:
+          to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            🚀 Published a new version of the relayer node service to docker hub: `tornadocash/relayer:${{ steps.vars.outputs.version }}`, `tornadocash/relayer:latest`.
+            ❗️Please update your nodes ❗️
           debug: true
           format: markdown
