@@ -61,7 +61,7 @@ jobs:
           to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            🚀 Published a new version of the relayer node service to docker hub: `tornadocash/relayer:${{ steps.vars.outputs.version }}` and `tornadocash/relayer:latest`.
+            🚀 Published a new version of the relayer node service to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:latest`.
 
             ❗️Please update your nodes ❗️
           debug: true
