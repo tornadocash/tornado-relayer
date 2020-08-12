@@ -3,7 +3,6 @@ const {
   netId,
   port,
   relayerServiceFee,
-  version,
   gasBumpPercentage,
   pendingTxTimeout,
   watherInterval,
@@ -14,6 +13,7 @@ const { fetcher, web3, gasPriceOracle } = require('./instances')
 const { getMixers } = require('./utils')
 const mixers = getMixers()
 const { redisClient } = require('./redis')
+const { version } = require('../package.json')
 const app = express()
 app.use(express.json())
 
@@ -62,7 +62,7 @@ app.get('/status', async function (req, res) {
 })
 
 app.post('/relay', relayController)
-
+console.log('Version:', version)
 let server = app.listen(port || 8000)
 server.setTimeout(600000)
 console.log('Gas price oracle started.')
