@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "1.0.0",
+  "version": "3.0.1",
   "description": "Relayer for Tornado.cash privacy solution. https://tornado.cash",
   "main": "app.js",
   "scripts": {
