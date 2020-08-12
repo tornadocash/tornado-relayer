@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: 12
       - run: npm ci
-      - run: npm eslint
+      - run: npm run eslint
 
   publish:
     runs-on: ubuntu-latest
