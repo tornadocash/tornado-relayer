@@ -29,7 +29,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v1.1.0
         with:
-          path: dist
           dockerfile: Dockerfile
           repository: tornadocash/relayer
           tag_with_ref: true
