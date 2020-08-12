@@ -14,7 +14,7 @@
     "bull": "^3.12.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "gas-price-oracle": "^0.1.4",
+    "gas-price-oracle": "^0.1.5",
     "ioredis": "^4.14.1",
     "node-fetch": "^2.6.0",
     "web3": "^1.2.2",
