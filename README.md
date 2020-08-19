@@ -1,4 +1,4 @@
-# Relayer for Tornado Cash [![Build Status](https://travis-ci.org/tornadocash/relayer.svg?branch=master)](https://travis-ci.org/tornadocash/relayer) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/tornadocash/relayer.svg)](https://hub.docker.com/r/tornadocash/relayer/builds)
+# Relayer for Tornado Cash [![Build Status](https://github.com/tornadocash/relayer/workflows/build/badge.svg)](https://github.com/tornadocash/relayer/actions) [![Docker Image Version (latest semver)](https://img.shields.io/docker/v/tornadocash/relayer?logo=docker&logoColor=%23FFFFFF&sort=semver)](https://hub.docker.com/repository/docker/tornadocash/relayer)
 
 ## Run locally
 
