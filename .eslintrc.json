@@ -26,7 +26,7 @@
     "semi": ["error", "never"],
     "object-curly-spacing": ["error", "always"],
     "require-await": "error",
-    "comma-dangle": ["error", "never"],
+    "comma-dangle": ["error", "only-multiline"],
     "space-before-function-paren": [
       "error",
       {

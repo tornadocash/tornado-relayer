@@ -1,0 +1,34 @@
+const express = require('express')
+const status = require('status')
+const controller = require('controller')
+const { port } = require('../config')
+const { version } = require('../package.json')
+
+const app = express()
+app.use(express.json())
+
+// Log error to console but don't send it to the client to avoid leaking data
+app.use((err, req, res, next) => {
+  if (err) {
+    console.error(err)
+    return res.sendStatus(500)
+  }
+  next()
+})
+
+// Add CORS headers
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', '*')
+  res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
+  next()
+})
+
+app.get('/', status.index)
+app.get('/v1/status', status.status)
+app.post('/v1/jobs/:id', status.getJob)
+app.post('/v1/tornadoWithdraw', controller.tornadoWithdraw)
+app.post('/v1/miningReward', controller.miningReward)
+app.post('/v1/miningWithdraw', controller.miningWithdraw)
+
+console.log('Version:', version)
+app.listen(port)
