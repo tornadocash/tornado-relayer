@@ -1,83 +1,191 @@
-const { isHexStrict } = require('web3-utils')
+const { isAddress } = require('web3-utils')
 const { getInstance } = require('./utils')
 const { rewardAccount } = require('../config')
 
-function getProofError(proof) {
-  if (!proof) {
-    return 'The proof is empty'
-  }
+const Ajv = require('ajv')
+const ajv = new Ajv({ format: 'fast' })
 
-  if (!isHexStrict(proof) || proof.length !== 2 + 2 * 8 * 32) {
-    return 'Corrupted proof'
-  }
-
-  return null
-}
-
-function getArgsError(args, expectedLengths) {
-  if (!args) {
-    return 'Args are empty'
-  }
-
-  if (!Array.isArray(args)) {
-    return 'Args should be an array'
-  }
-
-  if (args.length !== expectedLengths.length) {
-    return `Expected ${expectedLengths.length} args`
-  }
-
-  for (let i = 0; i < args.length; i++) {
-    if (!isHexStrict(args[i])) {
-      return `Corrupted signal ${i}: ${args[i]}`
+ajv.addKeyword('isAddress', {
+  validate: (schema, data) => {
+    try {
+      return isAddress(data)
+    } catch (e) {
+      return false
     }
-    if (args[i].length !== 2 + expectedLengths * 20) {
-      return `Signal ${i} has invalid length: ${args[i]}`
+  },
+  errors: true
+})
+
+ajv.addKeyword('isKnownContract', {
+  validate: (schema, data) => {
+    try {
+      return getInstance(data) !== null
+    } catch (e) {
+      return false
     }
-  }
+  },
+  errors: true
+})
 
+ajv.addKeyword('isForFee', {
+  validate: (schema, data) => {
+    try {
+      return rewardAccount === data
+    } catch (e) {
+      return false
+    }
+  },
+  errors: true
+})
+
+const addressType = { type: 'string', pattern: '^0x[a-fA-F0-9]{40}$', isAddress: true }
+const proofType = { type: 'string', pattern: '^0x[a-fA-F0-9]{512}$' }
+const encryptedAccountType = { type: 'string', pattern: '^0x[a-fA-F0-9]{392}$' }
+const bytes32Type = { type: 'string', pattern: '^0x[a-fA-F0-9]{64}$' }
+const instanceType = JSON.parse(JSON.stringify(addressType))
+instanceType.isKnownContract = true
+const relayerType = JSON.parse(JSON.stringify(addressType))
+relayerType.isForFee = true
+
+const tornadoWithdrawSchema = {
+  type: 'object',
+  properties: {
+    proof: proofType,
+    contract: instanceType,
+    args: {
+      type: 'array',
+      maxItems: 6,
+      minItems: 6,
+      uniqueItems: true,
+      items: [bytes32Type, bytes32Type, addressType, relayerType, bytes32Type, bytes32Type]
+    }
+  },
+  additionalProperties: false,
+  required: ['proof', 'contract', 'args']
+}
+
+const miningRewardSchema = {
+  type: 'object',
+  properties: {
+    proof: proofType,
+    args: {
+      type: 'object',
+      properties: {
+        rate: bytes32Type,
+        fee: bytes32Type,
+        instance: instanceType,
+        rewardNullifier: bytes32Type,
+        extDataHash: bytes32Type,
+        depositRoot: bytes32Type,
+        withdrawalRoot: bytes32Type,
+        extData: {
+          type: 'object',
+          properties: {
+            relayer: relayerType,
+            encryptedAccount: encryptedAccountType
+          },
+          additionalProperties: false,
+          required: ['relayer', 'encryptedAccount']
+        },
+        account: {
+          type: 'object',
+          properties: {
+            inputRoot: bytes32Type,
+            inputNullifierHash: bytes32Type,
+            outputRoot: bytes32Type,
+            outputPathIndices: bytes32Type,
+            outputCommitment: bytes32Type
+          },
+          additionalProperties: false,
+          required: ['inputRoot', 'inputNullifierHash', 'outputRoot', 'outputPathIndices', 'outputCommitment']
+        }
+      },
+      additionalProperties: false,
+      required: [
+        'rate',
+        'fee',
+        'instance',
+        'rewardNullifier',
+        'extDataHash',
+        'depositRoot',
+        'withdrawalRoot',
+        'extData',
+        'account'
+      ]
+    }
+  },
+  additionalProperties: false,
+  required: ['proof', 'args']
+}
+
+const miningWithdrawSchema = {
+  type: 'object',
+  properties: {
+    proof: proofType,
+    args: {
+      type: 'object',
+      properties: {
+        amount: bytes32Type,
+        fee: bytes32Type,
+        extDataHash: bytes32Type,
+        extData: {
+          type: 'object',
+          properties: {
+            recipient: addressType,
+            relayer: relayerType,
+            encryptedAccount: encryptedAccountType
+          },
+          additionalProperties: false,
+          required: ['relayer', 'encryptedAccount', 'recipient']
+        },
+        account: {
+          type: 'object',
+          properties: {
+            inputRoot: bytes32Type,
+            inputNullifierHash: bytes32Type,
+            outputRoot: bytes32Type,
+            outputPathIndices: bytes32Type,
+            outputCommitment: bytes32Type
+          },
+          additionalProperties: false,
+          required: ['inputRoot', 'inputNullifierHash', 'outputRoot', 'outputPathIndices', 'outputCommitment']
+        }
+      },
+      additionalProperties: false,
+      required: ['amount', 'fee', 'extDataHash', 'extData', 'account']
+    }
+  },
+  additionalProperties: false,
+  required: ['proof', 'args']
+}
+
+const validateTornadoWithdraw = ajv.compile(tornadoWithdrawSchema)
+const validateMiningReward = ajv.compile(miningRewardSchema)
+const validateMiningWithdraw = ajv.compile(miningWithdrawSchema)
+
+function getInputError(validator, data) {
+  validator(data)
+  if (validator.errors) {
+    const error = validator.errors[0]
+    return `${error.dataPath} ${error.message}`
+  }
   return null
 }
 
-function getContractError(contract) {
-  if (!contract) {
-    return 'The contract is empty'
-  }
-
-  if (!isHexStrict(contract) || contract.length !== 42) {
-    return 'Corrupted contract'
-  }
-
-  if (!getInstance(contract)) {
-    return `This relayer does not support the token: ${contract}`
-  }
-
-  return null
+function getTornadoWithdrawInputError(data) {
+  return getInputError(validateTornadoWithdraw, data)
 }
 
-function getRewardAddressError(address) {
-  if (address.toLowerCase() !== rewardAccount.toLowerCase()) {
-    return 'This proof is for different relayer'
-  }
-
-  return null
+function getMiningRewardInputError(data) {
+  return getInputError(validateMiningReward, data)
 }
 
-function getWithdrawInputError(input) {
-  return getProofError(input.proof) || getArgsError(input.args, [32, 32, 20, 20, 32, 32]) || getContractError(input.contract) || getRewardAddressError(input.args[3])
+function getMiningWithdrawInputError(data) {
+  return getInputError(validateMiningWithdraw, data)
 }
-
-function getClaimInputError(input) {
-  return getProofError(input.proof) || getArgsError(input.args, [32, 32, 20, 20, 32, 32])
-}
-
-function getRewardInputError(input) {
-  return getProofError(input.proof) || getArgsError(input.args, [32, 32, 20, 20, 32, 32])
-}
-
 
 module.exports = {
-  getWithdrawInputError,
-  getClaimInputError,
-  getRewardInputError,
+  getTornadoWithdrawInputError,
+  getMiningRewardInputError,
+  getMiningWithdrawInputError
 }

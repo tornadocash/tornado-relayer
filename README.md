@@ -59,3 +59,13 @@ tornado.cash UI from submitting your request over http connection
 Disclaimer:
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## New relayer architecture
+
+1. TreeWatcher module keeps track of Account Tree changes and automatically caches the actual state in Redis
+2. Server module is Express.js instance to accepts http requests
+3. Controller contains handlers for the Server endpoints. It validates input data and put a Job to Queue
+4. Queue module is used by Controller to put and get Job from queue (bull wrapper)
+5. Status module contains handler to get a Job status. It's used by UI for pull updates
+6. Validate contains validation logic for all endpoints
+7. Worker is the main module that gets a Job from queue and processes it

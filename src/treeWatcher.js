@@ -48,6 +48,7 @@ async function processNewBlock(err) {
     // console.error(err)
     // return
   }
+  // what if updateRedis takes more than 15 sec?
   await updateRedis()
 }
 

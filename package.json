@@ -11,6 +11,7 @@
   "author": "tornado.cash",
   "license": "MIT",
   "dependencies": {
+    "ajv": "^6.12.5",
     "bull": "^3.12.1",
     "circomlib": "git+https://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c",
     "dotenv": "^8.2.0",
