@@ -90,7 +90,7 @@ async function init() {
 
 init()
 
-process.on('unhandledRejection', error => {
+process.on('unhandledRejection', (error) => {
   console.error('Unhandled promise rejection', error)
   process.exit(1)
 })
