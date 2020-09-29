@@ -35,11 +35,7 @@ class TxManager {
     this._web3.eth.defaultAccount = this.address
     this._gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
     this._mutex = new Mutex()
-  }
-
-  // todo get rid of it
-  async init() {
-    this.nonce = await this._web3.eth.getTransactionCount(this.address, 'latest')
+    this.nonce
   }
 
   /**
@@ -57,6 +53,9 @@ class TxManager {
   async _submit(tx, emitter) {
     const release = await this._mutex.acquire()
     try {
+      if (!this.nonce) {
+        this.nonce = await this._web3.eth.getTransactionCount(this.address, 'latest')
+      }
       return new Transaction(tx, emitter, this).submit()
     } finally {
       release()
@@ -85,7 +84,9 @@ class Transaction {
 
   async _prepare() {
     this.tx.gas = await this._web3.eth.estimateGas(this.tx)
-    this.tx.gasPrice = await this._getGasPrice('fast')
+    if (!this.tx.gasPrice) {
+      this.tx.gasPrice = await this._getGasPrice('fast')
+    }
     this.tx.nonce = this.nonce
   }
 
@@ -111,12 +112,22 @@ class Transaction {
 
         await sleep(this.config.POLL_INTERVAL)
       }
-      console.log('Mined. Start waiting for confirmations...')
-      await sleep(5000) // todo
+
       let receipt = await this._getReceipts()
+      let retryAttempt = 5
+      while (retryAttempt >= 0 && !receipt) {
+        console.log('retryAttempt', retryAttempt)
+        await sleep(1000)
+        receipt = await this._getReceipts()
+        retryAttempt--
+      }
+
       if (!receipt) {
         // resubmit
       }
+
+      console.log('Mined. Start waiting for confirmations...')
+      this.emitter.emit('mined', receipt)
 
       let currentBlock = await this._web3.eth.getBlockNumber()
       let confirmations = currentBlock > receipt.blockNumber ? currentBlock - receipt.blockNumber : 0

@@ -2,7 +2,7 @@ const { instances, netId } = require('../config')
 const { poseidon } = require('circomlib')
 const { toBN } = require('web3-utils')
 
-const sleep = (ms) => new Promise(res => setTimeout(res, ms))
+const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
 
 function getInstance(address) {
   const inst = instances[`netId${netId}`]
@@ -30,19 +30,25 @@ const poseidonHash = (items) => toBN(poseidon(items).toString())
 const poseidonHash2 = (a, b) => poseidonHash([a, b])
 
 function setSafeInterval(func, interval) {
-  func().catch(console.error).finally(() => {
-    setTimeout(() => setSafeInterval(func, interval), interval)
-  })
+  func()
+    .catch(console.error)
+    .finally(() => {
+      setTimeout(() => setSafeInterval(func, interval), interval)
+    })
 }
 
 /**
  * A promise that resolves when the source emits specified event
  */
 function when(source, event) {
-  return new Promise(resolve => {
-    source.once(event, payload => {
-      resolve(payload)
-    })
+  return new Promise((resolve, reject) => {
+    source
+      .once(event, (payload) => {
+        resolve(payload)
+      })
+      .on('error', (error) => {
+        reject(error)
+      })
   })
 }
 
