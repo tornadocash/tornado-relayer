@@ -14,6 +14,7 @@ const tx = {
 }
 
 async function main() {
+  await TxM.init()
   const receipt = await TxM.submit(tx)
     .on('transactionHash', (hash) => {
       console.log('hash', hash)

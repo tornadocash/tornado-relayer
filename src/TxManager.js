@@ -2,7 +2,7 @@ const Web3 = require('web3')
 const { Mutex } = require('async-mutex')
 const { GasPriceOracle } = require('gas-price-oracle')
 const { toWei, toHex, toBN, BN } = require('web3-utils')
-const promiEvent = require('web3-core-promievent')
+const PromiEvent = require('web3-core-promievent')
 const { sleep, when } = require('./utils')
 
 const nonceErrors = [
@@ -40,25 +40,24 @@ class TxManager {
   // todo get rid of it
   async init() {
     this.nonce = await this._web3.eth.getTransactionCount(this.address, 'latest')
-    this.currentBlock = await this._web3.eth.getBlockNumber()
   }
 
   /**
    * Submits transaction to Ethereum network. Resolves when tx gets enough confirmations.
-   * todo: return PromiEvent that emits progress events
+   * Emits progress events.
    *
    * @param tx Transaction to send
    */
   submit(tx) {
-    const _promiEvent = promiEvent()
-    this._submit(tx, _promiEvent)
-    return _promiEvent.eventEmitter
+    const promiEvent = PromiEvent()
+    this._submit(tx, promiEvent.eventEmitter).then(promiEvent.resolve).catch(promiEvent.reject)
+    return promiEvent.eventEmitter
   }
 
-  async _submit(tx, _promiEvent) {
+  async _submit(tx, emitter) {
     const release = await this._mutex.acquire()
     try {
-      return new Transaction(tx, this).submit(_promiEvent)
+      return new Transaction(tx, emitter, this).submit()
     } finally {
       release()
     }
@@ -66,10 +65,11 @@ class TxManager {
 }
 
 class Transaction {
-  constructor(tx, manager) {
+  constructor(tx, emitter, manager) {
     Object.assign(this, manager)
     this.manager = manager
     this.tx = tx
+    this.emitter = emitter
     this.retries = 0
     this.hash = null
     // store all submitted hashes to catch cases when an old tx is mined
@@ -78,9 +78,9 @@ class Transaction {
     this.hashes = []
   }
 
-  async submit(_promiEvent) {
+  async submit() {
     await this._prepare()
-    await this._send(_promiEvent)
+    return this._send()
   }
 
   async _prepare() {
@@ -89,12 +89,12 @@ class Transaction {
     this.tx.nonce = this.nonce
   }
 
-  async _send(_promiEvent) {
+  async _send() {
     const signedTx = await this._web3.eth.accounts.signTransaction(this.tx, this._privateKey)
     this.tx.date = Date.now()
     this.tx.hash = signedTx.transactionHash
     this.hashes.push(this.tx.hash)
-    _promiEvent.eventEmitter.emit('transactionHash', signedTx.transactionHash)
+    this.emitter.emit('transactionHash', signedTx.transactionHash)
 
     try {
       await this._broadcast(signedTx.rawTransaction)
@@ -121,7 +121,7 @@ class Transaction {
       let currentBlock = await this._web3.eth.getBlockNumber()
       let confirmations = currentBlock > receipt.blockNumber ? currentBlock - receipt.blockNumber : 0
       while (confirmations <= this.config.CONFIRMATIONS) {
-        _promiEvent.eventEmitter.emit('confirmations', confirmations)
+        this.emitter.emit('confirmations', confirmations)
 
         await sleep(this.config.POLL_INTERVAL)
         receipt = await this._getReceipts()
@@ -134,24 +134,21 @@ class Transaction {
 
       // we could have bumped nonce during execution, so get the latest one + 1
       this.manager.nonce = this.tx.nonce + 1
-      _promiEvent.resolve(receipt)
+      return receipt
     } catch (e) {
       console.log('_send', e)
       await this._handleSendError()
-
-      // _promiEvent.reject(error) ?
     }
   }
 
   async _getReceipts() {
-    let receipt
     for (const hash of this.hashes.reverse()) {
-      receipt = await this._web3.eth.getTransactionReceipt(hash)
-      if (receipt !== null) {
+      const receipt = await this._web3.eth.getTransactionReceipt(hash)
+      if (receipt) {
         return receipt
       }
     }
-    return receipt
+    return null
   }
 
   /**
