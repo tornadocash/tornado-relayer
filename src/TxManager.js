@@ -20,18 +20,18 @@ const defaultConfig = {
   GAS_BUMP_PERCENTAGE: 5,
   GAS_BUMP_INTERVAL: 1000 * 60 * 5,
   MAX_GAS_PRICE: 1000,
-  POLL_INTERVAL: 3000,
+  POLL_INTERVAL: 5000,
   CONFIRMATIONS: 8,
 }
 
 class TxManager {
   constructor({ privateKey, rpcUrl, broadcastNodes = [], config = {} }) {
     this.config = Object.assign({ ...defaultConfig }, config)
-    this._privateKey = privateKey
+    this._privateKey = '0x' + privateKey
     this._web3 = new Web3(rpcUrl)
     this._broadcastNodes = broadcastNodes
-    this.address = this._web3.eth.accounts.privateKeyToAccount('0x' + privateKey).address
-    this._web3.eth.accounts.wallet.add('0x' + privateKey)
+    this.address = this._web3.eth.accounts.privateKeyToAccount(this._privateKey).address
+    this._web3.eth.accounts.wallet.add(this._privateKey)
     this._web3.eth.defaultAccount = this.address
     this._gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
     this._mutex = new Mutex()
@@ -49,10 +49,16 @@ class TxManager {
    *
    * @param tx Transaction to send
    */
-  async submit(tx) {
+  submit(tx) {
+    const _promiEvent = promiEvent()
+    this._submit(tx, _promiEvent)
+    return _promiEvent.eventEmitter
+  }
+
+  async _submit(tx, _promiEvent) {
     const release = await this._mutex.acquire()
     try {
-      await new Transaction(tx, this).submit()
+      return new Transaction(tx, this).submit(_promiEvent)
     } finally {
       release()
     }
@@ -72,11 +78,9 @@ class Transaction {
     this.hashes = []
   }
 
-  async submit() {
+  async submit(_promiEvent) {
     await this._prepare()
-    const _promiEvent = promiEvent()
-    this._send(_promiEvent)
-    return _promiEvent
+    await this._send(_promiEvent)
   }
 
   async _prepare() {
@@ -86,37 +90,44 @@ class Transaction {
   }
 
   async _send(_promiEvent) {
-    const signedTx = await this._web3.eth.accounts.signTransaction(this.tx, this.privateKey)
+    const signedTx = await this._web3.eth.accounts.signTransaction(this.tx, this._privateKey)
     this.tx.date = Date.now()
     this.tx.hash = signedTx.transactionHash
     this.hashes.push(this.tx.hash)
-    _promiEvent.emit('transactionHash', signedTx.transactionHash)
+    _promiEvent.eventEmitter.emit('transactionHash', signedTx.transactionHash)
 
     try {
       await this._broadcast(signedTx.rawTransaction)
+      console.log('Broadcasted. Start waiting for mining...')
       // The most reliable way to see if one of our tx was mined is to track current nonce
-      while (this.tx.nonce <= (await this._getLastNonce())) {
+      let latestNonce = await this._getLastNonce()
+      while (this.tx.nonce > latestNonce) {
         if (Date.now() - this.tx.date >= this.config.GAS_BUMP_INTERVAL) {
           if (this._increaseGasPrice()) {
+            console.log('Resubmit with higher gas price')
             return this._send()
           }
         }
 
         await sleep(this.config.POLL_INTERVAL)
       }
-      // got mined, let's check
+      console.log('Mined. Start waiting for confirmations...')
+      await sleep(5000) // todo
       let receipt = await this._getReceipts()
       if (!receipt) {
         // resubmit
       }
 
       let currentBlock = await this._web3.eth.getBlockNumber()
-      let confirmations = currentBlock - receipt.blockNumber
-      while (confirmations < this.config.CONFIRMATIONS) {
-        _promiEvent.emit('confirmations', confirmations)
+      let confirmations = currentBlock > receipt.blockNumber ? currentBlock - receipt.blockNumber : 0
+      while (confirmations <= this.config.CONFIRMATIONS) {
+        _promiEvent.eventEmitter.emit('confirmations', confirmations)
 
         await sleep(this.config.POLL_INTERVAL)
         receipt = await this._getReceipts()
+        if (!receipt) {
+          // resubmit
+        }
         currentBlock = await this._web3.eth.getBlockNumber()
         confirmations = currentBlock - receipt.blockNumber
       }
@@ -125,6 +136,7 @@ class Transaction {
       this.manager.nonce = this.tx.nonce + 1
       _promiEvent.resolve(receipt)
     } catch (e) {
+      console.log('_send', e)
       await this._handleSendError()
 
       // _promiEvent.reject(error) ?
@@ -198,7 +210,7 @@ class Transaction {
   }
 
   _getLastNonce() {
-    return this.web3.eth.getTransactionCount(this.address, 'latest')
+    return this._web3.eth.getTransactionCount(this.address, 'latest')
   }
 }
 
