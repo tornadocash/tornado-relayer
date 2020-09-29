@@ -27,7 +27,7 @@ ajv.addKeyword('isKnownContract', {
   errors: true
 })
 
-ajv.addKeyword('isForFee', {
+ajv.addKeyword('isFeeRecipient', {
   validate: (schema, data) => {
     try {
       return rewardAccount === data
@@ -42,10 +42,8 @@ const addressType = { type: 'string', pattern: '^0x[a-fA-F0-9]{40}$', isAddress:
 const proofType = { type: 'string', pattern: '^0x[a-fA-F0-9]{512}$' }
 const encryptedAccountType = { type: 'string', pattern: '^0x[a-fA-F0-9]{392}$' }
 const bytes32Type = { type: 'string', pattern: '^0x[a-fA-F0-9]{64}$' }
-const instanceType = JSON.parse(JSON.stringify(addressType))
-instanceType.isKnownContract = true
-const relayerType = JSON.parse(JSON.stringify(addressType))
-relayerType.isForFee = true
+const instanceType = { ...addressType, isKnownContract: true }
+const relayerType = { ...addressType, isFeeRecipient: true }
 
 const tornadoWithdrawSchema = {
   type: 'object',
@@ -56,7 +54,6 @@ const tornadoWithdrawSchema = {
       type: 'array',
       maxItems: 6,
       minItems: 6,
-      uniqueItems: true,
       items: [bytes32Type, bytes32Type, addressType, relayerType, bytes32Type, bytes32Type]
     }
   },

@@ -2,6 +2,8 @@ const { instances, netId } = require('../config')
 const { poseidon } = require('circomlib')
 const { toBN } = require('web3-utils')
 
+const sleep = (ms) => new Promise(res => setTimeout(res, ms))
+
 function getInstance(address) {
   const inst = instances[`netId${netId}`]
   for (const currency of Object.keys(inst)) {
@@ -33,8 +35,21 @@ function setSafeInterval(func, interval) {
   })
 }
 
+/**
+ * A promise that resolves when the source emits specified event
+ */
+function when(source, event) {
+  return new Promise(resolve => {
+    source.once(event, payload => {
+      resolve(payload)
+    })
+  })
+}
+
 module.exports = {
   getInstance,
   setSafeInterval,
   poseidonHash2,
+  sleep,
+  when,
 }

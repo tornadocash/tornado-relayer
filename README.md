@@ -62,9 +62,9 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 ## New relayer architecture
 
-1. TreeWatcher module keeps track of Account Tree changes and automatically caches the actual state in Redis
-2. Server module is Express.js instance to accepts http requests
-3. Controller contains handlers for the Server endpoints. It validates input data and put a Job to Queue
+1. TreeWatcher module keeps track of Account Tree changes and automatically caches the actual state in Redis and emits `treeUpdate` event to redis pub/sub channel
+2. Server module is Express.js instance that accepts http requests
+3. Controller contains handlers for the Server endpoints. It validates input data and adds a Job to Queue.
 4. Queue module is used by Controller to put and get Job from queue (bull wrapper)
 5. Status module contains handler to get a Job status. It's used by UI for pull updates
 6. Validate contains validation logic for all endpoints

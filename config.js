@@ -152,5 +152,5 @@ module.exports = {
   watherInterval: Number(process.env.NONCE_WATCHER_INTERVAL || 30) * 1000,
   pendingTxTimeout: Number(process.env.ALLOWABLE_PENDING_TX_TIMEOUT || 180) * 1000,
   gasBumpPercentage: process.env.GAS_PRICE_BUMP_PERCENTAGE || 20,
-  rewardAccount: '0x0000000000000000000000000000000000000000',
+  rewardAccount: '0x03Ebd0748Aa4D1457cF479cce56309641e0a98F5',
 }
