@@ -2,6 +2,7 @@ const Web3 = require('web3')
 const { Mutex } = require('async-mutex')
 const { GasPriceOracle } = require('gas-price-oracle')
 const { toWei, toHex, toBN, BN } = require('web3-utils')
+const promiEvent = require('web3-core-promievent')
 const { sleep, when } = require('./utils')
 
 const nonceErrors = [
@@ -20,8 +21,8 @@ const defaultConfig = {
   GAS_BUMP_INTERVAL: 1000 * 60 * 5,
   MAX_GAS_PRICE: 1000,
   POLL_INTERVAL: 3000,
+  CONFIRMATIONS: 8,
 }
-
 
 class TxManager {
   constructor({ privateKey, rpcUrl, broadcastNodes = [], config = {} }) {
@@ -34,11 +35,18 @@ class TxManager {
     this._web3.eth.defaultAccount = this.address
     this._gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
     this._mutex = new Mutex()
+
+    this._blockSubscription = this._web3.eth.subscribe('newBlockHeaders', this.processNewBlock)
+  }
+
+  processNewBlock(error, block) {
+    this.currentBlock = block.number
   }
 
   // todo get rid of it
   async init() {
-    this.nonce = await this.web3.eth.getTransactionCount(this.address, 'latest')
+    this.nonce = await this._web3.eth.getTransactionCount(this.address, 'latest')
+    this.currentBlock = await this._web3.eth.getBlockNumber()
   }
 
   /**
@@ -72,9 +80,7 @@ class Transaction {
 
   async submit() {
     await this._prepare()
-    await this._send()
-    // we could have bumped nonce during execution, so get the latest one + 1
-    this.manager.nonce = this.tx.nonce + 1
+    return this._send()
   }
 
   async _prepare() {
@@ -84,14 +90,17 @@ class Transaction {
   }
 
   async _send() {
+    const _promiEvent = promiEvent()
     const signedTx = await this._web3.eth.accounts.signTransaction(this.tx, this.privateKey)
     this.tx.date = Date.now()
     this.tx.hash = signedTx.transactionHash
     this.hashes.push(this.tx.hash)
+    _promiEvent.emit('transactionHash', signedTx.transactionHash)
+
     try {
       await this._broadcast(signedTx.rawTransaction)
       // The most reliable way to see if one of our tx was mined is to track current nonce
-      while(this.tx.nonce <= await this._getLastNonce()) {
+      while (this.tx.nonce <= (await this._getLastNonce())) {
         if (Date.now() - this.tx.date >= this.config.GAS_BUMP_INTERVAL) {
           if (this._increaseGasPrice()) {
             return this._send()
@@ -100,9 +109,27 @@ class Transaction {
 
         await sleep(this.config.POLL_INTERVAL)
       }
+      // got mined, let's check
+      const receipt = await this._web3.eth.getTransactionReceipt(signedTx.transactionHash)
+      if (!receipt) {
+        // resubmit
+      }
+
+      let confirmations = this.currentBlock - receipt.blockNumber
+      while (confirmations < this.config.CONFIRMATIONS) {
+        _promiEvent.emit('confirmations', confirmations)
+
+        await sleep(this.config.POLL_INTERVAL)
+        confirmations = this.currentBlock - receipt.blockNumber
+      }
+
+      // we could have bumped nonce during execution, so get the latest one + 1
+      this.manager.nonce = this.tx.nonce + 1
+      _promiEvent.resolve(receipt)
     } catch (e) {
       await this._handleSendError()
     }
+    return _promiEvent.eventEmitter
   }
 
   /**
@@ -166,4 +193,3 @@ class Transaction {
 }
 
 module.exports = TxManager
-

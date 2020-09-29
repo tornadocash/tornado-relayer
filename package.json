@@ -24,6 +24,7 @@
     "tornado-cash-anonymity-mining": "git+https://github.com/tornadocash/tornado-anonymity-mining.git#820bd83254f3264cebaf255869641ebc33288dc3",
     "uuid": "^8.3.0",
     "web3": "^1.3.0",
+    "web3-core-promievent": "^1.3.0",
     "web3-utils": "^1.2.2"
   },
   "devDependencies": {
