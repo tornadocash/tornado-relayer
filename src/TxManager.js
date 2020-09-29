@@ -35,12 +35,6 @@ class TxManager {
     this._web3.eth.defaultAccount = this.address
     this._gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
     this._mutex = new Mutex()
-
-    this._blockSubscription = this._web3.eth.subscribe('newBlockHeaders', this.processNewBlock)
-  }
-
-  processNewBlock(error, block) {
-    this.currentBlock = block.number
   }
 
   // todo get rid of it
@@ -80,7 +74,9 @@ class Transaction {
 
   async submit() {
     await this._prepare()
-    return this._send()
+    const _promiEvent = promiEvent()
+    this._send(_promiEvent)
+    return _promiEvent
   }
 
   async _prepare() {
@@ -89,8 +85,7 @@ class Transaction {
     this.tx.nonce = this.nonce
   }
 
-  async _send() {
-    const _promiEvent = promiEvent()
+  async _send(_promiEvent) {
     const signedTx = await this._web3.eth.accounts.signTransaction(this.tx, this.privateKey)
     this.tx.date = Date.now()
     this.tx.hash = signedTx.transactionHash
@@ -110,17 +105,20 @@ class Transaction {
         await sleep(this.config.POLL_INTERVAL)
       }
       // got mined, let's check
-      const receipt = await this._web3.eth.getTransactionReceipt(signedTx.transactionHash)
+      let receipt = await this._getReceipts()
       if (!receipt) {
         // resubmit
       }
 
-      let confirmations = this.currentBlock - receipt.blockNumber
+      let currentBlock = await this._web3.eth.getBlockNumber()
+      let confirmations = currentBlock - receipt.blockNumber
       while (confirmations < this.config.CONFIRMATIONS) {
         _promiEvent.emit('confirmations', confirmations)
 
         await sleep(this.config.POLL_INTERVAL)
-        confirmations = this.currentBlock - receipt.blockNumber
+        receipt = await this._getReceipts()
+        currentBlock = await this._web3.eth.getBlockNumber()
+        confirmations = currentBlock - receipt.blockNumber
       }
 
       // we could have bumped nonce during execution, so get the latest one + 1
@@ -128,8 +126,20 @@ class Transaction {
       _promiEvent.resolve(receipt)
     } catch (e) {
       await this._handleSendError()
+
+      // _promiEvent.reject(error) ?
     }
-    return _promiEvent.eventEmitter
+  }
+
+  async _getReceipts() {
+    let receipt
+    for (const hash of this.hashes.reverse()) {
+      receipt = await this._web3.eth.getTransactionReceipt(hash)
+      if (receipt !== null) {
+        return receipt
+      }
+    }
+    return receipt
   }
 
   /**
