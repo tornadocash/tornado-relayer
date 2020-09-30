@@ -6,7 +6,7 @@
     "server": "node src/server.js",
     "treeUpdater": "node src/treeWatcher",
     "eslint": "npx eslint --ignore-path .gitignore .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha"
   },
   "author": "tornado.cash",
   "license": "MIT",
@@ -28,6 +28,8 @@
     "web3-utils": "^1.2.2"
   },
   "devDependencies": {
-    "eslint": "^6.6.0"
+    "chai": "^4.2.0",
+    "eslint": "^6.6.0",
+    "mocha": "^8.1.3"
   }
 }

@@ -30,9 +30,6 @@ async function main() {
       console.log('confirmations', confirmations)
     })
   console.log('receipt', receipt)
-
-  // const hash = await when(TxM.submit(tx), 'transactionHash')
-  // console.log('hash', hash)
 }
 
 main()
