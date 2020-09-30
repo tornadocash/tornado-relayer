@@ -1,7 +1,7 @@
 const Web3 = require('web3')
 const { Mutex } = require('async-mutex')
 const { GasPriceOracle } = require('gas-price-oracle')
-const { toWei, toHex, toBN, BN } = require('web3-utils')
+const { toWei, toHex, toBN, BN, fromWei } = require('web3-utils')
 const PromiEvent = require('web3-core-promievent')
 const { sleep, when } = require('./utils')
 
@@ -18,6 +18,7 @@ const gasPriceErrors = [
 const defaultConfig = {
   MAX_RETRIES: 10,
   GAS_BUMP_PERCENTAGE: 5,
+  MIN_GWEI_BUMP: 1,
   GAS_BUMP_INTERVAL: 1000 * 60 * 5,
   MAX_GAS_PRICE: 1000,
   POLL_INTERVAL: 5000,
@@ -39,47 +40,79 @@ class TxManager {
   }
 
   /**
-   * Submits transaction to Ethereum network. Resolves when tx gets enough confirmations.
-   * Emits progress events.
+   * Creates Transaction class instance.
    *
    * @param tx Transaction to send
    */
-  submit(tx) {
-    const promiEvent = PromiEvent()
-    this._submit(tx, promiEvent.eventEmitter).then(promiEvent.resolve).catch(promiEvent.reject)
-    return promiEvent.eventEmitter
-  }
-
-  async _submit(tx, emitter) {
-    const release = await this._mutex.acquire()
+  async createTx(tx) {
     try {
+      await this._mutex.acquire()
       if (!this.nonce) {
         this.nonce = await this._web3.eth.getTransactionCount(this.address, 'latest')
       }
-      return new Transaction(tx, emitter, this).submit()
-    } finally {
-      release()
+      return new Transaction(tx, this)
+    } catch (e) {
+      console.log('e', e)
+      this._mutex.release()
     }
   }
 }
 
 class Transaction {
-  constructor(tx, emitter, manager) {
+  constructor(tx, manager) {
     Object.assign(this, manager)
     this.manager = manager
     this.tx = tx
-    this.emitter = emitter
+    this.promiReceipt = PromiEvent()
+    this.emitter = this.promiReceipt.eventEmitter
     this.retries = 0
-    this.hash = null
     // store all submitted hashes to catch cases when an old tx is mined
     // todo: what to do if old tx with the same nonce was submitted
     //       by other client and we don't have its hash?
     this.hashes = []
   }
 
-  async submit() {
-    await this._prepare()
-    return this._send()
+  /**
+   * Submits transaction to Ethereum network. Resolves when tx gets enough confirmations.
+   * Emits progress events.
+   */
+  send() {
+    this._prepare()
+      .then(() => {
+        this._send()
+          .then((result) => this.promiReceipt.resolve(result))
+          .catch((e) => this.promiReceipt.reject(e))
+      })
+      .catch((e) => this.promiReceipt.reject(e))
+      .finally(this.manager._mutex.release())
+
+    return this.emitter
+  }
+
+  /**
+   * Replaces pending tx.
+   *
+   * @param tx Transaction to send
+   */
+  replace(tx) {
+    // todo check if it's not mined yet
+    console.log('Replacing...')
+    this.tx = tx
+    return this.send()
+  }
+
+  /**
+   * Cancels pending tx.
+   */
+  cancel() {
+    // todo check if it's not mined yet
+    console.log('Canceling...')
+    this.tx = {
+      to: this.address,
+      gasPrice: this.tx.gasPrice,
+    }
+    this._increaseGasPrice()
+    return this.send()
   }
 
   async _prepare() {
@@ -87,7 +120,7 @@ class Transaction {
     if (!this.tx.gasPrice) {
       this.tx.gasPrice = await this._getGasPrice('fast')
     }
-    this.tx.nonce = this.nonce
+    this.tx.nonce = this.manager.nonce
   }
 
   async _send() {
@@ -101,8 +134,8 @@ class Transaction {
       await this._broadcast(signedTx.rawTransaction)
       console.log('Broadcasted. Start waiting for mining...')
       // The most reliable way to see if one of our tx was mined is to track current nonce
-      let latestNonce = await this._getLastNonce()
-      while (this.tx.nonce > latestNonce) {
+
+      while (this.tx.nonce >= (await this._getLastNonce())) {
         if (Date.now() - this.tx.date >= this.config.GAS_BUMP_INTERVAL) {
           if (this._increaseGasPrice()) {
             console.log('Resubmit with higher gas price')
@@ -116,7 +149,6 @@ class Transaction {
       let receipt = await this._getReceipts()
       let retryAttempt = 5
       while (retryAttempt >= 0 && !receipt) {
-        console.log('retryAttempt', retryAttempt)
         await sleep(1000)
         receipt = await this._getReceipts()
         retryAttempt--
@@ -199,14 +231,19 @@ class Transaction {
   }
 
   _increaseGasPrice() {
-    const newGasPrice = toBN(this.tx.gasPrice).mul(toBN(this.config.GAS_BUMP_PERCENTAGE)).div(toBN(100))
+    const minGweiBump = toBN(toWei(this.config.MIN_GWEI_BUMP.toString(), 'Gwei'))
+    const oldGasPrice = toBN(this.tx.gasPrice)
+    const newGasPrice = BN.max(
+      oldGasPrice.mul(toBN(100 + this.config.GAS_BUMP_PERCENTAGE)).div(toBN(100)),
+      oldGasPrice.add(minGweiBump),
+    )
     const maxGasPrice = toBN(toWei(this.config.MAX_GAS_PRICE.toString(), 'gwei'))
     if (toBN(this.tx.gasPrice).eq(maxGasPrice)) {
       console.log('Already at max gas price, not bumping')
       return false
     }
     this.tx.gasPrice = toHex(BN.min(newGasPrice, maxGasPrice))
-    console.log(`Increasing gas price to ${this.tx.gasPrice}`)
+    console.log(`Increasing gas price to ${fromWei(this.tx.gasPrice, 'Gwei')}`)
     return true
   }
 
