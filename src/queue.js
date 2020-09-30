@@ -6,11 +6,10 @@ const redis = new Redis(redisUrl)
 
 const queue = new Queue('proofs', redisUrl)
 
-async function postJob(type, data) {
+async function postJob({ type, data }) {
   const id = uuid()
 
   const job = await queue.add(
-    'proofs',
     {
       id,
       type,

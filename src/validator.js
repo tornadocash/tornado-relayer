@@ -1,6 +1,5 @@
-const { isAddress } = require('web3-utils')
+const { isAddress, toChecksumAddress } = require('web3-utils')
 const { getInstance } = require('./utils')
-const { rewardAccount } = require('../config')
 
 const Ajv = require('ajv')
 const ajv = new Ajv({ format: 'fast' })
@@ -13,7 +12,7 @@ ajv.addKeyword('isAddress', {
       return false
     }
   },
-  errors: true
+  errors: true,
 })
 
 ajv.addKeyword('isKnownContract', {
@@ -24,18 +23,18 @@ ajv.addKeyword('isKnownContract', {
       return false
     }
   },
-  errors: true
+  errors: true,
 })
 
 ajv.addKeyword('isFeeRecipient', {
   validate: (schema, data) => {
     try {
-      return rewardAccount === data
+      return require('../config').rewardAccount === toChecksumAddress(data)
     } catch (e) {
       return false
     }
   },
-  errors: true
+  errors: true,
 })
 
 const addressType = { type: 'string', pattern: '^0x[a-fA-F0-9]{40}$', isAddress: true }
@@ -54,11 +53,11 @@ const tornadoWithdrawSchema = {
       type: 'array',
       maxItems: 6,
       minItems: 6,
-      items: [bytes32Type, bytes32Type, addressType, relayerType, bytes32Type, bytes32Type]
-    }
+      items: [bytes32Type, bytes32Type, addressType, relayerType, bytes32Type, bytes32Type],
+    },
   },
   additionalProperties: false,
-  required: ['proof', 'contract', 'args']
+  required: ['proof', 'contract', 'args'],
 }
 
 const miningRewardSchema = {
@@ -79,10 +78,10 @@ const miningRewardSchema = {
           type: 'object',
           properties: {
             relayer: relayerType,
-            encryptedAccount: encryptedAccountType
+            encryptedAccount: encryptedAccountType,
           },
           additionalProperties: false,
-          required: ['relayer', 'encryptedAccount']
+          required: ['relayer', 'encryptedAccount'],
         },
         account: {
           type: 'object',
@@ -91,11 +90,17 @@ const miningRewardSchema = {
             inputNullifierHash: bytes32Type,
             outputRoot: bytes32Type,
             outputPathIndices: bytes32Type,
-            outputCommitment: bytes32Type
+            outputCommitment: bytes32Type,
           },
           additionalProperties: false,
-          required: ['inputRoot', 'inputNullifierHash', 'outputRoot', 'outputPathIndices', 'outputCommitment']
-        }
+          required: [
+            'inputRoot',
+            'inputNullifierHash',
+            'outputRoot',
+            'outputPathIndices',
+            'outputCommitment',
+          ],
+        },
       },
       additionalProperties: false,
       required: [
@@ -107,12 +112,12 @@ const miningRewardSchema = {
         'depositRoot',
         'withdrawalRoot',
         'extData',
-        'account'
-      ]
-    }
+        'account',
+      ],
+    },
   },
   additionalProperties: false,
-  required: ['proof', 'args']
+  required: ['proof', 'args'],
 }
 
 const miningWithdrawSchema = {
@@ -130,10 +135,10 @@ const miningWithdrawSchema = {
           properties: {
             recipient: addressType,
             relayer: relayerType,
-            encryptedAccount: encryptedAccountType
+            encryptedAccount: encryptedAccountType,
           },
           additionalProperties: false,
-          required: ['relayer', 'encryptedAccount', 'recipient']
+          required: ['relayer', 'encryptedAccount', 'recipient'],
         },
         account: {
           type: 'object',
@@ -142,18 +147,24 @@ const miningWithdrawSchema = {
             inputNullifierHash: bytes32Type,
             outputRoot: bytes32Type,
             outputPathIndices: bytes32Type,
-            outputCommitment: bytes32Type
+            outputCommitment: bytes32Type,
           },
           additionalProperties: false,
-          required: ['inputRoot', 'inputNullifierHash', 'outputRoot', 'outputPathIndices', 'outputCommitment']
-        }
+          required: [
+            'inputRoot',
+            'inputNullifierHash',
+            'outputRoot',
+            'outputPathIndices',
+            'outputCommitment',
+          ],
+        },
       },
       additionalProperties: false,
-      required: ['amount', 'fee', 'extDataHash', 'extData', 'account']
-    }
+      required: ['amount', 'fee', 'extDataHash', 'extData', 'account'],
+    },
   },
   additionalProperties: false,
-  required: ['proof', 'args']
+  required: ['proof', 'args'],
 }
 
 const validateTornadoWithdraw = ajv.compile(tornadoWithdrawSchema)
@@ -184,5 +195,5 @@ function getMiningWithdrawInputError(data) {
 module.exports = {
   getTornadoWithdrawInputError,
   getMiningRewardInputError,
-  getMiningWithdrawInputError
+  getMiningWithdrawInputError,
 }

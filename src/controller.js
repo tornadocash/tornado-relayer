@@ -10,7 +10,7 @@ async function tornadoWithdraw(req, res) {
 
   const { proof, args, contract } = req.body
   const id = await postJob({
-    type: 'withdraw',
+    type: 'tornadoWithdraw',
     data: { proof, args, contract },
   })
   return res.json({ id })

@@ -1,29 +1,34 @@
-const queue = require('queue')
+const queue = require('./queue')
+const { GasPriceOracle } = require('gas-price-oracle')
+const gasPriceOracle = new GasPriceOracle()
+const { netId, relayerServiceFee, instances } = require('../config')
+const { version } = require('../package.json')
 
 async function status(req, res) {
-  let nonce = await redisClient.get('nonce')
-  let latestBlock = null
-  try {
-    latestBlock = await web3.eth.getBlockNumber()
-  } catch (e) {
-    console.error('Problem with RPC', e)
+  const ethPrices = {
+    dai: '6700000000000000', // 0.0067
+    cdai: '157380000000000',
+    cusdc: '164630000000000',
+    usdc: '7878580000000000',
+    usdt: '7864940000000000',
   }
-  const { ethPrices } = fetcher
   res.json({
-    relayerAddress: web3.eth.defaultAccount,
-    mixers,
+    relayerAddress: require('../config').rewardAccount,
+    instances: instances.netId42,
     gasPrices: await gasPriceOracle.gasPrices(),
     netId,
     ethPrices,
     relayerServiceFee,
-    nonce,
+    nonce: 123,
     version,
-    latestBlock
+    latestBlock: 12312312,
   })
 }
 
 function index(req, res) {
-  res.send('This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/v1/status>/status</a> for settings')
+  res.send(
+    'This is <a href=https://tornado.cash>tornado.cash</a> Relayer service. Check the <a href=/v1/status>/status</a> for settings',
+  )
 }
 
 async function getJob(req, res) {

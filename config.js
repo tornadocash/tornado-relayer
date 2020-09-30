@@ -1,6 +1,11 @@
 require('dotenv').config()
 
-module.exports = {
+function updateConfig(options) {
+  config = Object.assign(config, options)
+}
+
+let config = {
+  updateConfig,
   netId: Number(process.env.NET_ID) || 42,
   redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
   rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
@@ -154,3 +159,5 @@ module.exports = {
   gasBumpPercentage: process.env.GAS_PRICE_BUMP_PERCENTAGE || 20,
   rewardAccount: '0x0000000000000000000000000000000000000000',
 }
+
+module.exports = config
