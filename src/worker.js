@@ -63,7 +63,7 @@ async function process(job) {
 
 async function processTornadoWithdraw(job) {
   currentJob = job
-  console.log(Date.now(), ' withdraw started', job.id)
+  console.log(`Start processing a new Tornado Withdraw job #${job.id}`)
   const { proof, args, contract } = job.data.data
   const fee = toBN(args[4])
   const refund = toBN(args[5])
@@ -93,7 +93,7 @@ async function processTornadoWithdraw(job) {
 
 async function processMiningReward(job) {
   currentJob = job
-  console.log(Date.now(), ' reward started', job.id)
+  console.log(`Start processing a new Mining Reward job #${job.id}`)
   const { proof, args } = job.data.data
 
   const contract = new web3.eth.Contract(miningABI, minerAddress)
@@ -119,7 +119,7 @@ async function processMiningReward(job) {
 
 async function processMiningWithdraw(job) {
   currentJob = job
-  console.log(Date.now(), ' mining withdraw started', job.id)
+  console.log(`Start processing a new Mining Withdraw job #${job.id}`)
   const { proof, args } = job.data.data
 
   const contract = new web3.eth.Contract(miningABI, minerAddress)

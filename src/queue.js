@@ -28,7 +28,7 @@ async function getJob(uuid) {
 
 async function getJobStatus(uuid) {
   const job = await getJob(uuid)
-  // ...
+  return job.data
 }
 
 module.exports = {

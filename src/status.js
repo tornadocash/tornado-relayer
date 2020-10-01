@@ -33,7 +33,7 @@ function index(req, res) {
 
 async function getJob(req, res) {
   const status = await queue.getJobStatus(req.params.id)
-  return res.send(status)
+  return res.json(status)
 }
 
 module.exports = {

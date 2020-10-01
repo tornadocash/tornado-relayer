@@ -26,7 +26,7 @@ app.use((req, res, next) => {
 
 app.get('/', status.index)
 app.get('/v1/status', status.status)
-app.post('/v1/jobs/:id', status.getJob)
+app.get('/v1/jobs/:id', status.getJob)
 app.post('/v1/tornadoWithdraw', controller.tornadoWithdraw)
 app.get('/status', status.status)
 app.post('/relay', controller.tornadoWithdraw)
