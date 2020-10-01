@@ -5,9 +5,10 @@ const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
 
 const tornadoABI = require('../abis/tornadoABI.json')
+const miningABI = require('../abis/mining.abi.json')
 const { queue } = require('./queue')
 const { poseidonHash2 } = require('./utils')
-const { rpcUrl, redisUrl, privateKey, updateConfig, rewardAccount } = require('../config')
+const { rpcUrl, redisUrl, privateKey, updateConfig, rewardAccount, minerAddress } = require('../config')
 const TxManager = require('./TxManager')
 
 let web3
@@ -45,9 +46,22 @@ async function checkTornadoFee(/* contract, fee, refund*/) {
 }
 
 async function process(job) {
-  if (job.data.type !== 'tornadoWithdraw') {
-    throw new Error('not implemented')
+  switch (job.data.type) {
+    case 'tornadoWithdraw':
+      await processTornadoWithdraw(job)
+      break
+    case 'miningReward':
+      await processMiningReward(job)
+      break
+    case 'miningWithdraw':
+      await processMiningWithdraw(job)
+      break
+    default:
+      throw new Error(`Unknown job type: ${job.data.type}`)
   }
+}
+
+async function processTornadoWithdraw(job) {
   currentJob = job
   console.log(Date.now(), ' withdraw started', job.id)
   const { proof, args, contract } = job.data.data
@@ -60,6 +74,58 @@ async function process(job) {
   currentTx = await txManager.createTx({
     value: numberToHex(refund),
     to: contract,
+    data,
+  })
+
+  try {
+    await currentTx
+      .send()
+      .on('transactionHash', updateTxHash)
+      .on('mined', (receipt) => {
+        console.log('Mined in block', receipt.blockNumber)
+      })
+      .on('confirmations', updateConfirmations)
+  } catch (e) {
+    console.error('Revert', e)
+    throw new Error(`Revert by smart contract ${e.message}`)
+  }
+}
+
+async function processMiningReward(job) {
+  currentJob = job
+  console.log(Date.now(), ' reward started', job.id)
+  const { proof, args } = job.data.data
+
+  const contract = new web3.eth.Contract(miningABI, minerAddress)
+  const data = contract.methods.reward(proof, args).encodeABI()
+  currentTx = await txManager.createTx({
+    to: minerAddress,
+    data,
+  })
+
+  try {
+    await currentTx
+      .send()
+      .on('transactionHash', updateTxHash)
+      .on('mined', (receipt) => {
+        console.log('Mined in block', receipt.blockNumber)
+      })
+      .on('confirmations', updateConfirmations)
+  } catch (e) {
+    console.error('Revert', e)
+    throw new Error(`Revert by smart contract ${e.message}`)
+  }
+}
+
+async function processMiningWithdraw(job) {
+  currentJob = job
+  console.log(Date.now(), ' mining withdraw started', job.id)
+  const { proof, args } = job.data.data
+
+  const contract = new web3.eth.Contract(miningABI, minerAddress)
+  const data = contract.methods.withdraw(proof, args).encodeABI()
+  currentTx = await txManager.createTx({
+    to: minerAddress,
     data,
   })
 
