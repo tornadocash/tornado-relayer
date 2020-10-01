@@ -312,8 +312,10 @@ class Transaction {
 
     if (this._hasError(e.message, sameTxErrors)) {
       console.log('Same transaction is already in mempool, skipping submit')
-      // do nothing
+      return // do nothing
     }
+
+    throw new Error(`Send error: ${e.message}`)
   }
 
   /**
