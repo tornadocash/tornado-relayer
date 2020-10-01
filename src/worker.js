@@ -30,12 +30,9 @@ async function fetchTree() {
 }
 
 async function start() {
-  web3 = new Web3(rpcUrl, null, { transactionConfirmationBlocks: 1 })
-  const account = web3.eth.accounts.privateKeyToAccount('0x' + privateKey)
-  web3.eth.accounts.wallet.add('0x' + privateKey)
-  web3.eth.defaultAccount = account.address
-  updateConfig({ rewardAccount: account.address })
+  web3 = new Web3(rpcUrl)
   txManager = new TxManager({ privateKey, rpcUrl })
+  updateConfig({ rewardAccount: txManager.address })
   queue.process(process)
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()

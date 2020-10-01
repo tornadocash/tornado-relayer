@@ -34,5 +34,5 @@ app.post('/relay', controller.tornadoWithdraw)
 // app.post('/v1/miningWithdraw', controller.miningWithdraw)
 
 worker.start()
-app.listen(port || 8000)
-console.log(`Relayer ${version} started on port ${port || 8000}`)
+app.listen(port)
+console.log(`Relayer ${version} started on port ${port}`)
