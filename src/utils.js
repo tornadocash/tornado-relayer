@@ -1,10 +1,11 @@
 const { instances, netId } = require('../config')
 const { poseidon } = require('circomlib')
-const { toBN } = require('web3-utils')
+const { toBN, toChecksumAddress } = require('web3-utils')
 
 const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
 
 function getInstance(address) {
+  address = toChecksumAddress(address)
   const inst = instances[`netId${netId}`]
   for (const currency of Object.keys(inst)) {
     for (const amount of Object.keys(inst[currency].instanceAddress)) {
