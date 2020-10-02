@@ -28,6 +28,7 @@ async function getJob(uuid) {
 
 async function getJobStatus(uuid) {
   const job = await getJob(uuid)
+  // todo job.data doesn't contain current status and other stuff?
   return job.data
 }
 

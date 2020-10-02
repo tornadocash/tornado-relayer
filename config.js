@@ -12,6 +12,7 @@ let config = {
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
   oracleAddress: '0xA2b8E7ee7c8a18ea561A5CF7C9C365592026E374',
   minerAddress: '0x0834DeaFD83130AE1867173919f693070DaE6eeD',
+  swapAddress: '0x0834DeaFD83130AE1867173919f693070DaE6eeD',
   minerMerkleTreeHeight: 10,
   privateKey: process.env.PRIVATE_KEY,
   instances: {

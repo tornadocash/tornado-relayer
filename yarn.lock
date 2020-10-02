@@ -3862,9 +3862,9 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-"tornado-cash-anonymity-mining@git+https://github.com/tornadocash/tornado-anonymity-mining.git#820bd83254f3264cebaf255869641ebc33288dc3":
+"tornado-cash-anonymity-mining@git+https://github.com/tornadocash/tornado-anonymity-mining.git#e3ae8b98b14eb7fee7cb8c93221920a20b1e0cd8":
   version "1.0.0"
-  resolved "git+https://github.com/tornadocash/tornado-anonymity-mining.git#820bd83254f3264cebaf255869641ebc33288dc3"
+  resolved "git+https://github.com/tornadocash/tornado-anonymity-mining.git#e3ae8b98b14eb7fee7cb8c93221920a20b1e0cd8"
   dependencies:
     circomlib "git+https://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c"
     eth-sig-util "^2.5.3"
