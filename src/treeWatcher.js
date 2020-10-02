@@ -18,7 +18,7 @@ async function fetchEvents(from = 0, to = 'latest') {
   })
   return events
     .sort((a, b) => a.returnValues.index - b.returnValues.index)
-    .map((e) => toBN(e.returnValues.commitment))
+    .map(e => toBN(e.returnValues.commitment))
 }
 
 async function processNewEvent(err, event) {
@@ -91,7 +91,7 @@ async function init() {
 
 init()
 
-process.on('unhandledRejection', (error) => {
+process.on('unhandledRejection', error => {
   console.error('Unhandled promise rejection', error)
   process.exit(1)
 })

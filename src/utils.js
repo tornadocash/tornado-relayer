@@ -2,7 +2,7 @@ const { instances, netId } = require('../config')
 const { poseidon } = require('circomlib')
 const { toBN, toChecksumAddress } = require('web3-utils')
 
-const sleep = (ms) => new Promise((res) => setTimeout(res, ms))
+const sleep = ms => new Promise(res => setTimeout(res, ms))
 
 function getInstance(address) {
   address = toChecksumAddress(address)
@@ -27,7 +27,7 @@ function getInstance(address) {
 //   }
 // }
 
-const poseidonHash = (items) => toBN(poseidon(items).toString())
+const poseidonHash = items => toBN(poseidon(items).toString())
 const poseidonHash2 = (a, b) => poseidonHash([a, b])
 
 function setSafeInterval(func, interval) {
@@ -44,10 +44,10 @@ function setSafeInterval(func, interval) {
 function when(source, event) {
   return new Promise((resolve, reject) => {
     source
-      .once(event, (payload) => {
+      .once(event, payload => {
         resolve(payload)
       })
-      .on('error', (error) => {
+      .on('error', error => {
         reject(error)
       })
   })

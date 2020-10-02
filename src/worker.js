@@ -115,7 +115,7 @@ async function processTornadoWithdraw(job) {
     await currentTx
       .send()
       .on('transactionHash', updateTxHash)
-      .on('mined', (receipt) => {
+      .on('mined', receipt => {
         console.log('Mined in block', receipt.blockNumber)
       })
       .on('confirmations', updateConfirmations)
@@ -141,7 +141,7 @@ async function processMiningReward(job) {
     await currentTx
       .send()
       .on('transactionHash', updateTxHash)
-      .on('mined', (receipt) => {
+      .on('mined', receipt => {
         console.log('Mined in block', receipt.blockNumber)
       })
       .on('confirmations', updateConfirmations)
@@ -167,7 +167,7 @@ async function processMiningWithdraw(job) {
     await currentTx
       .send()
       .on('transactionHash', updateTxHash)
-      .on('mined', (receipt) => {
+      .on('mined', receipt => {
         console.log('Mined in block', receipt.blockNumber)
       })
       .on('confirmations', updateConfirmations)

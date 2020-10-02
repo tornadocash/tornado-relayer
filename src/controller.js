@@ -1,4 +1,8 @@
-const { getTornadoWithdrawInputError, getMiningRewardInputError, getMiningWithdrawInputError } = require('./validator')
+const {
+  getTornadoWithdrawInputError,
+  getMiningRewardInputError,
+  getMiningWithdrawInputError,
+} = require('./validator')
 const { postJob } = require('./queue')
 
 async function tornadoWithdraw(req, res) {

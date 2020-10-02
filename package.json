@@ -5,7 +5,10 @@
   "scripts": {
     "server": "node src/server.js",
     "treeUpdater": "node src/treeWatcher",
-    "eslint": "npx eslint --ignore-path .gitignore .",
+    "eslint": "eslint --ext .js --ignore-path .gitignore .",
+    "prettier:check": "npx prettier --check . --config .prettierrc",
+    "prettier:fix": "npx prettier --write . --config .prettierrc",
+    "lint": "yarn eslint && yarn prettier:check",
     "test": "mocha"
   },
   "author": "tornado.cash",
@@ -34,6 +37,9 @@
   "devDependencies": {
     "chai": "^4.2.0",
     "eslint": "^6.6.0",
-    "mocha": "^8.1.3"
+    "eslint-config-prettier": "^6.12.0",
+    "eslint-plugin-prettier": "^3.1.4",
+    "mocha": "^8.1.3",
+    "prettier": "^2.1.2"
   }
 }
