@@ -10,6 +10,7 @@ const contract = new web3.eth.Contract(require('../abis/mining.abi.json'), miner
 
 let tree, eventSubscription, blockSubscription
 
+// todo handle the situation when we have two rewards in one block
 async function fetchEvents(from = 0, to = 'latest') {
   const events = await contract.getPastEvents('NewAccount', {
     fromBlock: from,

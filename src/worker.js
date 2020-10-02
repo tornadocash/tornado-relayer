@@ -10,8 +10,8 @@ const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
 const { poseidonHash2 } = require('./utils')
-const { rpcUrl, redisUrl, privateKey, updateConfig, swapAddress, rewardAccount, minerAddress } = require('../config')
-const TxManager = require('./TxManager')
+const { rpcUrl, redisUrl, privateKey, updateConfig, swapAddress, minerAddress } = require('../config')
+const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
 
 let web3
@@ -32,16 +32,17 @@ async function fetchTree() {
 
   if (currentTx && currentJob && ['miningReward', 'miningWithdraw'].includes(currentJob.data.type)) {
     const { proof, args } = currentJob.data.data
-    if (args.account.inputRoot === tree.root()) { // todo check type
+    if (toBN(args.account.inputRoot).eq(toBN(tree.root()))) {
       return
     }
 
     const update = await controller.treeUpdate(args.account.outputCommitment, tree)
 
     const instance = new web3.eth.Contract(tornadoABI, minerAddress)
-    const data = currentJob.data.type === 'miningReward' ?
-      instance.methods.reward(proof, args, update.proof, update.args).encodeABI() :
-      instance.methods.withdraw(proof, args, update.proof, update.args).encodeABI()
+    const data =
+      currentJob.data.type === 'miningReward'
+        ? instance.methods.reward(proof, args, update.proof, update.args).encodeABI()
+        : instance.methods.withdraw(proof, args, update.proof, update.args).encodeABI()
     currentTx = await currentTx.replace({
       to: minerAddress,
       data,

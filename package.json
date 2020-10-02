@@ -21,14 +21,15 @@
     "gas-price-oracle": "^0.1.5",
     "ioredis": "^4.14.1",
     "node-fetch": "^2.6.0",
+    "snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
     "tornado-cash-anonymity-mining": "git+https://github.com/tornadocash/tornado-anonymity-mining.git#e3ae8b98b14eb7fee7cb8c93221920a20b1e0cd8",
+    "tx-manager": "git+https://github.com/tornadocash/tx-manager.git#df118be318b007e597e157504d105dfa3e6322a1",
     "uuid": "^8.3.0",
     "web3": "^1.3.0",
     "web3-core-promievent": "^1.3.0",
     "web3-utils": "^1.2.2",
-    "why-is-node-running": "^2.2.0",
-    "snarkjs": "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5",
-    "websnark": "git+https://github.com/tornadocash/websnark.git#86a526718cd6f6f5d31bdb1fe26a9ec8819f633e"
+    "websnark": "git+https://github.com/tornadocash/websnark.git#86a526718cd6f6f5d31bdb1fe26a9ec8819f633e",
+    "why-is-node-running": "^2.2.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
