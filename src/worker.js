@@ -1,6 +1,6 @@
 const fs = require('fs')
 const Web3 = require('web3')
-const { numberToHex, toBN } = require('web3-utils')
+const { toBN } = require('web3-utils')
 const MerkleTree = require('fixed-merkle-tree')
 const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
@@ -9,7 +9,7 @@ const tornadoABI = require('../abis/tornadoABI.json')
 const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
-const { poseidonHash2 } = require('./utils')
+const { poseidonHash2, jobType } = require('./utils')
 const { rpcUrl, redisUrl, privateKey, updateConfig, swapAddress, minerAddress } = require('../config')
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
@@ -24,6 +24,13 @@ const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
 const gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
 
+const status = Object.freeze({
+  ACCEPTED: 'ACCEPTED',
+  SENT: 'SENT',
+  MINED: 'MINED',
+  CONFIRMED: 'CONFIRMED',
+})
+
 async function fetchTree() {
   console.log('got tree update')
   const elements = await redis.get('tree:elements')
@@ -31,14 +38,14 @@ async function fetchTree() {
   tree = MerkleTree.deserialize(JSON.parse(elements, convert), poseidonHash2)
 
   if (currentTx && currentJob && ['miningReward', 'miningWithdraw'].includes(currentJob.data.type)) {
-    const { proof, args } = currentJob.data.data
+    const { proof, args } = currentJob.data
     if (toBN(args.account.inputRoot).eq(toBN(tree.root()))) {
       return
     }
 
     const update = await controller.treeUpdate(args.account.outputCommitment, tree)
 
-    const instance = new web3.eth.Contract(tornadoABI, minerAddress)
+    const instance = new web3.eth.Contract(miningABI, minerAddress)
     const data =
       currentJob.data.type === 'miningReward'
         ? instance.methods.reward(proof, args, update.proof, update.args).encodeABI()
@@ -67,110 +74,79 @@ async function start() {
   console.log('Worker started')
 }
 
-async function checkTornadoFee(/* contract, fee, refund*/) {
+function checkFee({ data, type }) {
+  if (type === jobType.TORNADO_WITHDRAW) {
+    return checkTornadoFee(data)
+  }
+  return checkMiningFee(data)
+}
+
+async function checkTornadoFee({ args, contract }) {
+  console.log('args, contract', args, contract)
   const { fast } = await gasPriceOracle.gasPrices()
   console.log('fast', fast)
 }
 
-async function checkMiningFee(points) {
+async function checkMiningFee({ args }) {
   const swap = new web3.eth.Contract(swapABI, swapAddress)
-  const TornAmount = await swap.getExpectedReturn(points).call()
+  const TornAmount = await swap.getExpectedReturn(args.fee).call()
+  console.log('TornAmount', TornAmount)
 
   // todo: use desired torn/eth rate and compute the same way as in tornado
 }
 
-async function process(job) {
-  switch (job.data.type) {
-    case 'tornadoWithdraw':
-      await processTornadoWithdraw(job)
-      break
-    case 'miningReward':
-      await processMiningReward(job)
-      break
-    case 'miningWithdraw':
-      await processMiningWithdraw(job)
-      break
-    default:
-      throw new Error(`Unknown job type: ${job.data.type}`)
-  }
-}
+// may be this looks better
+//   const isTornadoWithdraw = type === jobType.TORNADO_WITHDRAW
+//   const ABI = isTornadoWithdraw ? tornadoABI : miningABI
+//   const contractAddress = isTornadoWithdraw ? data.contract : minerAddress
+//   const value = isTornadoWithdraw ? data.args[5] : 0 // refund
+function getTxObject({ data, type }) {
+  let ABI,
+    contractAddress,
+    value =
+      type === jobType.TORNADO_WITHDRAW
+        ? [tornadoABI, data.contract, data.args[5]]
+        : [miningABI, minerAddress, 0]
+  const method = type !== jobType.MINING_REWARD ? 'withdraw' : 'reward'
 
-async function processTornadoWithdraw(job) {
-  currentJob = job
-  console.log(`Start processing a new Tornado Withdraw job #${job.id}`)
-  const { proof, args, contract } = job.data.data
-  const fee = toBN(args[4])
-  const refund = toBN(args[5])
-  await checkTornadoFee(contract, fee, refund)
+  const contract = new web3.eth.Contract(ABI, contractAddress)
+  const calldata = contract.methods[method](data.proof, ...data.args).encodeABI()
 
-  const instance = new web3.eth.Contract(tornadoABI, contract)
-  const data = instance.methods.withdraw(proof, ...args).encodeABI()
-  currentTx = await txManager.createTx({
-    value: numberToHex(refund),
+  return {
+    value,
     to: contract,
-    data,
-  })
-
-  try {
-    await currentTx
-      .send()
-      .on('transactionHash', updateTxHash)
-      .on('mined', receipt => {
-        console.log('Mined in block', receipt.blockNumber)
-      })
-      .on('confirmations', updateConfirmations)
-  } catch (e) {
-    console.error('Revert', e)
-    throw new Error(`Revert by smart contract ${e.message}`)
+    data: calldata,
   }
 }
 
-async function processMiningReward(job) {
-  currentJob = job
-  console.log(`Start processing a new Mining Reward job #${job.id}`)
-  const { proof, args } = job.data.data
-
-  const contract = new web3.eth.Contract(miningABI, minerAddress)
-  const data = contract.methods.reward(proof, args).encodeABI()
-  currentTx = await txManager.createTx({
-    to: minerAddress,
-    data,
-  })
-
-  try {
-    await currentTx
-      .send()
-      .on('transactionHash', updateTxHash)
-      .on('mined', receipt => {
-        console.log('Mined in block', receipt.blockNumber)
-      })
-      .on('confirmations', updateConfirmations)
-  } catch (e) {
-    console.error('Revert', e)
-    throw new Error(`Revert by smart contract ${e.message}`)
+async function process(job) {
+  if (!jobType[job.data.type]) {
+    throw new Error(`Unknown job type: ${job.data.type}`)
   }
-}
-
-async function processMiningWithdraw(job) {
+  await updateStatus(status.ACCEPTED)
   currentJob = job
-  console.log(`Start processing a new Mining Withdraw job #${job.id}`)
-  const { proof, args } = job.data.data
+  console.log(`Start processing a new ${job.data.type} job #${job.id}`)
+  await checkFee(job)
+  if (job.data.type !== jobType.TORNADO_WITHDRAW) {
+    // precheck if root is up to date
+  }
 
-  const contract = new web3.eth.Contract(miningABI, minerAddress)
-  const data = contract.methods.withdraw(proof, args).encodeABI()
-  currentTx = await txManager.createTx({
-    to: minerAddress,
-    data,
-  })
+  currentTx = await txManager.createTx(getTxObject(job))
 
   try {
     await currentTx
       .send()
-      .on('transactionHash', updateTxHash)
+      .on('transactionHash', txHash => {
+        updateTxHash(txHash)
+        updateStatus(status.SENT)
+      })
       .on('mined', receipt => {
         console.log('Mined in block', receipt.blockNumber)
+        updateStatus(status.MINED)
       })
       .on('confirmations', updateConfirmations)
+
+    await updateStatus(status.CONFIRMED)
   } catch (e) {
     console.error('Revert', e)
     throw new Error(`Revert by smart contract ${e.message}`)
@@ -186,6 +162,12 @@ async function updateTxHash(txHash) {
 async function updateConfirmations(confirmations) {
   console.log(`Confirmations count ${confirmations}`)
   currentJob.data.confirmations = confirmations
+  await currentJob.update(currentJob.data)
+}
+
+async function updateStatus(status) {
+  console.log(`Job status updated ${status}`)
+  currentJob.data.status = status
   await currentJob.update(currentJob.data)
 }
 

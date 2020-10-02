@@ -4,3 +4,4 @@ node_modules/
 .env.mainnet
 .env.kovan
 kovan.*
+dump.rdb

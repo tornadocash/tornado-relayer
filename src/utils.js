@@ -2,6 +2,12 @@ const { instances, netId } = require('../config')
 const { poseidon } = require('circomlib')
 const { toBN, toChecksumAddress } = require('web3-utils')
 
+const jobType = Object.freeze({
+  TORNADO_WITHDRAW: 'TORNADO_WITHDRAW',
+  MINING_REWARD: 'MINING_REWARD',
+  MINING_WITHDRAW: 'MINING_WITHDRAW',
+})
+
 const sleep = ms => new Promise(res => setTimeout(res, ms))
 
 function getInstance(address) {
@@ -16,16 +22,6 @@ function getInstance(address) {
   }
   return null
 }
-
-// async function setSafeInterval(func, interval) {
-//   try {
-//     await func()
-//   } catch (e) {
-//     console.error('Unhandled promise error:', e)
-//   } finally {
-//     setTimeout(() => setSafeInterval(func, interval), interval)
-//   }
-// }
 
 const poseidonHash = items => toBN(poseidon(items).toString())
 const poseidonHash2 = (a, b) => poseidonHash([a, b])
@@ -59,4 +55,5 @@ module.exports = {
   poseidonHash2,
   sleep,
   when,
+  jobType,
 }

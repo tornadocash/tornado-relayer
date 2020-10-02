@@ -6,14 +6,14 @@ const redis = new Redis(redisUrl)
 
 const queue = new Queue('proofs', redisUrl)
 
-async function postJob({ type, data }) {
+async function postJob({ type, request }) {
   const id = uuid()
 
   const job = await queue.add(
     {
       id,
       type,
-      data,
+      ...request, // proof, args, ?contract
     },
     // { removeOnComplete: true },
   )
@@ -28,8 +28,10 @@ async function getJob(uuid) {
 
 async function getJobStatus(uuid) {
   const job = await getJob(uuid)
-  // todo job.data doesn't contain current status and other stuff?
-  return job.data
+  return {
+    ...job.data,
+    failedReason: job.failedReason,
+  }
 }
 
 module.exports = {

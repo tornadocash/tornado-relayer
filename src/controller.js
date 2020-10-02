@@ -4,6 +4,7 @@ const {
   getMiningWithdrawInputError,
 } = require('./validator')
 const { postJob } = require('./queue')
+const { jobType } = require('./utils')
 
 async function tornadoWithdraw(req, res) {
   const inputError = getTornadoWithdrawInputError(req.body)
@@ -13,8 +14,8 @@ async function tornadoWithdraw(req, res) {
   }
 
   const id = await postJob({
-    type: 'tornadoWithdraw',
-    data: req.body,
+    type: jobType.TORNADO_WITHDRAW,
+    request: req.body,
   })
   return res.json({ id })
 }
@@ -27,8 +28,8 @@ async function miningReward(req, res) {
   }
 
   const id = await postJob({
-    type: 'miningReward',
-    data: req.body,
+    type: jobType.MINING_REWARD,
+    request: req.body,
   })
   return res.json({ id })
 }
@@ -41,8 +42,8 @@ async function miningWithdraw(req, res) {
   }
 
   const id = await postJob({
-    type: 'miningWithdraw',
-    data: req.body,
+    type: jobType.MINING_WITHDRAW,
+    request: req.body,
   })
   return res.json({ id })
 }
