@@ -4,6 +4,7 @@ services:
   kovan:
     image: tornadocash/relayer
     restart: always
+    command: server
     environment:
       VIRTUAL_HOST: example.duckdns.org
       LETSENCRYPT_HOST: example.duckdns.org
@@ -20,24 +21,26 @@ services:
     depends_on:
       - redis
 
-  mainnet:
+  tree-monitor:
     image: tornadocash/relayer
     restart: always
+    command: tree-monitor
     environment:
-      VIRTUAL_HOST: example2.duckdns.org
-      LETSENCRYPT_HOST: example2.duckdns.org
-      NET_ID: 1
-      RPC_URL: https://mainnet.infura.io
-      # ORACLE_RPC_URL should always point to the mainnet
-      ORACLE_RPC_URL: https://mainnet.infura.io
-      # without 0x prefix
-      PRIVATE_KEY:
-      # 2.5 means 2.5%
-      RELAYER_FEE: 2.5
-      REDIS_URL: redis://redis/1
-      nginx_proxy_read_timeout: 600
-    depends_on:
-      - redis
+      qwe: ads
+
+  worker1:
+    image: tornadocash/relayer
+    restart: always
+    command: worker
+    environment:
+      PRIVATE_KEY: qwe
+
+  worker2:
+    image: tornadocash/relayer
+    restart: always
+    command: worker
+    environment:
+      PRIVATE_KEY: qwe
 
   redis:
     image: redis

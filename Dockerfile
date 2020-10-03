@@ -1,10 +1,11 @@
 FROM node:12
 WORKDIR /app
 
-COPY package.json package-lock.json ./
-RUN npm install && npm cache clean --force
+COPY package.json yarn.lock ./
+RUN yarn && yarn cache clean --force
 COPY . .
 
 EXPOSE 8000
-HEALTHCHECK CMD curl -f http://localhost:8000/status
-CMD ["npm", "run", "start"]
+# HEALTHCHECK CMD curl -f http://localhost:8000/status
+ENTRYPOINT ["yarn"]
+CMD ["server"]

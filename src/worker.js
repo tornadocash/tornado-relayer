@@ -89,7 +89,7 @@ async function checkTornadoFee({ args, contract }) {
 
 async function checkMiningFee({ args }) {
   const swap = new web3.eth.Contract(swapABI, swapAddress)
-  const TornAmount = await swap.getExpectedReturn(args.fee).call()
+  const TornAmount = await swap.methods.getExpectedReturn(args.fee).call()
   console.log('TornAmount', TornAmount)
 
   // todo: use desired torn/eth rate and compute the same way as in tornado
