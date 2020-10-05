@@ -1,7 +1,7 @@
 const queue = require('./queue')
 const { GasPriceOracle } = require('gas-price-oracle')
 const gasPriceOracle = new GasPriceOracle()
-const { netId, relayerServiceFee, instances } = require('../config')
+const { netId, tornadoServiceFee, miningServiceFee, instances } = require('../config')
 const { version } = require('../package.json')
 
 async function status(req, res) {
@@ -18,7 +18,8 @@ async function status(req, res) {
     gasPrices: await gasPriceOracle.gasPrices(),
     netId,
     ethPrices,
-    relayerServiceFee,
+    tornadoServiceFee,
+    miningServiceFee,
     nonce: 123,
     version,
     latestBlock: 12312312,
