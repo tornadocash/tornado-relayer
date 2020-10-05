@@ -1,6 +1,6 @@
 const fs = require('fs')
 const Web3 = require('web3')
-const { toBN } = require('web3-utils')
+const { toBN, toWei, fromWei } = require('web3-utils')
 const MerkleTree = require('fixed-merkle-tree')
 const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
@@ -9,8 +9,21 @@ const tornadoABI = require('../abis/tornadoABI.json')
 const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
-const { poseidonHash2, jobType } = require('./utils')
-const { rpcUrl, redisUrl, privateKey, updateConfig, swapAddress, minerAddress } = require('../config')
+const { poseidonHash2, getInstance, fromDecimals } = require('./utils')
+const jobType = require('./jobTypes')
+const {
+  netId,
+  rpcUrl,
+  redisUrl,
+  privateKey,
+  updateConfig,
+  swapAddress,
+  minerAddress,
+  gasLimits,
+  instances,
+  tornadoServiceFee,
+  miningServiceFee,
+} = require('../config')
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
 
@@ -74,17 +87,48 @@ async function start() {
   console.log('Worker started')
 }
 
-function checkFee({ data, type }) {
-  if (type === jobType.TORNADO_WITHDRAW) {
+function checkFee({ data }) {
+  if (data.type === jobType.TORNADO_WITHDRAW) {
     return checkTornadoFee(data)
   }
   return checkMiningFee(data)
 }
 
 async function checkTornadoFee({ args, contract }) {
-  console.log('args, contract', args, contract)
+  const { currency, amount } = getInstance(contract)
+  const { decimals } = instances[`netId${netId}`][currency]
+  const [fee, refund] = [args[4], args[5]].map(toBN)
   const { fast } = await gasPriceOracle.gasPrices()
-  console.log('fast', fast)
+
+  const ethPrice = await redis.hget('prices', currency)
+  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits.TORNADO_WITHDRAW))
+  const feePercent = toBN(fromDecimals(amount, decimals))
+    .mul(toBN(tornadoServiceFee * 1e10))
+    .div(toBN(1e10 * 100))
+  let desiredFee
+  switch (currency) {
+    case 'eth': {
+      desiredFee = expense.add(feePercent)
+      break
+    }
+    default: {
+      desiredFee = expense
+        .add(refund)
+        .mul(toBN(10 ** decimals))
+        .div(toBN(ethPrice))
+      desiredFee = desiredFee.add(feePercent)
+      break
+    }
+  }
+  console.log(
+    'sent fee, desired fee, feePercent',
+    fromWei(fee.toString()),
+    fromWei(desiredFee.toString()),
+    fromWei(feePercent.toString()),
+  )
+  if (fee.lt(desiredFee)) {
+    throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
+  }
 }
 
 async function checkMiningFee({ args }) {
@@ -95,61 +139,59 @@ async function checkMiningFee({ args }) {
   // todo: use desired torn/eth rate and compute the same way as in tornado
 }
 
-// may be this looks better
-//   const isTornadoWithdraw = type === jobType.TORNADO_WITHDRAW
-//   const ABI = isTornadoWithdraw ? tornadoABI : miningABI
-//   const contractAddress = isTornadoWithdraw ? data.contract : minerAddress
-//   const value = isTornadoWithdraw ? data.args[5] : 0 // refund
-function getTxObject({ data, type }) {
-  let ABI,
-    contractAddress,
-    value =
-      type === jobType.TORNADO_WITHDRAW
-        ? [tornadoABI, data.contract, data.args[5]]
-        : [miningABI, minerAddress, 0]
-  const method = type !== jobType.MINING_REWARD ? 'withdraw' : 'reward'
+function getTxObject({ data }) {
+  let [ABI, contractAddress, value] =
+    data.type === jobType.TORNADO_WITHDRAW
+      ? [tornadoABI, data.contract, data.args[5]]
+      : [miningABI, minerAddress, 0]
+  const method = data.type !== jobType.MINING_REWARD ? 'withdraw' : 'reward'
 
   const contract = new web3.eth.Contract(ABI, contractAddress)
   const calldata = contract.methods[method](data.proof, ...data.args).encodeABI()
 
   return {
     value,
-    to: contract,
+    to: contractAddress,
     data: calldata,
   }
 }
 
 async function process(job) {
-  if (!jobType[job.data.type]) {
-    throw new Error(`Unknown job type: ${job.data.type}`)
-  }
-  await updateStatus(status.ACCEPTED)
-  currentJob = job
-  console.log(`Start processing a new ${job.data.type} job #${job.id}`)
-  await checkFee(job)
-  if (job.data.type !== jobType.TORNADO_WITHDRAW) {
-    // precheck if root is up to date
-  }
-
-  currentTx = await txManager.createTx(getTxObject(job))
-
   try {
-    await currentTx
-      .send()
-      .on('transactionHash', txHash => {
-        updateTxHash(txHash)
-        updateStatus(status.SENT)
-      })
-      .on('mined', receipt => {
-        console.log('Mined in block', receipt.blockNumber)
-        updateStatus(status.MINED)
-      })
-      .on('confirmations', updateConfirmations)
+    if (!jobType[job.data.type]) {
+      throw new Error(`Unknown job type: ${job.data.type}`)
+    }
+    currentJob = job
+    await updateStatus(status.ACCEPTED)
+    console.log(`Start processing a new ${job.data.type} job #${job.id}`)
+    await checkFee(job)
+    if (job.data.type !== jobType.TORNADO_WITHDRAW) {
+      // precheck if root is up to date
+    }
 
-    await updateStatus(status.CONFIRMED)
+    currentTx = await txManager.createTx(getTxObject(job))
+
+    try {
+      await currentTx
+        .send()
+        .on('transactionHash', txHash => {
+          updateTxHash(txHash)
+          updateStatus(status.SENT)
+        })
+        .on('mined', receipt => {
+          console.log('Mined in block', receipt.blockNumber)
+          updateStatus(status.MINED)
+        })
+        .on('confirmations', updateConfirmations)
+
+      await updateStatus(status.CONFIRMED)
+    } catch (e) {
+      console.error('Revert', e)
+      throw new Error(`Revert by smart contract ${e.message}`)
+    }
   } catch (e) {
-    console.error('Revert', e)
-    throw new Error(`Revert by smart contract ${e.message}`)
+    console.error(e)
+    throw e
   }
 }
 
@@ -170,5 +212,7 @@ async function updateStatus(status) {
   currentJob.data.status = status
   await currentJob.update(currentJob.data)
 }
+
+start()
 
 module.exports = { start, process }

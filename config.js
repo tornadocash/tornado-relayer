@@ -1,5 +1,7 @@
 require('dotenv').config()
 
+const jobType = require('./src/jobTypes')
+
 function updateConfig(options) {
   config = Object.assign(config, options)
 }
@@ -151,14 +153,15 @@ let config = {
       },
     },
   },
-  defaultGasPrice: 20,
   port: process.env.APP_PORT || 8000,
-  relayerServiceFee: Number(process.env.RELAYER_FEE),
-  maxGasPrice: process.env.MAX_GAS_PRICE || 200,
-  watherInterval: Number(process.env.NONCE_WATCHER_INTERVAL || 30) * 1000,
-  pendingTxTimeout: Number(process.env.ALLOWABLE_PENDING_TX_TIMEOUT || 180) * 1000,
-  gasBumpPercentage: process.env.GAS_PRICE_BUMP_PERCENTAGE || 20,
-  rewardAccount: '0x0000000000000000000000000000000000000000',
+  tornadoServiceFee: Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE),
+  miningServiceFee: Number(process.env.MINING_SERVICE_FEE),
+  rewardAccount: '0x03Ebd0748Aa4D1457cF479cce56309641e0a98F5',
+  gasLimits: {
+    [jobType.TORNADO_WITHDRAW]: 350000,
+    [jobType.MINING_REWARD]: 800000,
+    [jobType.MINING_WITHDRAW]: 800000,
+  },
 }
 
 module.exports = config
