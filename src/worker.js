@@ -23,6 +23,7 @@ const {
   instances,
   tornadoServiceFee,
   miningServiceFee,
+  tornEthPrice,
 } = require('../config')
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
@@ -135,8 +136,26 @@ async function checkMiningFee({ args }) {
   const swap = new web3.eth.Contract(swapABI, swapAddress)
   const TornAmount = await swap.methods.getExpectedReturn(args.fee).call()
   console.log('TornAmount', TornAmount)
+  const { fast } = await gasPriceOracle.gasPrices()
 
-  // todo: use desired torn/eth rate and compute the same way as in tornado
+  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[args.type]))
+  const feePercent =
+    args.type === jobType.MINING_REWARD
+      ? 0
+      : toBN(args.amount)
+        .mul(toBN(miningServiceFee * 1e10))
+        .div(toBN(1e10 * 100))
+  let desiredFee = expense.mul(toBN(1e18)).div(toBN(tornEthPrice)).add(feePercent)
+
+  console.log(
+    'sent fee, desired fee, feePercent',
+    fromWei(args.fee.toString()),
+    fromWei(desiredFee.toString()),
+    fromWei(feePercent.toString()),
+  )
+  if (args.fee.lt(desiredFee)) {
+    throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
+  }
 }
 
 function getTxObject({ data }) {

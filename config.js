@@ -157,6 +157,7 @@ let config = {
   tornadoServiceFee: Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE),
   miningServiceFee: Number(process.env.MINING_SERVICE_FEE),
   rewardAccount: '0x03Ebd0748Aa4D1457cF479cce56309641e0a98F5',
+  tornEthPrice: '7000000000000000',
   gasLimits: {
     [jobType.TORNADO_WITHDRAW]: 350000,
     [jobType.MINING_REWARD]: 800000,
