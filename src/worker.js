@@ -16,14 +16,12 @@ const {
   rpcUrl,
   redisUrl,
   privateKey,
-  updateConfig,
   swapAddress,
   minerAddress,
   gasLimits,
   instances,
   tornadoServiceFee,
-  miningServiceFee,
-  tornEthPrice,
+  miningServiceFee
 } = require('./config')
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
@@ -75,7 +73,6 @@ async function fetchTree() {
 async function start() {
   web3 = new Web3(rpcUrl)
   txManager = new TxManager({ privateKey, rpcUrl })
-  updateConfig({ rewardAccount: txManager.address })
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()
   const provingKeys = {
