@@ -4,6 +4,7 @@ const { toBN, toWei, fromWei } = require('web3-utils')
 const MerkleTree = require('fixed-merkle-tree')
 const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
+const { Utils } = require('tornado-cash-anonymity-mining')
 
 const tornadoABI = require('../abis/tornadoABI.json')
 const miningABI = require('../abis/mining.abi.json')
@@ -21,7 +22,7 @@ const {
   gasLimits,
   instances,
   tornadoServiceFee,
-  miningServiceFee
+  miningServiceFee,
 } = require('./config')
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
@@ -32,6 +33,7 @@ let currentJob
 let tree
 let txManager
 let controller
+let swap
 const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
 const gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
@@ -73,6 +75,7 @@ async function fetchTree() {
 async function start() {
   web3 = new Web3(rpcUrl)
   txManager = new TxManager({ privateKey, rpcUrl })
+  swap = new web3.eth.Contract(swapABI, swapAddress)
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()
   const provingKeys = {
@@ -130,29 +133,32 @@ async function checkTornadoFee({ args, contract }) {
 }
 
 async function checkMiningFee({ args }) {
-  const swap = new web3.eth.Contract(swapABI, swapAddress)
-  const tornAmount = await swap.methods.getExpectedReturn(args.fee).call()
   const { fast } = await gasPriceOracle.gasPrices()
   const ethPrice = await redis.hget('prices', 'torn')
 
   const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[args.type]))
+  const expenseInTorn = expense.mul(toBN(1e18)).div(toBN(ethPrice))
+  // todo make aggregator for ethPrices and rewardSwap data
+  const balance = await swap.virtualTornBalance()
+  const poolWeight = await swap.poolWeight()
+  const expenseInPoints = Utils.reverseTornadoFormula({ balance, tokens: expenseInTorn, poolWeight })
   /* eslint-disable */
-  const feePercent =
+  const serviceFeePercent =
     args.type === jobType.MINING_REWARD
       ? 0
-      : toBN(tornAmount)
+      : toBN(args.amount)
           .mul(toBN(miningServiceFee * 1e10))
           .div(toBN(1e10 * 100))
   /* eslint-enable */
-  let desiredFee = expense.mul(toBN(1e18)).div(toBN(ethPrice)).add(feePercent)
+  const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
 
   console.log(
-    'sent fee, desired fee, feePercent',
+    'sent fee, desired fee, serviceFeePercent',
     fromWei(args.fee.toString()),
     fromWei(desiredFee.toString()),
-    fromWei(feePercent.toString()),
+    fromWei(serviceFeePercent.toString()),
   )
-  if (toBN(tornAmount).lt(desiredFee)) {
+  if (toBN(args.fee).lt(desiredFee)) {
     throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
   }
 }
