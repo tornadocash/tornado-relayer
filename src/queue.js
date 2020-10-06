@@ -1,7 +1,7 @@
 const { v4: uuid } = require('uuid')
 const Queue = require('bull')
 const Redis = require('ioredis')
-const { redisUrl } = require('../config')
+const { redisUrl } = require('./config')
 const redis = new Redis(redisUrl)
 
 const queue = new Queue('proofs', redisUrl)

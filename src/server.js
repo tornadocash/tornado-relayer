@@ -1,8 +1,9 @@
 const express = require('express')
 const status = require('./status')
 const controller = require('./controller')
-const { port } = require('../config')
+const { port, rewardAccount } = require('./config')
 const { version } = require('../package.json')
+const { isAddress } = require('web3-utils')
 
 const app = express()
 app.use(express.json())
@@ -31,6 +32,10 @@ app.get('/status', status.status)
 app.post('/relay', controller.tornadoWithdraw)
 app.post('/v1/miningReward', controller.miningReward)
 app.post('/v1/miningWithdraw', controller.miningWithdraw)
+
+if (!isAddress(rewardAccount)) {
+  throw new Error('No REWARD_ACCOUNT specified')
+}
 
 app.listen(port)
 console.log(`Relayer ${version} started on port ${port}`)

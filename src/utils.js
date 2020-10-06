@@ -1,4 +1,4 @@
-const { instances, netId } = require('../config')
+const { instances, netId } = require('./config')
 const { poseidon } = require('circomlib')
 const { toBN, toChecksumAddress, BN } = require('web3-utils')
 

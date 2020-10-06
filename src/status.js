@@ -1,28 +1,19 @@
 const queue = require('./queue')
-const { GasPriceOracle } = require('gas-price-oracle')
-const gasPriceOracle = new GasPriceOracle()
-const { netId, tornadoServiceFee, miningServiceFee, instances } = require('../config')
+const { netId, tornadoServiceFee, miningServiceFee, instances, redisUrl, rewardAccount } = require('./config')
 const { version } = require('../package.json')
+const Redis = require('ioredis')
+const redis = new Redis(redisUrl)
 
 async function status(req, res) {
-  const ethPrices = {
-    dai: '6700000000000000', // 0.0067
-    cdai: '157380000000000',
-    cusdc: '164630000000000',
-    usdc: '7878580000000000',
-    usdt: '7864940000000000',
-  }
+  const ethPrices = await redis.hgetall('prices')
   res.json({
-    relayerAddress: require('../config').rewardAccount,
-    instances: instances.netId42,
-    gasPrices: await gasPriceOracle.gasPrices(),
+    rewardAccount,
+    instances: instances[`netId${netId}`],
     netId,
     ethPrices,
     tornadoServiceFee,
     miningServiceFee,
-    nonce: 123,
     version,
-    latestBlock: 12312312,
   })
 }
 

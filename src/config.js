@@ -1,13 +1,8 @@
 require('dotenv').config()
 
-const jobType = require('./src/jobTypes')
+const jobType = require('./jobTypes')
 
-function updateConfig(options) {
-  config = Object.assign(config, options)
-}
-
-let config = {
-  updateConfig,
+module.exports = {
   netId: Number(process.env.NET_ID) || 42,
   redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
   rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
@@ -156,13 +151,11 @@ let config = {
   port: process.env.APP_PORT || 8000,
   tornadoServiceFee: Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE),
   miningServiceFee: Number(process.env.MINING_SERVICE_FEE),
-  rewardAccount: '0x03Ebd0748Aa4D1457cF479cce56309641e0a98F5',
-  tornEthPrice: '7000000000000000',
+  tornEthPrice: process.env.TORN_ETH_PRICE || '7000000000000000',
+  rewardAccount: process.env.REWARD_ACCOUNT,
   gasLimits: {
     [jobType.TORNADO_WITHDRAW]: 350000,
     [jobType.MINING_REWARD]: 800000,
     [jobType.MINING_WITHDRAW]: 800000,
   },
 }
-
-module.exports = config

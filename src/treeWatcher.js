@@ -1,5 +1,5 @@
 const MerkleTree = require('fixed-merkle-tree')
-const { redisUrl, rpcUrl, minerMerkleTreeHeight, minerAddress } = require('../config')
+const { redisUrl, rpcUrl, minerMerkleTreeHeight, minerAddress } = require('./config')
 const { poseidonHash2 } = require('./utils')
 const { toBN } = require('web3-utils')
 const Redis = require('ioredis')

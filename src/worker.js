@@ -24,7 +24,7 @@ const {
   tornadoServiceFee,
   miningServiceFee,
   tornEthPrice,
-} = require('../config')
+} = require('./config')
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
 
@@ -102,7 +102,7 @@ async function checkTornadoFee({ args, contract }) {
   const { fast } = await gasPriceOracle.gasPrices()
 
   const ethPrice = await redis.hget('prices', currency)
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits.TORNADO_WITHDRAW))
+  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
   const feePercent = toBN(fromDecimals(amount, decimals))
     .mul(toBN(tornadoServiceFee * 1e10))
     .div(toBN(1e10 * 100))
@@ -134,18 +134,20 @@ async function checkTornadoFee({ args, contract }) {
 
 async function checkMiningFee({ args }) {
   const swap = new web3.eth.Contract(swapABI, swapAddress)
-  const TornAmount = await swap.methods.getExpectedReturn(args.fee).call()
-  console.log('TornAmount', TornAmount)
+  const tornAmount = await swap.methods.getExpectedReturn(args.fee).call()
   const { fast } = await gasPriceOracle.gasPrices()
+  const ethPrice = await redis.hget('prices', 'torn')
 
   const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[args.type]))
+  /* eslint-disable */
   const feePercent =
     args.type === jobType.MINING_REWARD
       ? 0
-      : toBN(args.amount)
-        .mul(toBN(miningServiceFee * 1e10))
-        .div(toBN(1e10 * 100))
-  let desiredFee = expense.mul(toBN(1e18)).div(toBN(tornEthPrice)).add(feePercent)
+      : toBN(tornAmount)
+          .mul(toBN(miningServiceFee * 1e10))
+          .div(toBN(1e10 * 100))
+  /* eslint-enable */
+  let desiredFee = expense.mul(toBN(1e18)).div(toBN(ethPrice)).add(feePercent)
 
   console.log(
     'sent fee, desired fee, feePercent',
@@ -153,7 +155,7 @@ async function checkMiningFee({ args }) {
     fromWei(desiredFee.toString()),
     fromWei(feePercent.toString()),
   )
-  if (args.fee.lt(desiredFee)) {
+  if (toBN(tornAmount).lt(desiredFee)) {
     throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
   }
 }
