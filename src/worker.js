@@ -43,6 +43,7 @@ const status = Object.freeze({
   SENT: 'SENT',
   MINED: 'MINED',
   CONFIRMED: 'CONFIRMED',
+  FAILED: 'FAILED'
 })
 
 async function fetchTree() {
@@ -164,14 +165,14 @@ async function checkMiningFee({ args }) {
 }
 
 function getTxObject({ data }) {
-  let [ABI, contractAddress, value] =
+  let [ABI, contractAddress, value, args] =
     data.type === jobType.TORNADO_WITHDRAW
-      ? [tornadoABI, data.contract, data.args[5]]
-      : [miningABI, minerAddress, 0]
+      ? [tornadoABI, data.contract, data.args[5], data.args]
+      : [miningABI, minerAddress, 0, [data.args]]
   const method = data.type !== jobType.MINING_REWARD ? 'withdraw' : 'reward'
 
   const contract = new web3.eth.Contract(ABI, contractAddress)
-  const calldata = contract.methods[method](data.proof, data.args).encodeABI()
+  const calldata = contract.methods[method](data.proof, ...args).encodeABI()
 
   return {
     value,
@@ -215,6 +216,7 @@ async function process(job) {
     }
   } catch (e) {
     console.error(e)
+    await updateStatus(status.FAILED)
     throw e
   }
 }
