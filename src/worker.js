@@ -136,16 +136,16 @@ async function checkMiningFee({ args }) {
   const { fast } = await gasPriceOracle.gasPrices()
   const ethPrice = await redis.hget('prices', 'torn')
 
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[args.type]))
+  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[currentJob.data.type]))
   const expenseInTorn = expense.mul(toBN(1e18)).div(toBN(ethPrice))
   // todo make aggregator for ethPrices and rewardSwap data
-  const balance = await swap.virtualTornBalance()
-  const poolWeight = await swap.poolWeight()
+  const balance = await swap.methods.tornVirtualBalance().call()
+  const poolWeight = await swap.methods.poolWeight().call()
   const expenseInPoints = Utils.reverseTornadoFormula({ balance, tokens: expenseInTorn, poolWeight })
   /* eslint-disable */
   const serviceFeePercent =
-    args.type === jobType.MINING_REWARD
-      ? 0
+    currentJob.data.type === jobType.MINING_REWARD
+      ? toBN(0)
       : toBN(args.amount)
           .mul(toBN(miningServiceFee * 1e10))
           .div(toBN(1e10 * 100))
@@ -154,9 +154,9 @@ async function checkMiningFee({ args }) {
 
   console.log(
     'sent fee, desired fee, serviceFeePercent',
-    fromWei(args.fee.toString()),
-    fromWei(desiredFee.toString()),
-    fromWei(serviceFeePercent.toString()),
+    toBN(args.fee).toString(),
+    desiredFee.toString(),
+    serviceFeePercent.toString(),
   )
   if (toBN(args.fee).lt(desiredFee)) {
     throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
@@ -171,7 +171,7 @@ function getTxObject({ data }) {
   const method = data.type !== jobType.MINING_REWARD ? 'withdraw' : 'reward'
 
   const contract = new web3.eth.Contract(ABI, contractAddress)
-  const calldata = contract.methods[method](data.proof, ...data.args).encodeABI()
+  const calldata = contract.methods[method](data.proof, data.args).encodeABI()
 
   return {
     value,
