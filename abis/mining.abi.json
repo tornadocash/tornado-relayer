@@ -2,19 +2,19 @@
   {
     "inputs": [
       {
-        "internalType": "contract IRewardSwap",
+        "internalType": "bytes32",
         "name": "_rewardSwap",
-        "type": "address"
+        "type": "bytes32"
       },
       {
-        "internalType": "address",
+        "internalType": "bytes32",
         "name": "_governance",
-        "type": "address"
+        "type": "bytes32"
       },
       {
-        "internalType": "contract IVerifier[]",
+        "internalType": "bytes32[3]",
         "name": "verifiers",
-        "type": "address[]"
+        "type": "bytes32[3]"
       },
       {
         "internalType": "bytes32",
@@ -44,7 +44,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Farm.Rate[]",
+        "internalType": "struct Miner.Rate[]",
         "name": "_rates",
         "type": "tuple[]"
       }
@@ -188,9 +188,22 @@
     "name": "ACCOUNT_ROOT_HISTORY_SIZE",
     "outputs": [
       {
-        "internalType": "uint32",
+        "internalType": "uint256",
         "name": "",
-        "type": "uint32"
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "accountCount",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -229,32 +242,6 @@
         "internalType": "bytes32",
         "name": "",
         "type": "bytes32"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "currentAccountIndex",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
-      }
-    ],
-    "stateMutability": "view",
-    "type": "function"
-  },
-  {
-    "inputs": [],
-    "name": "currentAccountRootIndex",
-    "outputs": [
-      {
-        "internalType": "uint256",
-        "name": "",
-        "type": "uint256"
       }
     ],
     "stateMutability": "view",
@@ -349,6 +336,25 @@
     "name": "renounceOwnership",
     "outputs": [],
     "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "node",
+        "type": "bytes32"
+      }
+    ],
+    "name": "resolve",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
     "type": "function"
   },
   {
@@ -518,7 +524,7 @@
                 "type": "bytes"
               }
             ],
-            "internalType": "struct Farm.RewardExtData",
+            "internalType": "struct Miner.RewardExtData",
             "name": "extData",
             "type": "tuple"
           },
@@ -550,12 +556,12 @@
                 "type": "bytes32"
               }
             ],
-            "internalType": "struct Farm.AccountUpdate",
+            "internalType": "struct Miner.AccountUpdate",
             "name": "account",
             "type": "tuple"
           }
         ],
-        "internalType": "struct Farm.RewardArgs",
+        "internalType": "struct Miner.RewardArgs",
         "name": "_args",
         "type": "tuple"
       },
@@ -587,7 +593,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Farm.TreeUpdateArgs",
+        "internalType": "struct Miner.TreeUpdateArgs",
         "name": "_treeUpdateArgs",
         "type": "tuple"
       }
@@ -654,7 +660,7 @@
                 "type": "bytes"
               }
             ],
-            "internalType": "struct Farm.RewardExtData",
+            "internalType": "struct Miner.RewardExtData",
             "name": "extData",
             "type": "tuple"
           },
@@ -686,12 +692,12 @@
                 "type": "bytes32"
               }
             ],
-            "internalType": "struct Farm.AccountUpdate",
+            "internalType": "struct Miner.AccountUpdate",
             "name": "account",
             "type": "tuple"
           }
         ],
-        "internalType": "struct Farm.RewardArgs",
+        "internalType": "struct Miner.RewardArgs",
         "name": "_args",
         "type": "tuple"
       }
@@ -716,17 +722,17 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "fee",
-            "type": "uint256"
-          },
-          {
             "internalType": "bytes32",
             "name": "extDataHash",
             "type": "bytes32"
           },
           {
             "components": [
+              {
+                "internalType": "uint256",
+                "name": "fee",
+                "type": "uint256"
+              },
               {
                 "internalType": "address",
                 "name": "recipient",
@@ -743,7 +749,7 @@
                 "type": "bytes"
               }
             ],
-            "internalType": "struct Farm.WithdrawExtData",
+            "internalType": "struct Miner.WithdrawExtData",
             "name": "extData",
             "type": "tuple"
           },
@@ -775,12 +781,12 @@
                 "type": "bytes32"
               }
             ],
-            "internalType": "struct Farm.AccountUpdate",
+            "internalType": "struct Miner.AccountUpdate",
             "name": "account",
             "type": "tuple"
           }
         ],
-        "internalType": "struct Farm.WithdrawArgs",
+        "internalType": "struct Miner.WithdrawArgs",
         "name": "_args",
         "type": "tuple"
       }
@@ -805,17 +811,17 @@
             "type": "uint256"
           },
           {
-            "internalType": "uint256",
-            "name": "fee",
-            "type": "uint256"
-          },
-          {
             "internalType": "bytes32",
             "name": "extDataHash",
             "type": "bytes32"
           },
           {
             "components": [
+              {
+                "internalType": "uint256",
+                "name": "fee",
+                "type": "uint256"
+              },
               {
                 "internalType": "address",
                 "name": "recipient",
@@ -832,7 +838,7 @@
                 "type": "bytes"
               }
             ],
-            "internalType": "struct Farm.WithdrawExtData",
+            "internalType": "struct Miner.WithdrawExtData",
             "name": "extData",
             "type": "tuple"
           },
@@ -864,12 +870,12 @@
                 "type": "bytes32"
               }
             ],
-            "internalType": "struct Farm.AccountUpdate",
+            "internalType": "struct Miner.AccountUpdate",
             "name": "account",
             "type": "tuple"
           }
         ],
-        "internalType": "struct Farm.WithdrawArgs",
+        "internalType": "struct Miner.WithdrawArgs",
         "name": "_args",
         "type": "tuple"
       },
@@ -901,7 +907,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Farm.TreeUpdateArgs",
+        "internalType": "struct Miner.TreeUpdateArgs",
         "name": "_treeUpdateArgs",
         "type": "tuple"
       }
@@ -946,7 +952,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Farm.TreeLeaf[]",
+        "internalType": "struct Miner.TreeLeaf[]",
         "name": "_deposits",
         "type": "tuple[]"
       },
@@ -983,7 +989,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Farm.TreeLeaf[]",
+        "internalType": "struct Miner.TreeLeaf[]",
         "name": "_withdrawals",
         "type": "tuple[]"
       }
@@ -1008,7 +1014,7 @@
             "type": "uint256"
           }
         ],
-        "internalType": "struct Farm.Rate[]",
+        "internalType": "struct Miner.Rate[]",
         "name": "_rates",
         "type": "tuple[]"
       }
@@ -1034,28 +1040,14 @@
   {
     "inputs": [
       {
-        "internalType": "bytes",
-        "name": "data",
-        "type": "bytes"
-      }
-    ],
-    "name": "keccak252",
-    "outputs": [
-      {
-        "internalType": "bytes32",
-        "name": "",
-        "type": "bytes32"
-      }
-    ],
-    "stateMutability": "pure",
-    "type": "function"
-  },
-  {
-    "inputs": [
-      {
         "internalType": "bytes32",
         "name": "_root",
         "type": "bytes32"
+      },
+      {
+        "internalType": "uint256",
+        "name": "index",
+        "type": "uint256"
       }
     ],
     "name": "isKnownAccountRoot",

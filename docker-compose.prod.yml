@@ -6,7 +6,7 @@ services:
     restart: always
     command: server
     env_file: .env
-    expose: [ 8000 ]
+    expose: [8000]
     environment:
       VIRTUAL_HOST: example.duckdns.org
       LETSENCRYPT_HOST: example.duckdns.org
@@ -15,10 +15,18 @@ services:
     depends_on:
       - redis
 
-  tree-monitor:
+  treeWatcher:
     image: tornadocash/relayer
     restart: always
-    command: tree-monitor
+    command: treeWatcher
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis/0
+
+  priceWatcher:
+    image: tornadocash/relayer
+    restart: always
+    command: priceWatcher
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
@@ -31,14 +39,14 @@ services:
     environment:
       REDIS_URL: redis://redis/0
 
-#  worker2:
-#    image: tornadocash/relayer
-#    restart: always
-#    command: worker
-#    env_file: .env
-#    environment:
-#      PRIVATE_KEY: qwe
-#      REDIS_URL: redis://redis/0
+  #  worker2:
+  #    image: tornadocash/relayer
+  #    restart: always
+  #    command: worker
+  #    env_file: .env
+  #    environment:
+  #      PRIVATE_KEY: qwe
+  #      REDIS_URL: redis://redis/0
 
   redis:
     image: redis
