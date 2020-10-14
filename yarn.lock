@@ -145,6 +145,11 @@
     "@ethersproject/rlp" "^5.0.3"
     "@ethersproject/signing-key" "^5.0.4"
 
+"@openzeppelin/contracts@^3.1.0":
+  version "3.2.0"
+  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-3.2.0.tgz#3e6b3a7662d8ed64271ade96ef42655db983fd9d"
+  integrity sha512-bUOmkSoPkjnUyMiKo6RYnb0VHBk5D9KKDAgNLzF41aqAM3TeE0yGdFF5dVRcV60pZdJLlyFT/jjXIZCWyyEzAQ==
+
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.14.0.tgz#9fb3a3cf3132328151f353de4632e01e52102bea"
@@ -464,7 +469,7 @@ bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.10.0, bn.js@^4.11.0, bn.js@^4.11.1, bn.js@^
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.9.tgz#26d556829458f9d1e81fc48952493d0ba3507828"
   integrity sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==
 
-bn.js@^5.1.1:
+bn.js@^5.1.1, bn.js@^5.1.2:
   version "5.1.3"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.1.3.tgz#beca005408f642ebebea80b042b4d18d2ac0ee6b"
   integrity sha512-GkTiFpjFtUzU9CbMeJ5iazkCzGL3jrhzerzZIuqLABjbwRaFt33I9tUdSNryIptM+RxDet6OKm2WnLXzW51KsQ==
@@ -735,6 +740,16 @@ cipher-base@^1.0.0, cipher-base@^1.0.1, cipher-base@^1.0.3:
 "circomlib@git+https://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c":
   version "0.0.20"
   resolved "git+https://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c"
+  dependencies:
+    blake-hash "^1.1.0"
+    blake2b "^2.1.3"
+    snarkjs "git+https://github.com/tornadocash/snarkjs.git#869181cfaf7526fe8972073d31655493a04326d5"
+    typedarray-to-buffer "^3.1.5"
+    web3 "^1.2.11"
+
+"circomlib@git+ssh://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c":
+  version "0.0.20"
+  resolved "git+ssh://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c"
   dependencies:
     blake-hash "^1.1.0"
     blake2b "^2.1.3"
@@ -1577,6 +1592,18 @@ ethereumjs-util@^6.0.0:
     ethereum-cryptography "^0.1.3"
     ethjs-util "0.1.6"
     rlp "^2.2.3"
+
+ethereumjs-util@^7.0.3:
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-7.0.6.tgz#ce4a6391a163cd1f2217b5276273f83bdacc7ab2"
+  integrity sha512-E9aJ9W7XZkcBqIblfstBU+0nGSjF9Dz/Ps7s1NTFOgDZM8pwD+nX1P1GBJeSqB6Osxhj2UtuxVCqjvmrj2svzw==
+  dependencies:
+    "@types/bn.js" "^4.11.3"
+    bn.js "^5.1.2"
+    create-hash "^1.1.2"
+    ethereum-cryptography "^0.1.3"
+    ethjs-util "0.1.6"
+    rlp "^2.2.4"
 
 ethjs-unit@0.1.6:
   version "0.1.6"
@@ -3461,7 +3488,7 @@ ripemd160@^2.0.0, ripemd160@^2.0.1:
     hash-base "^3.0.0"
     inherits "^2.0.1"
 
-rlp@^2.0.0, rlp@^2.2.3:
+rlp@^2.0.0, rlp@^2.2.3, rlp@^2.2.4:
   version "2.2.6"
   resolved "https://registry.yarnpkg.com/rlp/-/rlp-2.2.6.tgz#c80ba6266ac7a483ef1e69e8e2f056656de2fb2c"
   integrity sha512-HAfAmL6SDYNWPUOJNrM500x4Thn4PZsEy5pijPh40U9WfNk0z15hUYzO9xVIMAdIHdFtD8CBDHd75Td1g36Mjg==
@@ -3893,9 +3920,19 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-"tornado-cash-anonymity-mining@git+https://github.com/tornadocash/tornado-anonymity-mining.git#dd4b996b89580fad986604e507a7e56ad64a3f71":
+"torn-token@git+ssh://github.com/tornadocash/torn-token.git#b90fc5adccbf9a87c3bdac6175a0e038a9ed3dd8":
   version "1.0.0"
-  resolved "git+https://github.com/tornadocash/tornado-anonymity-mining.git#dd4b996b89580fad986604e507a7e56ad64a3f71"
+  resolved "git+ssh://github.com/tornadocash/torn-token.git#b90fc5adccbf9a87c3bdac6175a0e038a9ed3dd8"
+  dependencies:
+    "@openzeppelin/contracts" "^3.1.0"
+    dotenv "^8.2.0"
+    eth-sig-util "^2.5.3"
+    ethereumjs-util "^7.0.3"
+    web3 "^1.2.11"
+
+"tornado-cash-anonymity-mining@git+ssh://github.com/tornadocash/tornado-anonymity-mining.git#dd4b996b89580fad986604e507a7e56ad64a3f71":
+  version "1.0.0"
+  resolved "git+ssh://github.com/tornadocash/tornado-anonymity-mining.git#dd4b996b89580fad986604e507a7e56ad64a3f71"
   dependencies:
     circomlib "git+https://github.com/tornadocash/circomlib.git#5beb6aee94923052faeecea40135d45b6ce6172c"
     decimal.js "^10.2.0"
@@ -3945,9 +3982,9 @@ tweetnacl@^1.0.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
-"tx-manager@git+https://github.com/tornadocash/tx-manager.git#df118be318b007e597e157504d105dfa3e6322a1":
+"tx-manager@git+ssh://github.com/tornadocash/tx-manager.git#df118be318b007e597e157504d105dfa3e6322a1":
   version "0.1.0"
-  resolved "git+https://github.com/tornadocash/tx-manager.git#df118be318b007e597e157504d105dfa3e6322a1"
+  resolved "git+ssh://github.com/tornadocash/tx-manager.git#df118be318b007e597e157504d105dfa3e6322a1"
   dependencies:
     async-mutex "^0.2.4"
     gas-price-oracle "^0.1.5"
