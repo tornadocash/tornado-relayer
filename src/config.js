@@ -5,7 +5,8 @@ const jobType = require('./jobTypes')
 module.exports = {
   netId: Number(process.env.NET_ID) || 42,
   redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
-  rpcUrl: process.env.RPC_URL || 'https://kovan.infura.io/',
+  httpRpcUrl: process.env.HTTP_RPC_URL,
+  wsRpcUrl: process.env.WS_RPC_URL,
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
   oracleAddress: '0xA2b8E7ee7c8a18ea561A5CF7C9C365592026E374',
   minerAddress: '0x96c7B5c39542bae92b3cD39392a81De514c6E698', // each network has its own instance

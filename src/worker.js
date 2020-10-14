@@ -14,7 +14,7 @@ const { poseidonHash2, getInstance, fromDecimals } = require('./utils')
 const jobType = require('./jobTypes')
 const {
   netId,
-  rpcUrl,
+  httpRpcUrl,
   redisUrl,
   privateKey,
   swapAddress,
@@ -36,36 +36,38 @@ let controller
 let swap
 const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
-const gasPriceOracle = new GasPriceOracle({ defaultRpc: rpcUrl })
+const gasPriceOracle = new GasPriceOracle({ defaultRpc: httpRpcUrl })
 
 const status = Object.freeze({
   ACCEPTED: 'ACCEPTED',
   SENT: 'SENT',
   MINED: 'MINED',
   CONFIRMED: 'CONFIRMED',
-  FAILED: 'FAILED'
+  FAILED: 'FAILED',
 })
 
 async function fetchTree() {
-  console.log('got tree update')
   const elements = await redis.get('tree:elements')
   const convert = (_, val) => (typeof val === 'string' ? toBN(val) : val)
   tree = MerkleTree.deserialize(JSON.parse(elements, convert), poseidonHash2)
 
-  if (currentTx && currentJob && ['miningReward', 'miningWithdraw'].includes(currentJob.data.type)) {
+  if (currentTx && currentJob && ['MINING_REWARD', 'MINING_WITHDRAW'].includes(currentJob.data.type)) {
     const { proof, args } = currentJob.data
     if (toBN(args.account.inputRoot).eq(toBN(tree.root()))) {
+      console.log('Account root is up to date. Skipping Root Update operation...')
       return
+    } else {
+      console.log('Account root is outdated. Starting Root Update operation...')
     }
 
     const update = await controller.treeUpdate(args.account.outputCommitment, tree)
 
     const instance = new web3.eth.Contract(miningABI, minerAddress)
     const data =
-      currentJob.data.type === 'miningReward'
+      currentJob.data.type === 'MINING_REWARD'
         ? instance.methods.reward(proof, args, update.proof, update.args).encodeABI()
         : instance.methods.withdraw(proof, args, update.proof, update.args).encodeABI()
-    currentTx = await currentTx.replace({
+    await currentTx.replace({
       to: minerAddress,
       data,
     })
@@ -74,8 +76,8 @@ async function fetchTree() {
 }
 
 async function start() {
-  web3 = new Web3(rpcUrl)
-  txManager = new TxManager({ privateKey, rpcUrl })
+  web3 = new Web3(httpRpcUrl)
+  txManager = new TxManager({ privateKey, rpcUrl: httpRpcUrl, config: { CONFIRMATIONS: 6 } })
   swap = new web3.eth.Contract(swapABI, swapAddress)
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()
@@ -190,11 +192,11 @@ async function process(job) {
     await updateStatus(status.ACCEPTED)
     console.log(`Start processing a new ${job.data.type} job #${job.id}`)
     await checkFee(job)
-    if (job.data.type !== jobType.TORNADO_WITHDRAW) {
-      // precheck if root is up to date
-    }
-
     currentTx = await txManager.createTx(getTxObject(job))
+
+    if (job.data.type !== jobType.TORNADO_WITHDRAW) {
+      await fetchTree()
+    }
 
     try {
       await currentTx
