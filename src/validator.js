@@ -129,17 +129,17 @@ const miningWithdrawSchema = {
       type: 'object',
       properties: {
         amount: bytes32Type,
-        fee: bytes32Type,
         extDataHash: bytes32Type,
         extData: {
           type: 'object',
           properties: {
+            fee: bytes32Type,
             recipient: addressType,
             relayer: relayerType,
             encryptedAccount: encryptedAccountType,
           },
           additionalProperties: false,
-          required: ['relayer', 'encryptedAccount', 'recipient'],
+          required: ['fee', 'relayer', 'encryptedAccount', 'recipient'],
         },
         account: {
           type: 'object',
@@ -161,7 +161,7 @@ const miningWithdrawSchema = {
         },
       },
       additionalProperties: false,
-      required: ['amount', 'fee', 'extDataHash', 'extData', 'account'],
+      required: ['amount', 'extDataHash', 'extData', 'account'],
     },
   },
   additionalProperties: false,

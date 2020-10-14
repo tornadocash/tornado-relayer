@@ -154,14 +154,14 @@ async function checkMiningFee({ args }) {
           .div(toBN(1e10 * 100))
   /* eslint-enable */
   const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
-
+  const providedFee = currentJob.data.type === jobType.MINING_REWARD ? args.fee : args.extData.fee
   console.log(
     'sent fee, desired fee, serviceFeePercent',
-    toBN(args.fee).toString(),
+    toBN(providedFee).toString(),
     desiredFee.toString(),
     serviceFeePercent.toString(),
   )
-  if (toBN(args.fee).lt(desiredFee)) {
+  if (toBN(providedFee).lt(desiredFee)) {
     throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
   }
 }

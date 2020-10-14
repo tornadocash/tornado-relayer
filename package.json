@@ -26,7 +26,7 @@
     "gas-price-oracle": "^0.1.5",
     "ioredis": "^4.14.1",
     "node-fetch": "^2.6.0",
-    "tornado-cash-anonymity-mining": "git+ssh://github.com/tornadocash/tornado-anonymity-mining.git#dd4b996b89580fad986604e507a7e56ad64a3f71",
+    "tornado-cash-anonymity-mining": "git+ssh://github.com/tornadocash/tornado-anonymity-mining.git#02ff4c9061eef94617b3c1b91a02c0d25bb1c410",
     "tx-manager": "git+ssh://github.com/tornadocash/tx-manager.git#df118be318b007e597e157504d105dfa3e6322a1",
     "torn-token": "git+ssh://github.com/tornadocash/torn-token.git#b90fc5adccbf9a87c3bdac6175a0e038a9ed3dd8",
     "uuid": "^8.3.0",
