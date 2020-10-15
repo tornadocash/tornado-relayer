@@ -138,6 +138,8 @@ async function checkTornadoFee({ args, contract }) {
 async function checkMiningFee({ args }) {
   const { fast } = await gasPriceOracle.gasPrices()
   const ethPrice = await redis.hget('prices', 'torn')
+  const isMiningReward = currentJob.data.type === jobType.MINING_REWARD
+  const providedFee = isMiningReward ? toBN(args.fee) : toBN(args.extData.fee)
 
   const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[currentJob.data.type]))
   const expenseInTorn = expense.mul(toBN(1e18)).div(toBN(ethPrice))
@@ -146,18 +148,17 @@ async function checkMiningFee({ args }) {
   const poolWeight = await swap.methods.poolWeight().call()
   const expenseInPoints = Utils.reverseTornadoFormula({ balance, tokens: expenseInTorn, poolWeight })
   /* eslint-disable */
-  const serviceFeePercent =
-    currentJob.data.type === jobType.MINING_REWARD
-      ? toBN(0)
-      : toBN(args.amount)
-          .mul(toBN(miningServiceFee * 1e10))
-          .div(toBN(1e10 * 100))
+  const serviceFeePercent = isMiningReward
+    ? toBN(0)
+    : toBN(args.amount)
+        .sub(providedFee) // args.amount includes fee
+        .mul(toBN(miningServiceFee * 1e10))
+        .div(toBN(1e10 * 100))
   /* eslint-enable */
   const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
-  const providedFee = currentJob.data.type === jobType.MINING_REWARD ? args.fee : args.extData.fee
   console.log(
-    'sent fee, desired fee, serviceFeePercent',
-    toBN(providedFee).toString(),
+    'user provided fee, desired fee, serviceFeePercent',
+    providedFee.toString(),
     desiredFee.toString(),
     serviceFeePercent.toString(),
   )
