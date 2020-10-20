@@ -1907,6 +1907,14 @@ gas-price-oracle@^0.1.5:
     axios "^0.19.2"
     bignumber.js "^9.0.0"
 
+gas-price-oracle@^0.2.2:
+  version "0.2.2"
+  resolved "https://registry.yarnpkg.com/gas-price-oracle/-/gas-price-oracle-0.2.2.tgz#32c57a9aa6bc69152be96812880232efebfecbc6"
+  integrity sha512-I4+rLbc7C1vgYXV+cYY0MKeqdZVna2hXpNfD2fcIvf/wIgvtIYmG9gsmhiaYGSgOE2RSPUs2xf/W4K2nJOoNuQ==
+  dependencies:
+    axios "^0.19.2"
+    bignumber.js "^9.0.0"
+
 get-caller-file@^1.0.1:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/get-caller-file/-/get-caller-file-1.0.3.tgz#f978fa4c90d1dfe7ff2d6beda2a515e713bdcf4a"

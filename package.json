@@ -23,7 +23,7 @@
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
     "fixed-merkle-tree": "^0.4.0",
-    "gas-price-oracle": "^0.1.5",
+    "gas-price-oracle": "^0.2.2",
     "ioredis": "^4.14.1",
     "node-fetch": "^2.6.0",
     "tornado-cash-anonymity-mining": "git+ssh://git@github.com/tornadocash/tornado-anonymity-mining.git#02ff4c9061eef94617b3c1b91a02c0d25bb1c410",
