@@ -10,6 +10,7 @@ module.exports = {
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
   oracleAddress: '0xA2b8E7ee7c8a18ea561A5CF7C9C365592026E374',
   minerAddress: '0x3E0a9C6Cf76136862De28ce25a56cDBF38EF9D37', // each network has its own instance
+  tornadoProxyAddress: '0x98529F6FaE5AdaFfa0AaDA37d9017AF9a4281E13', // each network has its own instance
   swapAddress: '0x1E73e0a484a595B692f3d212642AE4B3BF30E7e3',
   minerMerkleTreeHeight: 20,
   privateKey: process.env.PRIVATE_KEY,

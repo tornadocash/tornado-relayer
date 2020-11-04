@@ -10,4 +10,5 @@ COPY package.json yarn.lock ./
 RUN --mount=type=ssh yarn && yarn cache clean --force
 COPY . .
 
+EXPOSE 8000
 ENTRYPOINT ["yarn"]

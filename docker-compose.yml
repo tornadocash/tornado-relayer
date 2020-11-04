@@ -6,13 +6,12 @@ services:
     restart: always
     command: server
     env_file: .env
-    expose: [ 8000 ]
-    ports: [ 8000 ]
     environment:
+      VIRTUAL_HOST: example.duckdns.org
+      LETSENCRYPT_HOST: example.duckdns.org
       REDIS_URL: redis://redis/0
       nginx_proxy_read_timeout: 600
-    depends_on:
-      - redis
+    depends_on: [ redis ]
 
   treeWatcher:
     image: tornadocash/relayer
@@ -21,6 +20,7 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
+    depends_on: [ redis ]
 
   priceWatcher:
     image: tornadocash/relayer
@@ -29,6 +29,7 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
+    depends_on: [ redis ]
 
   worker1:
     image: tornadocash/relayer
@@ -37,15 +38,16 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
+    depends_on: [ redis ]
 
-#  worker2:
-#    image: tornadocash/relayer
-#    restart: always
-#    command: worker
-#    env_file: .env
-#    environment:
-#      PRIVATE_KEY: qwe
-#      REDIS_URL: redis://redis/0
+  #  worker2:
+  #    image: tornadocash/relayer
+  #    restart: always
+  #    command: worker
+  #    env_file: .env
+  #    environment:
+  #      PRIVATE_KEY: qwe
+  #      REDIS_URL: redis://redis/0
 
   redis:
     image: redis
@@ -54,6 +56,44 @@ services:
     volumes:
       - redis:/data
 
-volumes:
-  redis:
+  nginx:
+    image: nginx:alpine
+    container_name: nginx
+    restart: always
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - conf:/etc/nginx/conf.d
+      - vhost:/etc/nginx/vhost.d
+      - html:/usr/share/nginx/html
+      - certs:/etc/nginx/certs
+    logging:
+      driver: none
 
+  dockergen:
+    image: poma/docker-gen
+    container_name: dockergen
+    restart: always
+    command: -notify-sighup nginx -watch /etc/docker-gen/templates/nginx.tmpl /etc/nginx/conf.d/default.conf
+    volumes_from:
+      - nginx
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+
+  letsencrypt:
+    image: jrcs/letsencrypt-nginx-proxy-companion
+    container_name: letsencrypt
+    restart: always
+    environment:
+      NGINX_DOCKER_GEN_CONTAINER: dockergen
+    volumes_from:
+      - nginx
+      - dockergen
+
+volumes:
+  conf:
+  vhost:
+  html:
+  certs:
+  redis:

@@ -1,0 +1,171 @@
+[
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "_tornadoTrees",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "_governance",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "contract ITornado[]",
+        "name": "_instances",
+        "type": "address[]"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
+  },
+  {
+    "inputs": [],
+    "name": "governance",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITornado",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "instances",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "bytes32",
+        "name": "node",
+        "type": "bytes32"
+      }
+    ],
+    "name": "resolve",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "tornadoTrees",
+    "outputs": [
+      {
+        "internalType": "contract ITornadoTrees",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITornado",
+        "name": "tornado",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "commitment",
+        "type": "bytes32"
+      }
+    ],
+    "name": "deposit",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITornado",
+        "name": "instance",
+        "type": "address"
+      },
+      {
+        "internalType": "bool",
+        "name": "update",
+        "type": "bool"
+      }
+    ],
+    "name": "updateInstances",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "contract ITornado",
+        "name": "tornado",
+        "type": "address"
+      },
+      {
+        "internalType": "bytes",
+        "name": "proof",
+        "type": "bytes"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "root",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes32",
+        "name": "nullifierHash",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "address payable",
+        "name": "recipient",
+        "type": "address"
+      },
+      {
+        "internalType": "address payable",
+        "name": "relayer",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "fee",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "refund",
+        "type": "uint256"
+      }
+    ],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  }
+]

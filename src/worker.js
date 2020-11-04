@@ -6,7 +6,7 @@ const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
 const { Utils } = require('tornado-cash-anonymity-mining')
 
-const tornadoABI = require('../abis/tornadoABI.json')
+const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
 const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
@@ -19,6 +19,7 @@ const {
   privateKey,
   swapAddress,
   minerAddress,
+  tornadoProxyAddress,
   gasLimits,
   instances,
   tornadoServiceFee,
@@ -168,19 +169,22 @@ async function checkMiningFee({ args }) {
 }
 
 function getTxObject({ data }) {
-  let [ABI, contractAddress, value, args] =
-    data.type === jobType.TORNADO_WITHDRAW
-      ? [tornadoABI, data.contract, data.args[5], data.args]
-      : [miningABI, minerAddress, 0, [data.args]]
-  const method = data.type !== jobType.MINING_REWARD ? 'withdraw' : 'reward'
-
-  const contract = new web3.eth.Contract(ABI, contractAddress)
-  const calldata = contract.methods[method](data.proof, ...args).encodeABI()
-
-  return {
-    value,
-    to: contractAddress,
-    data: calldata,
+  if (data.type === jobType.TORNADO_WITHDRAW) {
+    const contract = new web3.eth.Contract(tornadoProxyABI, tornadoProxyAddress)
+    const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
+    return {
+      value: data.args[5],
+      to: tornadoProxyAddress,
+      data: calldata
+    }
+  } else {
+    const contract = new web3.eth.Contract(miningABI, minerAddress)
+    const method = data.type === jobType.MINING_REWARD ? 'reward' : 'withdraw'
+    const calldata = contract.methods[method](data.proof, data.args).encodeABI()
+    return {
+      to: minerAddress,
+      data: calldata,
+    }
   }
 }
 
