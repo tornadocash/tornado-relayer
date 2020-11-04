@@ -14,17 +14,17 @@ const { poseidonHash2, getInstance, fromDecimals } = require('./utils')
 const jobType = require('./jobTypes')
 const {
   netId,
+  torn,
   httpRpcUrl,
   redisUrl,
   privateKey,
-  swapAddress,
-  minerAddress,
-  tornadoProxyAddress,
   gasLimits,
   instances,
   tornadoServiceFee,
   miningServiceFee,
 } = require('./config')
+const ENSResolver = require('./resolver')
+const resolver = new ENSResolver()
 const { TxManager } = require('tx-manager')
 const { Controller } = require('tornado-cash-anonymity-mining')
 
@@ -63,6 +63,7 @@ async function fetchTree() {
 
     const update = await controller.treeUpdate(args.account.outputCommitment, tree)
 
+    const minerAddress = await resolver.resolve(torn.miningV2.address)
     const instance = new web3.eth.Contract(miningABI, minerAddress)
     const data =
       currentJob.data.type === 'MINING_REWARD'
@@ -79,7 +80,7 @@ async function fetchTree() {
 async function start() {
   web3 = new Web3(httpRpcUrl)
   txManager = new TxManager({ privateKey, rpcUrl: httpRpcUrl, config: { CONFIRMATIONS: 6 } })
-  swap = new web3.eth.Contract(swapABI, swapAddress)
+  swap = new web3.eth.Contract(swapABI, resolver.resolve(torn.rewardSwap.address))
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()
   const provingKeys = {
@@ -168,16 +169,18 @@ async function checkMiningFee({ args }) {
   }
 }
 
-function getTxObject({ data }) {
+async function getTxObject({ data }) {
   if (data.type === jobType.TORNADO_WITHDRAW) {
+    const tornadoProxyAddress = await resolver.resolve(torn.tornadoProxy.address)
     const contract = new web3.eth.Contract(tornadoProxyABI, tornadoProxyAddress)
     const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
     return {
       value: data.args[5],
       to: tornadoProxyAddress,
-      data: calldata
+      data: calldata,
     }
   } else {
+    const minerAddress = await resolver.resolve(torn.miningV2.address)
     const contract = new web3.eth.Contract(miningABI, minerAddress)
     const method = data.type === jobType.MINING_REWARD ? 'reward' : 'withdraw'
     const calldata = contract.methods[method](data.proof, data.args).encodeABI()
@@ -197,7 +200,7 @@ async function process(job) {
     await updateStatus(status.ACCEPTED)
     console.log(`Start processing a new ${job.data.type} job #${job.id}`)
     await checkFee(job)
-    currentTx = await txManager.createTx(getTxObject(job))
+    currentTx = await txManager.createTx(await getTxObject(job))
 
     if (job.data.type !== jobType.TORNADO_WITHDRAW) {
       await fetchTree()

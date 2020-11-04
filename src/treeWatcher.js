@@ -1,12 +1,15 @@
 const MerkleTree = require('fixed-merkle-tree')
-const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, minerAddress } = require('./config')
+const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, torn } = require('./config')
 const { poseidonHash2 } = require('./utils')
 const { toBN } = require('web3-utils')
 const Redis = require('ioredis')
 const redis = new Redis(redisUrl)
+const ENSResolver = require('./resolver')
+const resolver = new ENSResolver()
 const Web3 = require('web3')
 const web3 = new Web3(wsRpcUrl)
-const contract = new web3.eth.Contract(require('../abis/mining.abi.json'), minerAddress)
+const MinerABI = require('../abis/mining.abi.json')
+let contract
 
 let tree, eventSubscription, blockSubscription
 
@@ -86,6 +89,7 @@ async function rebuild() {
 
 async function init() {
   console.log('Initializing')
+  contract = new web3.eth.Contract(MinerABI, await resolver.resolve(torn.miningV2.address))
   const block = await web3.eth.getBlockNumber()
   const events = await fetchEvents(0, block)
   tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })

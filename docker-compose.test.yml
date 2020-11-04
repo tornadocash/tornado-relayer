@@ -13,7 +13,7 @@ services:
     environment:
       REDIS_URL: redis://redis/0
       nginx_proxy_read_timeout: 600
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   treeWatcher:
     image: tornadocash/relayer
@@ -22,7 +22,7 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   priceWatcher:
     image: tornadocash/relayer
@@ -31,7 +31,7 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   worker1:
     image: tornadocash/relayer
@@ -40,16 +40,16 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
-    depends_on: [ redis ]
+    depends_on: [redis]
 
-#  worker2:
-#    image: tornadocash/relayer
-#    restart: always
-#    command: worker
-#    env_file: .env
-#    environment:
-#      PRIVATE_KEY: qwe
-#      REDIS_URL: redis://redis/0
+  #  worker2:
+  #    image: tornadocash/relayer
+  #    restart: always
+  #    command: worker
+  #    env_file: .env
+  #    environment:
+  #      PRIVATE_KEY: qwe
+  #      REDIS_URL: redis://redis/0
 
   redis:
     image: redis
