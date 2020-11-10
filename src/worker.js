@@ -79,8 +79,9 @@ async function fetchTree() {
 
 async function start() {
   web3 = new Web3(httpRpcUrl)
-  txManager = new TxManager({ privateKey, rpcUrl: httpRpcUrl, config: { CONFIRMATIONS: 6 } })
-  swap = new web3.eth.Contract(swapABI, resolver.resolve(torn.rewardSwap.address))
+  const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
+  txManager = new TxManager({ privateKey, rpcUrl: httpRpcUrl, config: { CONFIRMATIONS, MAX_GAS_PRICE } })
+  swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()
   const provingKeys = {
@@ -89,7 +90,7 @@ async function start() {
   }
   controller = new Controller({ provingKeys })
   await controller.init()
-  queue.process(process)
+  queue.process(processJob)
   console.log('Worker started')
 }
 
@@ -191,7 +192,7 @@ async function getTxObject({ data }) {
   }
 }
 
-async function process(job) {
+async function processJob(job) {
   try {
     if (!jobType[job.data.type]) {
       throw new Error(`Unknown job type: ${job.data.type}`)
@@ -250,5 +251,3 @@ async function updateStatus(status) {
 }
 
 start()
-
-module.exports = { start, process }

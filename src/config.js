@@ -10,7 +10,7 @@ module.exports = {
   wsRpcUrl: process.env.WS_RPC_URL,
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
   oracleAddress: '0xA2b8E7ee7c8a18ea561A5CF7C9C365592026E374',
-  aggregatorAddress: '0x748F37B04eAB454Ad8cF4F5d6814984448c79B35',
+  aggregatorAddress: '0x3a02d7828722059FCf570DA19b74B16ca69Cb770',
   minerMerkleTreeHeight: 20,
   privateKey: process.env.PRIVATE_KEY,
   instances: tornConfig.instances,

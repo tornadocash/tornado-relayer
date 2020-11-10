@@ -89,7 +89,8 @@ async function rebuild() {
 
 async function init() {
   console.log('Initializing')
-  contract = new web3.eth.Contract(MinerABI, await resolver.resolve(torn.miningV2.address))
+  const miner = await resolver.resolve(torn.miningV2.address)
+  contract = new web3.eth.Contract(MinerABI, miner)
   const block = await web3.eth.getBlockNumber()
   const events = await fetchEvents(0, block)
   tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })
