@@ -7,6 +7,7 @@ const { GasPriceOracle } = require('gas-price-oracle')
 const { Utils } = require('tornado-cash-anonymity-mining')
 
 const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
+const tornadoABI = require('../abis/tornadoABI.json')
 const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
@@ -172,12 +173,18 @@ async function checkMiningFee({ args }) {
 
 async function getTxObject({ data }) {
   if (data.type === jobType.TORNADO_WITHDRAW) {
-    const tornadoProxyAddress = await resolver.resolve(torn.tornadoProxy.address)
-    const contract = new web3.eth.Contract(tornadoProxyABI, tornadoProxyAddress)
-    const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
+    let contract, calldata
+    if (getInstance(data.contract).currency === 'eth') {
+      const tornadoProxyAddress = await resolver.resolve(torn.tornadoProxy.address)
+      contract = new web3.eth.Contract(tornadoProxyABI, tornadoProxyAddress)
+      calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
+    } else {
+      contract = new web3.eth.Contract(tornadoABI, data.contract)
+      calldata = contract.methods.withdraw(data.proof, ...data.args).encodeABI()
+    }
     return {
       value: data.args[5],
-      to: tornadoProxyAddress,
+      to: contract._address,
       data: calldata,
     }
   } else {
