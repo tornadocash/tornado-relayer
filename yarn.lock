@@ -4322,9 +4322,9 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-"torn-token@git+ssh://git@github.com/tornadocash/torn-token.git#a42f83aadeda88b9d8c364a0034d8ec6c7f8fb74":
+"torn-token@git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d":
   version "1.0.0"
-  resolved "git+ssh://git@github.com/tornadocash/torn-token.git#a42f83aadeda88b9d8c364a0034d8ec6c7f8fb74"
+  resolved "git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d"
   dependencies:
     "@openzeppelin/contracts" "^3.1.0"
     dotenv "^8.2.0"
