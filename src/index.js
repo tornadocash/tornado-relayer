@@ -94,5 +94,5 @@ if (!ALLOWABLE_PENDING_TX_TIMEOUT) {
 }
 
 if (!MAX_GAS_PRICE) {
-  console.log(`ALLOWABLE_PENDING_TX_TIMEOUT is not set. Using default value ${maxGasPrice} Gwei`)
+  console.log(`MAX_GAS_PRICE is not set. Using default value ${maxGasPrice} Gwei`)
 }
