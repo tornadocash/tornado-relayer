@@ -4384,10 +4384,10 @@ tweetnacl@^1.0.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
-tx-manager@^0.2.6:
-  version "0.2.6"
-  resolved "https://registry.yarnpkg.com/tx-manager/-/tx-manager-0.2.6.tgz#05f49794695ebd71c58b794bb213927efdbf6d3e"
-  integrity sha512-19h+PacgoUuXbN2wKTpb4R+MxD9fOxil3ZsvnDRG/Z4pPboUzd/D2+VBdcH9+EEVGXovZ6bcVggIZ4RIO7LO1w==
+tx-manager@^0.2.8:
+  version "0.2.8"
+  resolved "https://registry.yarnpkg.com/tx-manager/-/tx-manager-0.2.8.tgz#9175782f16c1fc3de9d5bcdec8c408e8474bf45a"
+  integrity sha512-Uo3Jz9NfCZucwwVXuB6MYImIX6Yq8YRhRAJbMMGQMbwG+ghs4mG8p6+GNld7ZA2sH7qdEzY5c3Sk+BROznIAGw==
   dependencies:
     async-mutex "^0.2.4"
     ethers "^5.0.17"

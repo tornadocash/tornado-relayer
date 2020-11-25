@@ -48,6 +48,7 @@ const status = Object.freeze({
   MINED: 'MINED',
   CONFIRMED: 'CONFIRMED',
   FAILED: 'FAILED',
+  RESUBMITTED: 'RESUBMITTED',
 })
 
 async function fetchTree() {
@@ -83,7 +84,11 @@ async function fetchTree() {
 async function start() {
   web3 = new Web3(httpRpcUrl)
   const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
-  txManager = new TxManager({ privateKey, rpcUrl: httpRpcUrl, config: { CONFIRMATIONS, MAX_GAS_PRICE } })
+  txManager = new TxManager({
+    privateKey,
+    rpcUrl: httpRpcUrl,
+    config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false },
+  })
   swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
   minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
   proxyContract = new web3.eth.Contract(tornadoProxyABI, await resolver.resolve(torn.tornadoProxy.address))
@@ -175,7 +180,7 @@ async function checkMiningFee({ args }) {
   }
 }
 
-async function getTxObject({ data }) {
+function getTxObject({ data }) {
   if (data.type === jobType.TORNADO_WITHDRAW) {
     let contract, calldata
     if (getInstance(data.contract).currency === 'eth') {
@@ -200,53 +205,17 @@ async function getTxObject({ data }) {
   }
 }
 
-function extractRevertReason(msg) {
-  console.log('RAW error message:', msg)
-
-  if (!msg.startsWith('Node error: ')) {
-    console.log('Failed to parse error message from Ethereum call: ' + msg)
-    return null
-  }
-
-  // Trim "Node error: "
-  const errorObjectStr = msg.slice(12)
-  // Parse the error object
-  const errorObject = JSON.parse(errorObjectStr)
-
-  if (!errorObject.data) {
-    console.log('Failed to parse data field error object:' + errorObjectStr)
-    return null
-  }
-
-  if (errorObject.data.startsWith('Reverted 0x')) {
-    // Trim "Reverted 0x" from the data field
-    msg = errorObject.data.slice(11)
-  } else if (errorObject.data.startsWith('0x')) {
-    // Trim "0x" from the data field
-    msg = errorObject.data.slice(2)
-  } else {
-    console.log('Failed to parse data field error object:' + errorObjectStr)
-    return null
-  }
-
-  // Get the length of the revert reason
-  const strLen = parseInt(msg.slice(8 + 64, 8 + 128), 16)
-  // Using the length and known offset, extract and convert the revert reason
-  const reasonCodeHex = msg.slice(8 + 128, 8 + 128 + (strLen * 2))
-  // Convert reason from hex to string
-  const reason = web3.utils.hexToAscii('0x' + reasonCodeHex)
-  return reason
-}
-
 async function isOutdatedTreeRevert(receipt, currentTx) {
   try {
     await web3.eth.call(currentTx.tx, receipt.blockNumber)
     console.log('Simulated call successful')
     return false
-  } catch(e) {
-    const reason = extractRevertReason(e.message)
-    console.log('Decoded revert reason:', reason)
-    return reason === 'Outdated account merkle root' || reason === 'Outdated tree update merkle root'
+  } catch (e) {
+    console.log('Decoded revert reason:', e.message)
+    return (
+      e.message.indexOf('Outdated account merkle root') !== -1 ||
+      e.message.indexOf('Outdated tree update merkle root') !== -1
+    )
   }
 }
 
@@ -260,7 +229,7 @@ async function processJob(job) {
     console.log(`Start processing a new ${job.data.type} job #${job.id}`)
     await submitTx(job)
   } catch (e) {
-    console.error(e)
+    console.error('processJob', e.message)
     await updateStatus(status.FAILED)
     throw e
   }
@@ -268,7 +237,7 @@ async function processJob(job) {
 
 async function submitTx(job, retry = 0) {
   await checkFee(job)
-  currentTx = await txManager.createTx(await getTxObject(job))
+  currentTx = await txManager.createTx(getTxObject(job))
 
   if (job.data.type !== jobType.TORNADO_WITHDRAW) {
     await fetchTree()
@@ -290,8 +259,9 @@ async function submitTx(job, retry = 0) {
     if (receipt.status === 1) {
       await updateStatus(status.CONFIRMED)
     } else {
-      if (job.data.type !== jobType.TORNADO_WITHDRAW && await isOutdatedTreeRevert(receipt, currentTx)) {
+      if (job.data.type !== jobType.TORNADO_WITHDRAW && (await isOutdatedTreeRevert(receipt, currentTx))) {
         if (retry < 3) {
+          await updateStatus(status.RESUBMITTED)
           await submitTx(job, retry + 1)
         } else {
           throw new Error('Tree update retry limit exceeded')
@@ -303,7 +273,6 @@ async function submitTx(job, retry = 0) {
   } catch (e) {
     // todo this could result in duplicated error logs
     // todo handle a case where account tree is still not up to date (wait and retry)?
-    console.error('Revert', e)
     throw new Error(`Revert by smart contract ${e.message}`)
   }
 }
