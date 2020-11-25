@@ -36,6 +36,8 @@ let tree
 let txManager
 let controller
 let swap
+let minerContract
+let proxyContract
 const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
 const gasPriceOracle = new GasPriceOracle({ defaultRpc: httpRpcUrl })
@@ -83,6 +85,8 @@ async function start() {
   const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
   txManager = new TxManager({ privateKey, rpcUrl: httpRpcUrl, config: { CONFIRMATIONS, MAX_GAS_PRICE } })
   swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
+  minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
+  proxyContract = new web3.eth.Contract(tornadoProxyABI, await resolver.resolve(torn.tornadoProxy.address))
   redisSubscribe.subscribe('treeUpdate', fetchTree)
   await fetchTree()
   const provingKeys = {
@@ -175,8 +179,7 @@ async function getTxObject({ data }) {
   if (data.type === jobType.TORNADO_WITHDRAW) {
     let contract, calldata
     if (getInstance(data.contract).currency === 'eth') {
-      const tornadoProxyAddress = await resolver.resolve(torn.tornadoProxy.address)
-      contract = new web3.eth.Contract(tornadoProxyABI, tornadoProxyAddress)
+      contract = proxyContract
       calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
     } else {
       contract = new web3.eth.Contract(tornadoABI, data.contract)
@@ -188,14 +191,62 @@ async function getTxObject({ data }) {
       data: calldata,
     }
   } else {
-    const minerAddress = await resolver.resolve(torn.miningV2.address)
-    const contract = new web3.eth.Contract(miningABI, minerAddress)
     const method = data.type === jobType.MINING_REWARD ? 'reward' : 'withdraw'
-    const calldata = contract.methods[method](data.proof, data.args).encodeABI()
+    const calldata = minerContract.methods[method](data.proof, data.args).encodeABI()
     return {
-      to: minerAddress,
+      to: minerContract._address,
       data: calldata,
     }
+  }
+}
+
+function extractRevertReason(msg) {
+  console.log('RAW error message:', msg)
+
+  if (!msg.startsWith('Node error: ')) {
+    console.log('Failed to parse error message from Ethereum call: ' + msg)
+    return null
+  }
+
+  // Trim "Node error: "
+  const errorObjectStr = msg.slice(12)
+  // Parse the error object
+  const errorObject = JSON.parse(errorObjectStr)
+
+  if (!errorObject.data) {
+    console.log('Failed to parse data field error object:' + errorObjectStr)
+    return null
+  }
+
+  if (errorObject.data.startsWith('Reverted 0x')) {
+    // Trim "Reverted 0x" from the data field
+    msg = errorObject.data.slice(11)
+  } else if (errorObject.data.startsWith('0x')) {
+    // Trim "0x" from the data field
+    msg = errorObject.data.slice(2)
+  } else {
+    console.log('Failed to parse data field error object:' + errorObjectStr)
+    return null
+  }
+
+  // Get the length of the revert reason
+  const strLen = parseInt(msg.slice(8 + 64, 8 + 128), 16)
+  // Using the length and known offset, extract and convert the revert reason
+  const reasonCodeHex = msg.slice(8 + 128, 8 + 128 + (strLen * 2))
+  // Convert reason from hex to string
+  const reason = web3.utils.hexToAscii('0x' + reasonCodeHex)
+  return reason
+}
+
+async function isOutdatedTreeRevert(receipt, currentTx) {
+  try {
+    await web3.eth.call(currentTx.tx, receipt.blockNumber)
+    console.log('Simulated call successful')
+    return false
+  } catch(e) {
+    const reason = extractRevertReason(e.message)
+    console.log('Decoded revert reason:', reason)
+    return reason === 'Outdated account merkle root' || reason === 'Outdated tree update merkle root'
   }
 }
 
@@ -207,35 +258,53 @@ async function processJob(job) {
     currentJob = job
     await updateStatus(status.ACCEPTED)
     console.log(`Start processing a new ${job.data.type} job #${job.id}`)
-    await checkFee(job)
-    currentTx = await txManager.createTx(await getTxObject(job))
-
-    if (job.data.type !== jobType.TORNADO_WITHDRAW) {
-      await fetchTree()
-    }
-
-    try {
-      await currentTx
-        .send()
-        .on('transactionHash', txHash => {
-          updateTxHash(txHash)
-          updateStatus(status.SENT)
-        })
-        .on('mined', receipt => {
-          console.log('Mined in block', receipt.blockNumber)
-          updateStatus(status.MINED)
-        })
-        .on('confirmations', updateConfirmations)
-
-      await updateStatus(status.CONFIRMED)
-    } catch (e) {
-      console.error('Revert', e)
-      throw new Error(`Revert by smart contract ${e.message}`)
-    }
+    await submitTx(job)
   } catch (e) {
     console.error(e)
     await updateStatus(status.FAILED)
     throw e
+  }
+}
+
+async function submitTx(job, retry = 0) {
+  await checkFee(job)
+  currentTx = await txManager.createTx(await getTxObject(job))
+
+  if (job.data.type !== jobType.TORNADO_WITHDRAW) {
+    await fetchTree()
+  }
+
+  try {
+    const receipt = await currentTx
+      .send()
+      .on('transactionHash', txHash => {
+        updateTxHash(txHash)
+        updateStatus(status.SENT)
+      })
+      .on('mined', receipt => {
+        console.log('Mined in block', receipt.blockNumber)
+        updateStatus(status.MINED)
+      })
+      .on('confirmations', updateConfirmations)
+
+    if (receipt.status === 1) {
+      await updateStatus(status.CONFIRMED)
+    } else {
+      if (job.data.type !== jobType.TORNADO_WITHDRAW && await isOutdatedTreeRevert(receipt, currentTx)) {
+        if (retry < 3) {
+          await submitTx(job, retry + 1)
+        } else {
+          throw new Error('Tree update retry limit exceeded')
+        }
+      } else {
+        throw new Error('Submitted transaction failed')
+      }
+    }
+  } catch (e) {
+    // todo this could result in duplicated error logs
+    // todo handle a case where account tree is still not up to date (wait and retry)?
+    console.error('Revert', e)
+    throw new Error(`Revert by smart contract ${e.message}`)
   }
 }
 
