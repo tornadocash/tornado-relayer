@@ -29,7 +29,7 @@
     "node-fetch": "^2.6.0",
     "torn-token": "git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d",
     "tornado-cash-anonymity-mining": "git+ssh://git@github.com/tornadocash/tornado-anonymity-mining.git#b13228c20126f212ebbcc5a8493ce2105210739e",
-    "tx-manager": "^0.2.8",
+    "tx-manager": "^0.2.9",
     "uuid": "^8.3.0",
     "web3": "^1.3.0",
     "web3-core-promievent": "^1.3.0",
