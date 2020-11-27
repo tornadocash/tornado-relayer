@@ -12,7 +12,7 @@ const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
 const { poseidonHash2, getInstance, fromDecimals } = require('./utils')
-const jobType = require('./jobTypes')
+const { jobType, status } = require('./constants')
 const {
   netId,
   torn,
@@ -41,15 +41,6 @@ let proxyContract
 const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
 const gasPriceOracle = new GasPriceOracle({ defaultRpc: httpRpcUrl })
-
-const status = Object.freeze({
-  ACCEPTED: 'ACCEPTED',
-  SENT: 'SENT',
-  MINED: 'MINED',
-  CONFIRMED: 'CONFIRMED',
-  FAILED: 'FAILED',
-  RESUBMITTED: 'RESUBMITTED',
-})
 
 async function fetchTree() {
   const elements = await redis.get('tree:elements')

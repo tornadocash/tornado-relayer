@@ -1,6 +1,6 @@
 require('dotenv').config()
 
-const jobType = require('./jobTypes')
+const { jobType } = require('./constants')
 const tornConfig = require('torn-token')
 module.exports = {
   netId: Number(process.env.NET_ID) || 42,

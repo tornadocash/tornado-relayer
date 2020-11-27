@@ -2,6 +2,7 @@ const { v4: uuid } = require('uuid')
 const Queue = require('bull')
 const Redis = require('ioredis')
 const { redisUrl } = require('./config')
+const { status } = require('./constants')
 const redis = new Redis(redisUrl)
 
 const queue = new Queue('proofs', redisUrl)
@@ -13,6 +14,7 @@ async function postJob({ type, request }) {
     {
       id,
       type,
+      status: status.QUEUED,
       ...request, // proof, args, ?contract
     },
     // { removeOnComplete: true },
