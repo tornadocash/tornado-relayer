@@ -47,6 +47,53 @@ services:
   #      PRIVATE_KEY: qwe
   #      REDIS_URL: redis://redis/0
 
+  #  # this container will proxy *.onion domain to the mainnet container
+  #  tor:
+  #    image: strm/tor
+  #    restart: always
+  #    depends_on: [mainnet]
+  #    environment:
+  #      LISTEN_PORT: 80
+  #      REDIRECT: mainnet:8000
+  #      # Generate a new key with
+  #      # docker run --rm --entrypoint shallot strm/tor-hiddenservice-nginx ^foo
+  #      PRIVATE_KEY: |
+  #        -----BEGIN RSA PRIVATE KEY-----
+  #        ...
+  #        -----END RSA PRIVATE KEY-----
+
+  #  # auto update docker containers when new image is pushed to docker hub (be careful with that)
+  #  watchtower:
+  #    image: v2tec/watchtower
+  #    restart: always
+  #    volumes:
+  #      - /var/run/docker.sock:/var/run/docker.sock
+
+  #  # this container will send Telegram notifications when other containers are stopped/restarted
+  #  # it's best to run this container on some other instance, otherwise it can't notify if the whole instance goes down
+  #  notifier:
+  #    image: poma/docker-telegram-notifier
+  #    restart: always
+  #    volumes:
+  #      - /var/run/docker.sock:/var/run/docker.sock:ro
+  #    environment:
+  #      # How to create bot: https://core.telegram.org/bots#3-how-do-i-create-a-bot
+  #      # How to get chat id: https://stackoverflow.com/questions/32423837/telegram-bot-how-to-get-a-group-chat-id/32572159#32572159
+  #      TELEGRAM_NOTIFIER_BOT_TOKEN: ...
+  #      TELEGRAM_NOTIFIER_CHAT_ID: ...
+
+  #  # this container will send Telegram notifications if specified address doesn't have enough funds
+  #  monitor_mainnet:
+  #    image: peppersec/monitor_eth
+  #    restart: always
+  #    environment:
+  #      TELEGRAM_NOTIFIER_BOT_TOKEN: ...
+  #      TELEGRAM_NOTIFIER_CHAT_ID: ...
+  #      ADDRESS: '0x0000000000000000000000000000000000000000'
+  #      THRESHOLD: 0.5 # ETH
+  #      RPC_URL: https://mainnet.infura.io
+  #      BLOCK_EXPLORER: etherscan.io
+
   redis:
     image: redis
     restart: always
