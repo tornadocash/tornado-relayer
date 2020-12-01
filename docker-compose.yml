@@ -7,8 +7,6 @@ services:
     command: server
     env_file: .env
     environment:
-      VIRTUAL_HOST: example.duckdns.org
-      LETSENCRYPT_HOST: example.duckdns.org
       REDIS_URL: redis://redis/0
       nginx_proxy_read_timeout: 600
     depends_on: [redis]

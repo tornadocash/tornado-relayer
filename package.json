@@ -11,7 +11,8 @@
     "prettier:check": "npx prettier --check . --config .prettierrc",
     "prettier:fix": "npx prettier --write . --config .prettierrc",
     "lint": "yarn eslint && yarn prettier:check",
-    "test": "mocha"
+    "test": "mocha",
+    "start": "yarn server & yarn priceWatcher & yarn treeWatcher & yarn worker "
   },
   "author": "tornado.cash",
   "license": "MIT",
