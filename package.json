@@ -20,7 +20,7 @@
     "ajv": "^6.12.5",
     "async-mutex": "^0.2.4",
     "bull": "^3.12.1",
-    "circomlib": "git+https://git@github.com/tornadocash/circomlib.git#3b492f9801573eebcfe1b6c584afe8a3beecf2b4",
+    "circomlib": "git+https://github.com/tornadocash/circomlib.git#3b492f9801573eebcfe1b6c584afe8a3beecf2b4",
     "dotenv": "^8.2.0",
     "eth-ens-namehash": "^2.0.8",
     "express": "^4.17.1",
