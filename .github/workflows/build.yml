@@ -80,7 +80,7 @@ jobs:
         uses: appleboy/telegram-action@0.0.7
         if: failure()
         with:
-          message: ❗ Failed to publish [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}/actions) because of ${{ env.GITHUB_ACTOR }}
+          message: ❗ Failed to publish [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
           format: markdown
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
