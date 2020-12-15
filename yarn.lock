@@ -4322,9 +4322,10 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-"torn-token@git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d":
+torn-token@^1.0.0:
   version "1.0.0"
-  resolved "git+ssh://git@github.com/tornadocash/torn-token.git#04c4df88d470ca7503ef5d97882c56cba4f3647d"
+  resolved "https://registry.yarnpkg.com/torn-token/-/torn-token-1.0.0.tgz#73e47025646c3e07ab733afbf7aa53b6ab9cad55"
+  integrity sha512-BRzt3fy4211jCb64cWyOb5/NMGt9M9EV2ZFnGQYMubKrVkszoYm97Nex+EBa0mvV2KfXzCmJ6tehoDgOFAPGug==
   dependencies:
     "@openzeppelin/contracts" "^3.1.0"
     dotenv "^8.2.0"
@@ -4332,9 +4333,10 @@ toidentifier@1.0.0:
     ethereumjs-util "^7.0.3"
     web3 "^1.2.11"
 
-"tornado-cash-anonymity-mining@git+ssh://git@github.com/tornadocash/tornado-anonymity-mining.git#b13228c20126f212ebbcc5a8493ce2105210739e":
+tornado-cash-anonymity-mining@^1.0.0:
   version "1.0.0"
-  resolved "git+ssh://git@github.com/tornadocash/tornado-anonymity-mining.git#b13228c20126f212ebbcc5a8493ce2105210739e"
+  resolved "https://registry.yarnpkg.com/tornado-cash-anonymity-mining/-/tornado-cash-anonymity-mining-1.0.0.tgz#1e9d68e60097de6fa3ff6989558ca313030daf5c"
+  integrity sha512-OVwj1N6g6NqRrkj0QkSrrGSY7Mlmb0BMeJUh7BeI9doOY/tS1OMky/G/xHdcVRLTbJN34MHIepTSF6/xRM33eg==
   dependencies:
     circomlib "git+https://github.com/tornadocash/circomlib.git#3b492f9801573eebcfe1b6c584afe8a3beecf2b4"
     decimal.js "^10.2.0"

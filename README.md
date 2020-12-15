@@ -7,6 +7,7 @@ docker-compose.yml contains a stack that will automatically provision SSL certif
 1. Download [docker-compose.yml](/docker-compose.yml) and [env.example](/env.example)
 2. `mv .env.example .env`
 3. Setup environment variables
+
    - set `NET_ID` (1 for mainnet, 5 for Goerli)
    - set `HTTP_RPC_URL` rpc url for your ethereum node
    - set `WS_RPC_URL` websocket url
@@ -22,6 +23,7 @@ docker-compose.yml contains a stack that will automatically provision SSL certif
    - update `MAX_GAS_PRICE` if needed - maximum value of gwei value for relayer's transaction
 
      If you want to use more than 1 eth address for relaying transactions, please add as many `workers` as you want. For example, you can comment out `worker2` in docker-compose.yml file, but please use a different `PRIVATE_KEY` for each worker.
+
 4. Run `docker-compose up -d`
 
 ## Run locally
