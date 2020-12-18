@@ -11,8 +11,7 @@ wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/docker
 wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/.env.example -O .env
 ```
 
-2. `mv .env.example .env`
-3. Setup environment variables
+2. Setup environment variables
 
    - set `NET_ID` (1 for mainnet, 5 for Goerli)
    - set `HTTP_RPC_URL` rpc url for your ethereum node
@@ -30,7 +29,7 @@ wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/.env.e
 
      If you want to use more than 1 eth address for relaying transactions, please add as many `workers` as you want. For example, you can comment out `worker2` in docker-compose.yml file, but please use a different `PRIVATE_KEY` for each worker.
 
-4. Run `docker-compose up -d`
+3. Run `docker-compose up -d`
 
 ## Run locally
 
