@@ -11,7 +11,7 @@ const tornadoABI = require('../abis/tornadoABI.json')
 const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
 const { queue } = require('./queue')
-const { poseidonHash2, getInstance, fromDecimals } = require('./utils')
+const { poseidonHash2, getInstance, fromDecimals, sleep } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
   netId,
@@ -264,7 +264,21 @@ async function submitTx(job, retry = 0) {
   } catch (e) {
     // todo this could result in duplicated error logs
     // todo handle a case where account tree is still not up to date (wait and retry)?
-    throw new Error(`Revert by smart contract ${e.message}`)
+    if (
+      job.data.type !== jobType.TORNADO_WITHDRAW &&
+      (e.message.indexOf('Outdated account merkle root') !== -1 ||
+        e.message.indexOf('Outdated tree update merkle root') !== -1)
+    ) {
+      if (retry < 5) {
+        await sleep(3000)
+        console.log('Tree is still not up to date, resubmitting')
+        await submitTx(job, retry + 1)
+      } else {
+        throw new Error('Tree update retry limit exceeded')
+      }
+    } else {
+      throw new Error(`Revert by smart contract ${e.message}`)
+    }
   }
 }
 
