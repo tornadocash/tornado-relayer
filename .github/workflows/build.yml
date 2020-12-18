@@ -64,7 +64,7 @@ jobs:
           debug: true
           format: markdown
 
-      - name: Telegram Notification
+      - name: Telegram Relayer Channel Notification
         uses: appleboy/telegram-action@0.0.7
         with:
           to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
