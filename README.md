@@ -4,7 +4,13 @@
 
 docker-compose.yml contains a stack that will automatically provision SSL certificates for your domain name and will add a https redirect to port 80.
 
-1. Download [docker-compose.yml](/docker-compose.yml) and [env.example](/env.example)
+1. Download [docker-compose.yml](/docker-compose.yml) and [.env.example](/.env.example)
+
+```
+wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/docker-compose.yml
+wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/.env.example -O .env
+```
+
 2. `mv .env.example .env`
 3. Setup environment variables
 
