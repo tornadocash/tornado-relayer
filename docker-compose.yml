@@ -47,14 +47,15 @@ services:
   #      PRIVATE_KEY: qwe
   #      REDIS_URL: redis://redis/0
 
-  #  # this container will proxy *.onion domain to the mainnet container
+  #  # this container will proxy *.onion domain to the server container
+  #  # if you want to run *only* as .onion service, you don't need `nginx`, `letsencrypt`, `dockergen` containers
   #  tor:
   #    image: strm/tor
   #    restart: always
-  #    depends_on: [mainnet]
+  #    depends_on: [server]
   #    environment:
   #      LISTEN_PORT: 80
-  #      REDIRECT: mainnet:8000
+  #      REDIRECT: server:8000
   #      # Generate a new key with
   #      # docker run --rm --entrypoint shallot strm/tor-hiddenservice-nginx ^foo
   #      PRIVATE_KEY: |
