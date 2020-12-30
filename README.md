@@ -28,8 +28,8 @@ docker-compose.yml contains a stack that will automatically provision SSL certif
 1. Download [docker-compose.yml](/docker-compose.yml) and [.env.example](/.env.example)
 
 ```
-wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/docker-compose.yml
-wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/.env.example -O .env
+wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/master/docker-compose.yml
+wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/master/.env.example -O .env
 ```
 
 2. Setup environment variables
@@ -60,6 +60,12 @@ wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/mining/.env.e
 4. `npm run start`
 5. Go to `http://127.0.0.1:8000`
 6. In order to execute withdraw request, you can run following command
+
+```bash
+curl -X POST -H 'content-type:application/json' --data '<input data>' http://127.0.0.1:8000/relay
+```
+
+Relayer should return a transaction hash
 
 In that case you will need to add https termination yourself because browsers with default settings will prevent https
 tornado.cash UI from submitting your request over http connection
