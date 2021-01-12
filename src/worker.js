@@ -21,6 +21,7 @@ const {
   privateKey,
   gasLimits,
   instances,
+  oracleRpcUrl,
   tornadoServiceFee,
   miningServiceFee,
 } = require('./config')
@@ -40,7 +41,7 @@ let minerContract
 let proxyContract
 const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
-const gasPriceOracle = new GasPriceOracle({ defaultRpc: httpRpcUrl })
+const gasPriceOracle = new GasPriceOracle({ defaultRpc: oracleRpcUrl })
 
 async function fetchTree() {
   const elements = await redis.get('tree:elements')
