@@ -24,4 +24,5 @@ module.exports = {
     [jobType.MINING_REWARD]: 800000,
     [jobType.MINING_WITHDRAW]: 800000,
   },
+  minimumBalance: 1000000000000000000,
 }

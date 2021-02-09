@@ -6,6 +6,10 @@ const redis = new Redis(redisUrl)
 
 async function status(req, res) {
   const ethPrices = await redis.hgetall('prices')
+  const health = await redis.hgetall('health')
+
+  const { waiting: currentQueue } = await queue.queue.getJobCounts()
+
   res.json({
     rewardAccount,
     instances: instances[`netId${netId}`],
@@ -14,6 +18,8 @@ async function status(req, res) {
     tornadoServiceFee,
     miningServiceFee,
     version,
+    health,
+    currentQueue,
   })
 }
 

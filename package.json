@@ -1,18 +1,19 @@
 {
   "name": "relay",
-  "version": "4.0.1",
+  "version": "4.0.2",
   "description": "Relayer for Tornado.cash privacy solution. https://tornado.cash",
   "scripts": {
     "server": "node src/server.js",
     "worker": "node src/worker",
     "treeWatcher": "node src/treeWatcher",
     "priceWatcher": "node src/priceWatcher",
+    "healthWatcher": "node src/healthWatcher",
     "eslint": "eslint --ext .js --ignore-path .gitignore .",
     "prettier:check": "npx prettier --check . --config .prettierrc",
     "prettier:fix": "npx prettier --write . --config .prettierrc",
     "lint": "yarn eslint && yarn prettier:check",
     "test": "mocha",
-    "start": "yarn server & yarn priceWatcher & yarn treeWatcher & yarn worker "
+    "start": "yarn server & yarn priceWatcher & yarn treeWatcher & yarn worker & yarn healthWatcher"
   },
   "author": "tornado.cash",
   "license": "MIT",
