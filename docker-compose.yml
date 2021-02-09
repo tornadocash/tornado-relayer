@@ -29,6 +29,15 @@ services:
       REDIS_URL: redis://redis/0
     depends_on: [redis]
 
+  healthWatcher:
+    image: tornadocash/relayer:mining
+    restart: always
+    command: healthWatcher
+    env_file: .env
+    environment:
+      REDIS_URL: redis://redis/0
+    depends_on: [redis]
+
   worker1:
     image: tornadocash/relayer:mining
     restart: always
