@@ -17,7 +17,6 @@ module.exports = {
   port: process.env.APP_PORT || 8000,
   tornadoServiceFee: Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE),
   miningServiceFee: Number(process.env.MINING_SERVICE_FEE),
-  tornEthPrice: process.env.TORN_ETH_PRICE || '7000000000000000',
   rewardAccount: process.env.REWARD_ACCOUNT,
   gasLimits: {
     [jobType.TORNADO_WITHDRAW]: 350000,
