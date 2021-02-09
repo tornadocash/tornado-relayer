@@ -41,7 +41,6 @@ wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/master/.env.e
    - set `PRIVATE_KEY` for your relayer address (without 0x prefix)
    - set `VIRTUAL_HOST` and `LETSENCRYPT_HOST` to your domain and add DNS record pointing to your relayer ip address
    - set `REGULAR_TORNADO_WITHDRAW_FEE` - fee in % that is used for tornado pool withdrawals
-   - set `TORN_ETH_PRICE` - TORN/ETH rate that relayer will use to calculate fee for mining claim and swap
    - set `MINING_SERVICE_FEE` - fee in % that is used for mining AP withdrawals
    - set `REWARD_ACCOUNT` - eth address that is used to collect fees
    - update `AGGREGATOR` if needed - Contract address of aggregator instance.

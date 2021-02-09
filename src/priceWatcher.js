@@ -1,5 +1,5 @@
 const Redis = require('ioredis')
-const { redisUrl, oracleAddress, oracleRpcUrl, tornEthPrice } = require('./config')
+const { redisUrl, oracleAddress, oracleRpcUrl } = require('./config')
 const { getArgsForOracle, setSafeInterval } = require('./utils')
 const redis = new Redis(redisUrl)
 const Web3 = require('web3')
@@ -15,7 +15,6 @@ async function main() {
     acc[currencyLookup[tokenAddresses[i]]] = price
     return acc
   }, {})
-  ethPrices.torn = tornEthPrice
   await redis.hmset('prices', ethPrices)
   console.log('Wrote following prices to redis', ethPrices)
 }
