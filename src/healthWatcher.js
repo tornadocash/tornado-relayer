@@ -14,7 +14,7 @@ async function main() {
     const balance = await web3.eth.getBalance(address)
 
     if (toBN(balance).lt(toBN(minimumBalance))) {
-      throw new Error(`Not enough balance, less than ${fromWei(minimumBalance.toString())} ETH`)
+      throw new Error(`Not enough balance, less than ${fromWei(minimumBalance)} ETH`)
     }
 
     await redis.hset('health', { status: true, error: '' })
