@@ -20,8 +20,8 @@ module.exports = {
   rewardAccount: process.env.REWARD_ACCOUNT,
   gasLimits: {
     [jobType.TORNADO_WITHDRAW]: 350000,
-    [jobType.MINING_REWARD]: 800000,
-    [jobType.MINING_WITHDRAW]: 800000,
+    [jobType.MINING_REWARD]: 455000,
+    [jobType.MINING_WITHDRAW]: 400000,
   },
-  minimumBalance: 1000000000000000000,
+  minimumBalance: '1000000000000000000',
 }
