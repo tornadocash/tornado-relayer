@@ -1,0 +1,22 @@
+[
+  {
+    "inputs": [
+      {
+        "components": [
+          { "internalType": "address", "name": "to", "type": "address" },
+          { "internalType": "bytes", "name": "data", "type": "bytes" }
+        ],
+        "internalType": "struct MultiCall.Call[]",
+        "name": "calls",
+        "type": "tuple[]"
+      }
+    ],
+    "name": "multicall",
+    "outputs": [
+      { "internalType": "bytes[]", "name": "results", "type": "bytes[]" },
+      { "internalType": "bool[]", "name": "success", "type": "bool[]" }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]

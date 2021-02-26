@@ -1,0 +1,12 @@
+[
+  {
+    "inputs": [
+      { "internalType": "contract IERC20", "name": "srcToken", "type": "address" },
+      { "internalType": "contract IERC20", "name": "dstToken", "type": "address" }
+    ],
+    "name": "getRate",
+    "outputs": [{ "internalType": "uint256", "name": "weightedRate", "type": "uint256" }],
+    "stateMutability": "view",
+    "type": "function"
+  }
+]
