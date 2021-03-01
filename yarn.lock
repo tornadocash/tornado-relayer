@@ -483,9 +483,9 @@
     "@ethersproject/strings" "^5.0.4"
 
 "@openzeppelin/contracts@^3.1.0":
-  version "3.2.0"
-  resolved "https://registry.yarnpkg.com/@openzeppelin/contracts/-/contracts-3.2.0.tgz#3e6b3a7662d8ed64271ade96ef42655db983fd9d"
-  integrity sha512-bUOmkSoPkjnUyMiKo6RYnb0VHBk5D9KKDAgNLzF41aqAM3TeE0yGdFF5dVRcV60pZdJLlyFT/jjXIZCWyyEzAQ==
+  version "3.4.0"
+  resolved "https://registry.npmjs.org/@openzeppelin/contracts/-/contracts-3.4.0.tgz#9a1669ad5f9fdfb6e273bb5a4fed10cb4cc35eb0"
+  integrity sha512-qh+EiHWzfY/9CORr+eRUkeEUP1WiFUcq3974bLHwyYzLBUtK6HPaMkIUHi74S1rDTZ0sNz42DwPc5A4IJvN3rg==
 
 "@sindresorhus/is@^0.14.0":
   version "0.14.0"
@@ -816,10 +816,15 @@ bn.js@^4.0.0, bn.js@^4.1.0, bn.js@^4.10.0, bn.js@^4.11.0, bn.js@^4.11.1, bn.js@^
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.9.tgz#26d556829458f9d1e81fc48952493d0ba3507828"
   integrity sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==
 
-bn.js@^5.1.1, bn.js@^5.1.2:
+bn.js@^5.1.1:
   version "5.1.3"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-5.1.3.tgz#beca005408f642ebebea80b042b4d18d2ac0ee6b"
   integrity sha512-GkTiFpjFtUzU9CbMeJ5iazkCzGL3jrhzerzZIuqLABjbwRaFt33I9tUdSNryIptM+RxDet6OKm2WnLXzW51KsQ==
+
+bn.js@^5.1.2:
+  version "5.2.0"
+  resolved "https://registry.npmjs.org/bn.js/-/bn.js-5.2.0.tgz#358860674396c6997771a9d051fcc1b57d4ae002"
+  integrity sha512-D7iWRBvnZE8ecXiLj/9wbxH7Tk79fAh8IHaTNq1RWRixsS02W+5qS+iE9yq6RYl0asXx5tw0bLhmT5pIfbSquw==
 
 body-parser@1.19.0, body-parser@^1.16.0:
   version "1.19.0"
@@ -1941,9 +1946,9 @@ ethereumjs-util@^6.0.0:
     rlp "^2.2.3"
 
 ethereumjs-util@^7.0.3:
-  version "7.0.6"
-  resolved "https://registry.yarnpkg.com/ethereumjs-util/-/ethereumjs-util-7.0.6.tgz#ce4a6391a163cd1f2217b5276273f83bdacc7ab2"
-  integrity sha512-E9aJ9W7XZkcBqIblfstBU+0nGSjF9Dz/Ps7s1NTFOgDZM8pwD+nX1P1GBJeSqB6Osxhj2UtuxVCqjvmrj2svzw==
+  version "7.0.8"
+  resolved "https://registry.npmjs.org/ethereumjs-util/-/ethereumjs-util-7.0.8.tgz#5258762b7b17e3d828e41834948363ff0a703ffd"
+  integrity sha512-JJt7tDpCAmDPw/sGoFYeq0guOVqT3pTE9xlEbBmc/nlCij3JRCoS2c96SQ6kXVHOT3xWUNLDm5QCJLQaUnVAtQ==
   dependencies:
     "@types/bn.js" "^4.11.3"
     bn.js "^5.1.2"
@@ -4311,13 +4316,12 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-torn-token@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/torn-token/-/torn-token-1.0.0.tgz#73e47025646c3e07ab733afbf7aa53b6ab9cad55"
-  integrity sha512-BRzt3fy4211jCb64cWyOb5/NMGt9M9EV2ZFnGQYMubKrVkszoYm97Nex+EBa0mvV2KfXzCmJ6tehoDgOFAPGug==
+torn-token@1.0.2:
+  version "1.0.2"
+  resolved "https://registry.npmjs.org/torn-token/-/torn-token-1.0.2.tgz#4ecf7f10ed9fcbf9b628f00c14f5f3a117cab4f3"
+  integrity sha512-wdQFKXxj2QDA2iovceKEozoi0VfpyEVwAOuBj24l174mPpqVCPnyXbvaL+A36+izfUPDcekq1N++un1155LCdg==
   dependencies:
     "@openzeppelin/contracts" "^3.1.0"
-    dotenv "^8.2.0"
     eth-sig-util "^2.5.3"
     ethereumjs-util "^7.0.3"
     web3 "^1.2.11"
