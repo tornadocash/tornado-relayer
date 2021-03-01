@@ -29,7 +29,7 @@
     "gas-price-oracle": "^0.2.2",
     "ioredis": "^4.14.1",
     "node-fetch": "^2.6.0",
-    "torn-token": "1.0.2",
+    "torn-token": "1.0.3",
     "tornado-cash-anonymity-mining": "^1.0.0",
     "tx-manager": "^0.2.9",
     "uuid": "^8.3.0",
