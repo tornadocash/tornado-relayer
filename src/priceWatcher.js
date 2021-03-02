@@ -3,9 +3,11 @@ const { redisUrl, offchainOracleAddress, oracleRpcUrl } = require('./config')
 const { getArgsForOracle, setSafeInterval } = require('./utils')
 const redis = new Redis(redisUrl)
 const Web3 = require('web3')
-const web3 = new Web3(oracleRpcUrl, {
-  timeout: 200000, // ms
-})
+const web3 = new Web3(
+  new Web3.providers.HttpProvider(oracleRpcUrl, {
+    timeout: 200000, // ms
+  }),
+)
 
 const offchainOracleABI = require('../abis/OffchainOracle.abi.json')
 
