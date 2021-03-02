@@ -3,7 +3,7 @@ const { poseidon } = require('circomlib')
 const { toBN, toChecksumAddress, BN } = require('web3-utils')
 
 const TORN_TOKEN = {
-  tokenAddress: '0x77777feddddffc19ff86db637967013e6c6a116c',
+  tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
   symbol: 'TORN',
   decimals: 18,
 }

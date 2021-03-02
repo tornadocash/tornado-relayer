@@ -22,13 +22,17 @@ let tree, eventSubscription, blockSubscription
 
 // todo handle the situation when we have two rewards in one block
 async function fetchEvents(from = 0, to = 'latest') {
-  const events = await contract.getPastEvents('NewAccount', {
-    fromBlock: from,
-    toBlock: to,
-  })
-  return events
-    .sort((a, b) => a.returnValues.index - b.returnValues.index)
-    .map(e => toBN(e.returnValues.commitment))
+  try {
+    const events = await contract.getPastEvents('NewAccount', {
+      fromBlock: from,
+      toBlock: to,
+    })
+    return events
+      .sort((a, b) => a.returnValues.index - b.returnValues.index)
+      .map(e => toBN(e.returnValues.commitment))
+  } catch (e) {
+    console.error('error fetching events', e)
+  }
 }
 
 async function processNewEvent(err, event) {
@@ -95,16 +99,20 @@ async function rebuild() {
 }
 
 async function init() {
-  console.log('Initializing')
-  const miner = await resolver.resolve(torn.miningV2.address)
-  contract = new web3.eth.Contract(MinerABI, miner)
-  const block = await web3.eth.getBlockNumber()
-  const events = await fetchEvents(0, block)
-  tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })
-  console.log(`Rebuilt tree with ${events.length} elements, root: ${tree.root()}`)
-  eventSubscription = contract.events.NewAccount({ fromBlock: block + 1 }, processNewEvent)
-  blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
-  await updateRedis()
+  try {
+    console.log('Initializing')
+    const miner = await resolver.resolve(torn.miningV2.address)
+    contract = new web3.eth.Contract(MinerABI, miner)
+    const block = await web3.eth.getBlockNumber()
+    const events = await fetchEvents(0, block)
+    tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })
+    console.log(`Rebuilt tree with ${events.length} elements, root: ${tree.root()}`)
+    eventSubscription = contract.events.NewAccount({ fromBlock: block + 1 }, processNewEvent)
+    blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
+    await updateRedis()
+  } catch (e) {
+    console.error('error on init treeWatcher', e.message)
+  }
 }
 
 init()

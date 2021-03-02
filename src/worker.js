@@ -74,26 +74,30 @@ async function fetchTree() {
 }
 
 async function start() {
-  web3 = new Web3(httpRpcUrl)
-  const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
-  txManager = new TxManager({
-    privateKey,
-    rpcUrl: httpRpcUrl,
-    config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false },
-  })
-  swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
-  minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
-  proxyContract = new web3.eth.Contract(tornadoProxyABI, await resolver.resolve(torn.tornadoProxy.address))
-  redisSubscribe.subscribe('treeUpdate', fetchTree)
-  await fetchTree()
-  const provingKeys = {
-    treeUpdateCircuit: require('../keys/TreeUpdate.json'),
-    treeUpdateProvingKey: fs.readFileSync('./keys/TreeUpdate_proving_key.bin').buffer,
+  try {
+    web3 = new Web3(httpRpcUrl)
+    const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
+    txManager = new TxManager({
+      privateKey,
+      rpcUrl: httpRpcUrl,
+      config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false },
+    })
+    swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
+    minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
+    proxyContract = new web3.eth.Contract(tornadoProxyABI, await resolver.resolve(torn.tornadoProxy.address))
+    redisSubscribe.subscribe('treeUpdate', fetchTree)
+    await fetchTree()
+    const provingKeys = {
+      treeUpdateCircuit: require('../keys/TreeUpdate.json'),
+      treeUpdateProvingKey: fs.readFileSync('./keys/TreeUpdate_proving_key.bin').buffer,
+    }
+    controller = new Controller({ provingKeys })
+    await controller.init()
+    queue.process(processJob)
+    console.log('Worker started')
+  } catch (e) {
+    console.error('error on start worker', e.message)
   }
-  controller = new Controller({ provingKeys })
-  await controller.init()
-  queue.process(processJob)
-  console.log('Worker started')
 }
 
 function checkFee({ data }) {
