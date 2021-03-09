@@ -211,6 +211,7 @@ async function getTxObject({ data }) {
       value: data.args[5],
       to: contract._address,
       data: calldata,
+      gasLimit: gasLimits[data.type],
     }
   } else {
     const method = data.type === jobType.MINING_REWARD ? 'reward' : 'withdraw'
@@ -218,6 +219,7 @@ async function getTxObject({ data }) {
     return {
       to: minerContract._address,
       data: calldata,
+      gasLimit: gasLimits[data.type],
     }
   }
 }
