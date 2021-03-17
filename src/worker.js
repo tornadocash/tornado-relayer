@@ -1,35 +1,34 @@
 const fs = require('fs')
 const Web3 = require('web3')
-const { toBN, toWei, fromWei } = require('web3-utils')
+const { toBN, toWei, fromWei, toChecksumAddress } = require('web3-utils')
 const MerkleTree = require('fixed-merkle-tree')
 const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
-const { Utils } = require('tornado-cash-anonymity-mining')
+const { Utils, Controller } = require('tornado-anonymity-mining')
 
-const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
-const tornadoABI = require('../abis/tornadoABI.json')
-const miningABI = require('../abis/mining.abi.json')
 const swapABI = require('../abis/swap.abi.json')
+const miningABI = require('../abis/mining.abi.json')
+const tornadoABI = require('../abis/tornadoABI.json')
+const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
 const { queue } = require('./queue')
 const { poseidonHash2, getInstance, fromDecimals, sleep } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
-  netId,
   torn,
-  httpRpcUrl,
+  netId,
   redisUrl,
-  privateKey,
   gasLimits,
   instances,
+  privateKey,
+  httpRpcUrl,
   oracleRpcUrl,
-  tornadoProxy,
-  tornadoServiceFee,
   miningServiceFee,
+  tornadoServiceFee,
+  tornadoGoerliProxy,
 } = require('./config')
 const ENSResolver = require('./resolver')
 const resolver = new ENSResolver()
 const { TxManager } = require('tx-manager')
-const { Controller } = require('tornado-cash-anonymity-mining')
 
 let web3
 let currentTx
@@ -39,7 +38,6 @@ let txManager
 let controller
 let swap
 let minerContract
-let proxyContract
 const redis = new Redis(redisUrl)
 const redisSubscribe = new Redis(redisUrl)
 const gasPriceOracle = new GasPriceOracle({ defaultRpc: oracleRpcUrl })
@@ -85,14 +83,6 @@ async function start() {
     })
     swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
     minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
-    if (netId === 5) {
-      proxyContract = new web3.eth.Contract(tornadoProxyABI, tornadoProxy)
-    } else {
-      proxyContract = new web3.eth.Contract(
-        tornadoProxyABI,
-        await resolver.resolve(torn.tornadoProxy.address),
-      )
-    }
     redisSubscribe.subscribe('treeUpdate', fetchTree)
     await fetchTree()
     const provingKeys = {
@@ -184,16 +174,37 @@ async function checkMiningFee({ args }) {
   }
 }
 
-function getTxObject({ data }) {
+async function getProxyContract() {
+  let proxyAddress = await resolver.resolve(torn.tornadoProxy.address)
+
+  if (netId === 5) {
+    proxyAddress = tornadoGoerliProxy
+  }
+
+  const contract = new web3.eth.Contract(tornadoProxyABI, proxyAddress)
+
+  return {
+    contract,
+    isOldProxy: checkOldProxy(proxyAddress),
+  }
+}
+
+function checkOldProxy(address) {
+  const OLD_PROXY = '0x905b63Fff465B9fFBF41DeA908CEb12478ec7601'
+  return toChecksumAddress(address) === OLD_PROXY
+}
+
+async function getTxObject({ data }) {
   if (data.type === jobType.TORNADO_WITHDRAW) {
-    let contract, calldata
-    if (getInstance(data.contract).currency === 'eth') {
-      contract = proxyContract
-      calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
-    } else {
+    let { contract, isOldProxy } = await getProxyContract()
+
+    let calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
+
+    if (isOldProxy && getInstance(data.contract).currency !== 'eth') {
       contract = new web3.eth.Contract(tornadoABI, data.contract)
       calldata = contract.methods.withdraw(data.proof, ...data.args).encodeABI()
     }
+
     return {
       value: data.args[5],
       to: contract._address,
@@ -241,7 +252,7 @@ async function processJob(job) {
 
 async function submitTx(job, retry = 0) {
   await checkFee(job)
-  currentTx = await txManager.createTx(getTxObject(job))
+  currentTx = await txManager.createTx(await getTxObject(job))
 
   if (job.data.type !== jobType.TORNADO_WITHDRAW) {
     await fetchTree()
