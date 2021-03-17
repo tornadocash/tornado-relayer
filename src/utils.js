@@ -2,10 +2,12 @@ const { instances, netId } = require('./config')
 const { poseidon } = require('circomlib')
 const { toBN, toChecksumAddress, BN } = require('web3-utils')
 
-const TORN_TOKEN = {
-  tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
-  symbol: 'TORN',
-  decimals: 18,
+const TOKENS = {
+  torn: {
+    tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
+    symbol: 'TORN',
+    decimals: 18,
+  },
 }
 
 const sleep = ms => new Promise(res => setTimeout(res, ms))
@@ -52,7 +54,7 @@ function when(source, event) {
 function getArgsForOracle() {
   const tokens = {
     ...instances.netId1,
-    torn: TORN_TOKEN,
+    ...TOKENS,
   }
   const tokenAddresses = []
   const oneUintAmount = []
