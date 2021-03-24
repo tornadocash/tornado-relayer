@@ -22,6 +22,7 @@ const {
   gasLimits,
   instances,
   oracleRpcUrl,
+  tornadoProxy,
   tornadoServiceFee,
   miningServiceFee,
 } = require('./config')
@@ -84,7 +85,14 @@ async function start() {
     })
     swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
     minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
-    proxyContract = new web3.eth.Contract(tornadoProxyABI, await resolver.resolve(torn.tornadoProxy.address))
+    if (netId === 5) {
+      proxyContract = new web3.eth.Contract(tornadoProxyABI, tornadoProxy)
+    } else {
+      proxyContract = new web3.eth.Contract(
+        tornadoProxyABI,
+        await resolver.resolve(torn.tornadoProxy.address),
+      )
+    }
     redisSubscribe.subscribe('treeUpdate', fetchTree)
     await fetchTree()
     const provingKeys = {

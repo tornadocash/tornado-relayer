@@ -23,5 +23,6 @@ module.exports = {
     [jobType.MINING_REWARD]: 455000,
     [jobType.MINING_WITHDRAW]: 400000,
   },
+  tornadoProxy: '0x454d870a72e29d5E5697f635128D18077BD04C60',
   minimumBalance: '1000000000000000000',
 }
