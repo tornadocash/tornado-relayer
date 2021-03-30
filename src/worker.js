@@ -175,10 +175,12 @@ async function checkMiningFee({ args }) {
 }
 
 async function getProxyContract() {
-  let proxyAddress = await resolver.resolve(torn.tornadoProxy.address)
+  let proxyAddress
 
   if (netId === 5) {
     proxyAddress = tornadoGoerliProxy
+  } else {
+    proxyAddress = await resolver.resolve(torn.tornadoProxy.address)
   }
 
   const contract = new web3.eth.Contract(tornadoProxyABI, proxyAddress)
@@ -191,7 +193,7 @@ async function getProxyContract() {
 
 function checkOldProxy(address) {
   const OLD_PROXY = '0x905b63Fff465B9fFBF41DeA908CEb12478ec7601'
-  return toChecksumAddress(address) === OLD_PROXY
+  return toChecksumAddress(address) === toChecksumAddress(OLD_PROXY)
 }
 
 async function getTxObject({ data }) {
