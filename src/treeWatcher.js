@@ -18,6 +18,7 @@ const web3 = new Web3(
 const MinerABI = require('../abis/mining.abi.json')
 let contract
 
+// eslint-disable-next-line no-unused-vars
 let tree, eventSubscription, blockSubscription
 
 // todo handle the situation when we have two rewards in one block
