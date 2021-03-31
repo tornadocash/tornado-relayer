@@ -59,7 +59,7 @@ async function processNewEvent(err, event) {
     await updateRedis()
   } else {
     console.log(`Invalid element index ${index}, rebuilding tree`)
-    await rebuild()
+    rebuild()
   }
 }
 
@@ -77,7 +77,7 @@ async function updateRedis() {
   const rootOnContract = await contract.methods.getLastAccountRoot().call()
   if (!tree.root().eq(toBN(rootOnContract))) {
     console.log(`Invalid tree root: ${tree.root()} != ${toBN(rootOnContract)}, rebuilding tree`)
-    await rebuild()
+    rebuild()
     return
   }
   const rootInRedis = await redis.get('tree:root')
@@ -92,10 +92,11 @@ async function updateRedis() {
   }
 }
 
-async function rebuild() {
-  await eventSubscription.unsubscribe()
-  await blockSubscription.unsubscribe()
-  setTimeout(init, 3000)
+function rebuild() {
+  process.exit(1)
+  // await eventSubscription.unsubscribe()
+  // await blockSubscription.unsubscribe()
+  // setTimeout(init, 3000)
 }
 
 async function init() {
@@ -106,10 +107,10 @@ async function init() {
     const block = await web3.eth.getBlockNumber()
     const events = await fetchEvents(0, block)
     tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })
+    await updateRedis()
     console.log(`Rebuilt tree with ${events.length} elements, root: ${tree.root()}`)
     eventSubscription = contract.events.NewAccount({ fromBlock: block + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
-    await updateRedis()
   } catch (e) {
     console.error('error on init treeWatcher', e.message)
   }
