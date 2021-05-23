@@ -114,7 +114,7 @@ async function checkTornadoFee({ args, contract }) {
   const ethPrice = await redis.hget('prices', currency)
   const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
   const feePercent = toBN(fromDecimals(amount, decimals))
-    .mul(toBN(tornadoServiceFee * 1e10))
+    .mul(toBN(parseInt(tornadoServiceFee * 1e10)))
     .div(toBN(1e10 * 100))
   let desiredFee
   switch (currency) {
@@ -159,7 +159,7 @@ async function checkMiningFee({ args }) {
     ? toBN(0)
     : toBN(args.amount)
         .sub(providedFee) // args.amount includes fee
-        .mul(toBN(miningServiceFee * 1e10))
+        .mul(toBN(parseInt(miningServiceFee * 1e10)))
         .div(toBN(1e10 * 100))
   /* eslint-enable */
   const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
