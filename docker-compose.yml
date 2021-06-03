@@ -2,7 +2,7 @@ version: '2'
 
 services:
   server:
-    image: tornadocash/relayer:mining
+    image: tornadocash/relayer:light
     restart: always
     command: server
     env_file: .env
@@ -11,26 +11,8 @@ services:
       nginx_proxy_read_timeout: 600
     depends_on: [redis]
 
-  treeWatcher:
-    image: tornadocash/relayer:mining
-    restart: always
-    command: treeWatcher
-    env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [redis]
-
-  priceWatcher:
-    image: tornadocash/relayer:mining
-    restart: always
-    command: priceWatcher
-    env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [redis]
-
   healthWatcher:
-    image: tornadocash/relayer:mining
+    image: tornadocash/relayer:light
     restart: always
     command: healthWatcher
     env_file: .env
@@ -39,7 +21,7 @@ services:
     depends_on: [redis]
 
   worker1:
-    image: tornadocash/relayer:mining
+    image: tornadocash/relayer:light
     restart: always
     command: worker
     env_file: .env
@@ -48,7 +30,7 @@ services:
     depends_on: [redis]
 
   #  worker2:
-  #    image: tornadocash/relayer:mining
+  #    image: tornadocash/relayer:light
   #    restart: always
   #    command: worker
   #    env_file: .env

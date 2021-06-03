@@ -30,8 +30,6 @@ app.get('/v1/jobs/:id', status.getJob)
 app.post('/v1/tornadoWithdraw', controller.tornadoWithdraw)
 app.get('/status', status.status)
 app.post('/relay', controller.tornadoWithdraw)
-app.post('/v1/miningReward', controller.miningReward)
-app.post('/v1/miningWithdraw', controller.miningWithdraw)
 
 if (!isAddress(rewardAccount)) {
   throw new Error('No REWARD_ACCOUNT specified')

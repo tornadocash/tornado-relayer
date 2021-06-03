@@ -1,29 +1,26 @@
 require('dotenv').config()
 
-const { jobType } = require('./constants')
-const tornConfig = require('torn-token')
+const { jobType, networkConfig } = require('./constants')
+
+const netId = Number(process.env.NET_ID) || 56
+const { instances, gasPrices, nativeCurrency, proxyLight } = networkConfig[`netId${netId}`]
+
 module.exports = {
-  netId: Number(process.env.NET_ID) || 1,
+  netId,
   redisUrl: process.env.REDIS_URL || 'redis://127.0.0.1:6379',
   httpRpcUrl: process.env.HTTP_RPC_URL,
-  wsRpcUrl: process.env.WS_RPC_URL,
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
-  offchainOracleAddress: '0x080AB73787A8B13EC7F40bd7d00d6CC07F9b24d0',
-  aggregatorAddress: process.env.AGGREGATOR,
   minerMerkleTreeHeight: 20,
   privateKey: process.env.PRIVATE_KEY,
-  instances: tornConfig.instances,
-  torn: tornConfig,
+  instances,
   port: process.env.APP_PORT || 8000,
   tornadoServiceFee: Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE),
-  miningServiceFee: Number(process.env.MINING_SERVICE_FEE),
   rewardAccount: process.env.REWARD_ACCOUNT,
-  tornadoGoerliProxy: '0x454d870a72e29d5E5697f635128D18077BD04C60',
+  gasPrices,
   gasLimits: {
     [jobType.TORNADO_WITHDRAW]: 390000,
-    WITHDRAW_WITH_EXTRA: 480000,
-    [jobType.MINING_REWARD]: 455000,
-    [jobType.MINING_WITHDRAW]: 400000,
   },
-  minimumBalance: '1000000000000000000',
+  proxyLight,
+  nativeCurrency,
+  minimumBalance: '500000000000000000', // 0.5
 }

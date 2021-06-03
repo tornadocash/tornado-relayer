@@ -1,22 +1,19 @@
 const queue = require('./queue')
-const { netId, tornadoServiceFee, miningServiceFee, instances, redisUrl, rewardAccount } = require('./config')
+const { netId, tornadoServiceFee, instances, redisUrl, rewardAccount } = require('./config')
 const { version } = require('../package.json')
 const Redis = require('ioredis')
 const redis = new Redis(redisUrl)
 
 async function status(req, res) {
-  const ethPrices = await redis.hgetall('prices')
   const health = await redis.hgetall('health')
 
   const { waiting: currentQueue } = await queue.queue.getJobCounts()
 
   res.json({
     rewardAccount,
-    instances: instances[`netId${netId}`],
+    instances,
     netId,
-    ethPrices,
     tornadoServiceFee,
-    miningServiceFee,
     version,
     health,
     currentQueue,

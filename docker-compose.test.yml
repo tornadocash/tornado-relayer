@@ -15,19 +15,10 @@ services:
       nginx_proxy_read_timeout: 600
     depends_on: [redis]
 
-  treeWatcher:
+  healthWatcher:
     image: tornadocash/relayer
     restart: always
-    command: treeWatcher
-    env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [redis]
-
-  priceWatcher:
-    image: tornadocash/relayer
-    restart: always
-    command: priceWatcher
+    command: healthWatcher
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0

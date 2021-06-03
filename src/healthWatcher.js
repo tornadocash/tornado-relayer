@@ -3,7 +3,14 @@ const Redis = require('ioredis')
 const { toBN, fromWei } = require('web3-utils')
 
 const { setSafeInterval } = require('./utils')
-const { redisUrl, httpRpcUrl, privateKey, minimumBalance } = require('./config')
+const {
+  redisUrl,
+  httpRpcUrl,
+  privateKey,
+  minimumBalance,
+  nativeCurrency,
+  instances,
+} = require('./config')
 
 const web3 = new Web3(httpRpcUrl)
 const redis = new Redis(redisUrl)
@@ -14,7 +21,8 @@ async function main() {
     const balance = await web3.eth.getBalance(address)
 
     if (toBN(balance).lt(toBN(minimumBalance))) {
-      throw new Error(`Not enough balance, less than ${fromWei(minimumBalance)} ETH`)
+      const currency = instances[nativeCurrency].symbol
+      throw new Error(`Not enough balance, less than ${fromWei(minimumBalance)} ${currency}`)
     }
 
     await redis.hset('health', { status: true, error: '' })

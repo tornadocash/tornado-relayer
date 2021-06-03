@@ -1,96 +1,50 @@
-const fs = require('fs')
 const Web3 = require('web3')
-const { toBN, toWei, fromWei, toChecksumAddress } = require('web3-utils')
-const MerkleTree = require('fixed-merkle-tree')
-const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
-const { Utils, Controller } = require('tornado-anonymity-mining')
+const { toBN, toWei, fromWei } = require('web3-utils')
 
-const swapABI = require('../abis/swap.abi.json')
-const miningABI = require('../abis/mining.abi.json')
-const tornadoABI = require('../abis/tornadoABI.json')
-const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
+const proxyLightABI = require('../abis/proxyLightABI.json')
 const { queue } = require('./queue')
-const { poseidonHash2, getInstance, fromDecimals, sleep } = require('./utils')
+const { getInstance, fromDecimals } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
-  torn,
   netId,
-  redisUrl,
+  gasPrices,
   gasLimits,
   instances,
   privateKey,
+  proxyLight,
   httpRpcUrl,
-  oracleRpcUrl,
-  miningServiceFee,
   tornadoServiceFee,
-  tornadoGoerliProxy,
 } = require('./config')
-const ENSResolver = require('./resolver')
-const resolver = new ENSResolver()
 const { TxManager } = require('tx-manager')
 
 let web3
 let currentTx
 let currentJob
-let tree
 let txManager
-let controller
-let swap
-let minerContract
-const redis = new Redis(redisUrl)
-const redisSubscribe = new Redis(redisUrl)
-const gasPriceOracle = new GasPriceOracle({ defaultRpc: oracleRpcUrl })
+let gasPriceOracle
 
-async function fetchTree() {
-  const elements = await redis.get('tree:elements')
-  const convert = (_, val) => (typeof val === 'string' ? toBN(val) : val)
-  tree = MerkleTree.deserialize(JSON.parse(elements, convert), poseidonHash2)
-
-  if (currentTx && currentJob && ['MINING_REWARD', 'MINING_WITHDRAW'].includes(currentJob.data.type)) {
-    const { proof, args } = currentJob.data
-    if (toBN(args.account.inputRoot).eq(toBN(tree.root()))) {
-      console.log('Account root is up to date. Skipping Root Update operation...')
-      return
-    } else {
-      console.log('Account root is outdated. Starting Root Update operation...')
-    }
-
-    const update = await controller.treeUpdate(args.account.outputCommitment, tree)
-
-    const minerAddress = await resolver.resolve(torn.miningV2.address)
-    const instance = new web3.eth.Contract(miningABI, minerAddress)
-    const data =
-      currentJob.data.type === 'MINING_REWARD'
-        ? instance.methods.reward(proof, args, update.proof, update.args).encodeABI()
-        : instance.methods.withdraw(proof, args, update.proof, update.args).encodeABI()
-    await currentTx.replace({
-      to: minerAddress,
-      data,
-    })
-    console.log('replaced pending tx')
-  }
-}
-
-async function start() {
+function start() {
   try {
     web3 = new Web3(httpRpcUrl)
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
+    let gasPriceOracleConfig = {}
+
+    if (netId === 56) {
+      gasPriceOracleConfig = {
+        chainId: netId,
+        defaultFallbackGasPrices: gasPrices,
+      }
+      gasPriceOracle = new GasPriceOracle(gasPriceOracleConfig)
+    }
+
     txManager = new TxManager({
       privateKey,
       rpcUrl: httpRpcUrl,
       config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false },
+      gasPriceOracleConfig,
     })
-    swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
-    minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
-    redisSubscribe.subscribe('treeUpdate', fetchTree)
-    await fetchTree()
-    const provingKeys = {
-      treeUpdateCircuit: require('../keys/TreeUpdate.json'),
-      treeUpdateProvingKey: fs.readFileSync('./keys/TreeUpdate_proving_key.bin').buffer,
-    }
-    controller = new Controller({ provingKeys })
-    await controller.init()
+
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
@@ -98,39 +52,23 @@ async function start() {
   }
 }
 
-function checkFee({ data }) {
-  if (data.type === jobType.TORNADO_WITHDRAW) {
-    return checkTornadoFee(data)
-  }
-  return checkMiningFee(data)
-}
-
 async function checkTornadoFee({ args, contract }) {
   const { currency, amount } = getInstance(contract)
-  const { decimals } = instances[`netId${netId}`][currency]
-  const [fee, refund] = [args[4], args[5]].map(toBN)
-  const { fast } = await gasPriceOracle.gasPrices()
+  const { decimals } = instances[currency]
+  const fee = toBN(args[4])
+  let { fast } = gasPrices
 
-  const ethPrice = await redis.hget('prices', currency)
+  if (gasPriceOracle) {
+    // eslint-disable-next-line no-extra-semi
+    ;({ fast } = await gasPriceOracle.gasPrices())
+  }
+
   const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
   const feePercent = toBN(fromDecimals(amount, decimals))
     .mul(toBN(parseInt(tornadoServiceFee * 1e10)))
     .div(toBN(1e10 * 100))
-  let desiredFee
-  switch (currency) {
-    case 'eth': {
-      desiredFee = expense.add(feePercent)
-      break
-    }
-    default: {
-      desiredFee = expense
-        .add(refund)
-        .mul(toBN(10 ** decimals))
-        .div(toBN(ethPrice))
-      desiredFee = desiredFee.add(feePercent)
-      break
-    }
-  }
+  const desiredFee = expense.add(feePercent)
+
   console.log(
     'sent fee, desired fee, feePercent',
     fromWei(fee.toString()),
@@ -142,99 +80,16 @@ async function checkTornadoFee({ args, contract }) {
   }
 }
 
-async function checkMiningFee({ args }) {
-  const { fast } = await gasPriceOracle.gasPrices()
-  const ethPrice = await redis.hget('prices', 'torn')
-  const isMiningReward = currentJob.data.type === jobType.MINING_REWARD
-  const providedFee = isMiningReward ? toBN(args.fee) : toBN(args.extData.fee)
+function getTxObject({ data }) {
+  const contract = new web3.eth.Contract(proxyLightABI, proxyLight)
 
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[currentJob.data.type]))
-  const expenseInTorn = expense.mul(toBN(1e18)).div(toBN(ethPrice))
-  // todo make aggregator for ethPrices and rewardSwap data
-  const balance = await swap.methods.tornVirtualBalance().call()
-  const poolWeight = await swap.methods.poolWeight().call()
-  const expenseInPoints = Utils.reverseTornadoFormula({ balance, tokens: expenseInTorn, poolWeight })
-  /* eslint-disable */
-  const serviceFeePercent = isMiningReward
-    ? toBN(0)
-    : toBN(args.amount)
-        .sub(providedFee) // args.amount includes fee
-        .mul(toBN(parseInt(miningServiceFee * 1e10)))
-        .div(toBN(1e10 * 100))
-  /* eslint-enable */
-  const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
-  console.log(
-    'user provided fee, desired fee, serviceFeePercent',
-    providedFee.toString(),
-    desiredFee.toString(),
-    serviceFeePercent.toString(),
-  )
-  if (toBN(providedFee).lt(desiredFee)) {
-    throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
-  }
-}
-
-async function getProxyContract() {
-  let proxyAddress
-
-  if (netId === 5) {
-    proxyAddress = tornadoGoerliProxy
-  } else {
-    proxyAddress = await resolver.resolve(torn.tornadoProxy.address)
-  }
-
-  const contract = new web3.eth.Contract(tornadoProxyABI, proxyAddress)
+  const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
 
   return {
-    contract,
-    isOldProxy: checkOldProxy(proxyAddress),
-  }
-}
-
-function checkOldProxy(address) {
-  const OLD_PROXY = '0x905b63Fff465B9fFBF41DeA908CEb12478ec7601'
-  return toChecksumAddress(address) === toChecksumAddress(OLD_PROXY)
-}
-
-async function getTxObject({ data }) {
-  if (data.type === jobType.TORNADO_WITHDRAW) {
-    let { contract, isOldProxy } = await getProxyContract()
-
-    let calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
-
-    if (isOldProxy && getInstance(data.contract).currency !== 'eth') {
-      contract = new web3.eth.Contract(tornadoABI, data.contract)
-      calldata = contract.methods.withdraw(data.proof, ...data.args).encodeABI()
-    }
-
-    return {
-      value: data.args[5],
-      to: contract._address,
-      data: calldata,
-      gasLimit: gasLimits['WITHDRAW_WITH_EXTRA'],
-    }
-  } else {
-    const method = data.type === jobType.MINING_REWARD ? 'reward' : 'withdraw'
-    const calldata = minerContract.methods[method](data.proof, data.args).encodeABI()
-    return {
-      to: minerContract._address,
-      data: calldata,
-      gasLimit: gasLimits[data.type],
-    }
-  }
-}
-
-async function isOutdatedTreeRevert(receipt, currentTx) {
-  try {
-    await web3.eth.call(currentTx.tx, receipt.blockNumber)
-    console.log('Simulated call successful')
-    return false
-  } catch (e) {
-    console.log('Decoded revert reason:', e.message)
-    return (
-      e.message.indexOf('Outdated account merkle root') !== -1 ||
-      e.message.indexOf('Outdated tree update merkle root') !== -1
-    )
+    value: data.args[5],
+    to: contract._address,
+    data: calldata,
+    gasLimit: gasLimits[jobType.TORNADO_WITHDRAW],
   }
 }
 
@@ -254,13 +109,9 @@ async function processJob(job) {
   }
 }
 
-async function submitTx(job, retry = 0) {
-  await checkFee(job)
+async function submitTx(job) {
+  await checkTornadoFee(job.data)
   currentTx = await txManager.createTx(await getTxObject(job))
-
-  if (job.data.type !== jobType.TORNADO_WITHDRAW) {
-    await fetchTree()
-  }
 
   try {
     const receipt = await currentTx
@@ -278,35 +129,12 @@ async function submitTx(job, retry = 0) {
     if (receipt.status === 1) {
       await updateStatus(status.CONFIRMED)
     } else {
-      if (job.data.type !== jobType.TORNADO_WITHDRAW && (await isOutdatedTreeRevert(receipt, currentTx))) {
-        if (retry < 3) {
-          await updateStatus(status.RESUBMITTED)
-          await submitTx(job, retry + 1)
-        } else {
-          throw new Error('Tree update retry limit exceeded')
-        }
-      } else {
-        throw new Error('Submitted transaction failed')
-      }
+      throw new Error('Submitted transaction failed')
     }
   } catch (e) {
     // todo this could result in duplicated error logs
     // todo handle a case where account tree is still not up to date (wait and retry)?
-    if (
-      job.data.type !== jobType.TORNADO_WITHDRAW &&
-      (e.message.indexOf('Outdated account merkle root') !== -1 ||
-        e.message.indexOf('Outdated tree update merkle root') !== -1)
-    ) {
-      if (retry < 5) {
-        await sleep(3000)
-        console.log('Tree is still not up to date, resubmitting')
-        await submitTx(job, retry + 1)
-      } else {
-        throw new Error('Tree update retry limit exceeded')
-      }
-    } else {
-      throw new Error(`Revert by smart contract ${e.message}`)
-    }
+    throw new Error(`Revert by smart contract ${e.message}`)
   }
 }
 
