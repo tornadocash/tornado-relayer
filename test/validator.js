@@ -1,8 +1,6 @@
 require('chai').should()
 
-const {
-  getTornadoWithdrawInputError,
-} = require('../src/validator')
+const { getTornadoWithdrawInputError } = require('../src/validator')
 
 describe('Validator', () => {
   describe('#getTornadoWithdrawInputError', () => {
@@ -46,5 +44,5 @@ const withdrawData = {
     '0x000000000000000000000000000000000000000000000000058d15e176280000',
     '0x0000000000000000000000000000000000000000000000000000000000000000',
   ],
-  contract: '0x47CE0C6eD5B0Ce3d3A51fdb1C52DC66a7c3c2936',
+  contract: '0xd47438C816c9E7f2E2888E060936a499Af9582b3',
 }

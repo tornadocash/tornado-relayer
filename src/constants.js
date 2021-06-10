@@ -24,13 +24,16 @@ const networkConfig = {
     instances: {
       bnb: {
         instanceAddress: {
-          0.1: '0x0Ce22770451A8acAD1220D9d1678656b4fAe4a1d',
+          0.1: '0x84443CFd09A48AF6eF360C6976C5392aC5023a1F',
+          1: '0xd47438C816c9E7f2E2888E060936a499Af9582b3',
+          10: '0x330bdFADE01eE9bF63C209Ee33102DD334618e0a',
+          100: '0x1E34A77868E19A6647b1f2F47B51ed72dEDE95DD',
         },
         symbol: 'BNB',
         decimals: 18,
       },
     },
-    proxyLight: '0x5D595DB16eb6d074E0e7E7f0bE37E7e75f23BEc7',
+    proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
   },
 }
 
