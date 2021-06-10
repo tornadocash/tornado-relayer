@@ -20,7 +20,7 @@
     "bull": "^3.12.1",
     "dotenv": "^8.2.0",
     "express": "^4.17.1",
-    "gas-price-oracle": "^0.3.1",
+    "gas-price-oracle": "^0.3.2",
     "ioredis": "^4.14.1",
     "tx-manager": "^0.3.0",
     "uuid": "^8.3.0",
