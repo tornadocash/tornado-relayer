@@ -35,6 +35,28 @@ const networkConfig = {
     },
     proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
   },
+  netId137: {
+    gasPrices: {
+      instant: 7.5,
+      fast: 5,
+      standard: 1,
+      low: 1,
+    },
+    nativeCurrency: 'matic',
+    instances: {
+      matic: {
+        instanceAddress: {
+          0.1: '0x992A81FA34aa6ecD9520F39f858abc51fee6994a',
+          1: undefined,
+          10: undefined,
+          100: undefined,
+        },
+        symbol: 'MATIC',
+        decimals: 18,
+      },
+    },
+    proxyLight: '0xDC16d16341A62c60E7C9889F9d1FcE4cde57a90F',
+  },
 }
 
 module.exports = {

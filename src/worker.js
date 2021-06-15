@@ -30,7 +30,8 @@ function start() {
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
     let gasPriceOracleConfig = {}
 
-    if (netId === 56) {
+    const networksWithOracle = [56, 137]
+    if (networksWithOracle.includes(netId)) {
       gasPriceOracleConfig = {
         chainId: netId,
         defaultFallbackGasPrices: gasPrices,
