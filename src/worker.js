@@ -1,6 +1,6 @@
 const Web3 = require('web3')
 const { GasPriceOracle } = require('gas-price-oracle')
-const { toBN, toWei, fromWei } = require('web3-utils')
+const { toBN, toWei, fromWei, toHex } = require('web3-utils')
 
 const proxyLightABI = require('../abis/proxyLightABI.json')
 const { queue } = require('./queue')
@@ -8,7 +8,7 @@ const { getInstance, fromDecimals } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
   netId,
-  gasPrices,
+  gasPrices: GAS_PRICES,
   gasLimits,
   instances,
   privateKey,
@@ -34,7 +34,7 @@ function start() {
     if (networksWithOracle.includes(netId)) {
       gasPriceOracleConfig = {
         chainId: netId,
-        defaultFallbackGasPrices: gasPrices,
+        defaultFallbackGasPrices: GAS_PRICES,
       }
       gasPriceOracle = new GasPriceOracle(gasPriceOracleConfig)
     }
@@ -53,16 +53,22 @@ function start() {
   }
 }
 
+async function getGasPrices() {
+  let gasPrices = GAS_PRICES
+
+  if (gasPriceOracle) {
+    gasPrices = await gasPriceOracle.gasPrices()
+  }
+
+  return gasPrices
+}
+
 async function checkTornadoFee({ args, contract }) {
   const { currency, amount } = getInstance(contract)
   const { decimals } = instances[currency]
   const fee = toBN(args[4])
-  let { fast } = gasPrices
 
-  if (gasPriceOracle) {
-    // eslint-disable-next-line no-extra-semi
-    ;({ fast } = await gasPriceOracle.gasPrices())
-  }
+  const { fast } = await getGasPrices()
 
   const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
   const feePercent = toBN(fromDecimals(amount, decimals))
@@ -81,17 +87,24 @@ async function checkTornadoFee({ args, contract }) {
   }
 }
 
-function getTxObject({ data }) {
+async function getTxObject({ data }) {
   const contract = new web3.eth.Contract(proxyLightABI, proxyLight)
 
   const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
 
-  return {
+  const tx = {
     value: data.args[5],
     to: contract._address,
     data: calldata,
     gasLimit: gasLimits[jobType.TORNADO_WITHDRAW],
   }
+
+  if (!gasPriceOracle) {
+    const { fast } = await getGasPrices()
+    tx.gasPrice = toHex(toWei(fast.toString(), 'gwei'))
+  }
+
+  return tx
 }
 
 async function processJob(job) {
