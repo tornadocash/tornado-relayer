@@ -22,7 +22,7 @@ async function main() {
     for (let i = 0; i < tokenAddresses.length; i++) {
       try {
         const price = await offchainOracle.methods
-          .getRate(tokenAddresses[i], '0x0000000000000000000000000000000000000000')
+          .getRate(tokenAddresses[i], '0x0000000000000000000000000000000000000000', false)
           .call()
         const numerator = toBN(oneUintAmount[i])
         const denominator = toBN(10).pow(toBN(18)) // eth decimals

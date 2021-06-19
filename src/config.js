@@ -8,7 +8,7 @@ module.exports = {
   httpRpcUrl: process.env.HTTP_RPC_URL,
   wsRpcUrl: process.env.WS_RPC_URL,
   oracleRpcUrl: process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/',
-  offchainOracleAddress: '0x080AB73787A8B13EC7F40bd7d00d6CC07F9b24d0',
+  offchainOracleAddress: '0x07D91f5fb9Bf7798734C3f606dB065549F6893bb',
   aggregatorAddress: process.env.AGGREGATOR,
   minerMerkleTreeHeight: 20,
   privateKey: process.env.PRIVATE_KEY,
