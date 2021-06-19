@@ -1,6 +1,7 @@
 const Redis = require('ioredis')
 const { redisUrl, offchainOracleAddress, oracleRpcUrl } = require('./config')
 const { getArgsForOracle, setSafeInterval } = require('./utils')
+const { toChecksumAddress } = require('web3-utils')
 const redis = new Redis(redisUrl)
 const Web3 = require('web3')
 const web3 = new Web3(
@@ -21,8 +22,10 @@ async function main() {
     const ethPrices = {}
     for (let i = 0; i < tokenAddresses.length; i++) {
       try {
+        const isWrap = toChecksumAddress(tokenAddresses[i]) === toChecksumAddress('0x5d3a536E4D6DbD6114cc1Ead35777bAB948E3643')
+
         const price = await offchainOracle.methods
-          .getRate(tokenAddresses[i], '0x0000000000000000000000000000000000000000', false)
+          .getRateToEth(tokenAddresses[i], isWrap)
           .call()
         const numerator = toBN(oneUintAmount[i])
         const denominator = toBN(10).pow(toBN(18)) // eth decimals
