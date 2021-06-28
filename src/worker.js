@@ -28,16 +28,12 @@ function start() {
   try {
     web3 = new Web3(httpRpcUrl)
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
-    let gasPriceOracleConfig = {}
-
-    const networksWithOracle = [56, 137]
-    if (networksWithOracle.includes(netId)) {
-      gasPriceOracleConfig = {
-        chainId: netId,
-        defaultFallbackGasPrices: GAS_PRICES,
-      }
-      gasPriceOracle = new GasPriceOracle(gasPriceOracleConfig)
+    const gasPriceOracleConfig = {
+      chainId: netId,
+      defaultFallbackGasPrices: GAS_PRICES,
     }
+
+    gasPriceOracle = new GasPriceOracle(gasPriceOracleConfig)
 
     txManager = new TxManager({
       privateKey,
@@ -54,13 +50,12 @@ function start() {
 }
 
 async function getGasPrices() {
-  let gasPrices = GAS_PRICES
-
-  if (gasPriceOracle) {
-    gasPrices = await gasPriceOracle.gasPrices()
+  const networksWithOracle = [56, 137]
+  if (networksWithOracle.includes(netId)) {
+    return await gasPriceOracle.gasPrices()
   }
 
-  return gasPrices
+  return GAS_PRICES
 }
 
 async function checkTornadoFee({ args, contract }) {
@@ -92,19 +87,15 @@ async function getTxObject({ data }) {
 
   const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
 
-  const tx = {
+  const { fast } = await getGasPrices()
+
+  return {
     value: data.args[5],
     to: contract._address,
     data: calldata,
     gasLimit: gasLimits[jobType.TORNADO_WITHDRAW],
+    gasPrice: toHex(toWei(fast.toString(), 'gwei')),
   }
-
-  if (!gasPriceOracle) {
-    const { fast } = await getGasPrices()
-    tx.gasPrice = toHex(toWei(fast.toString(), 'gwei'))
-  }
-
-  return tx
 }
 
 async function processJob(job) {
