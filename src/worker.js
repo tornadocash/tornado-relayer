@@ -8,7 +8,7 @@ const { getInstance, fromDecimals } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
   netId,
-  gasPrices: GAS_PRICES,
+  gasPrices,
   gasLimits,
   instances,
   privateKey,
@@ -30,7 +30,7 @@ function start() {
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
     const gasPriceOracleConfig = {
       chainId: netId,
-      defaultFallbackGasPrices: GAS_PRICES,
+      defaultFallbackGasPrices: gasPrices,
     }
 
     gasPriceOracle = new GasPriceOracle(gasPriceOracleConfig)
@@ -55,7 +55,7 @@ async function getGasPrices() {
     return await gasPriceOracle.gasPrices()
   }
 
-  return GAS_PRICES
+  return gasPrices
 }
 
 async function checkTornadoFee({ args, contract }) {
