@@ -46,16 +46,16 @@ const networkConfig = {
     instances: {
       matic: {
         instanceAddress: {
-          0.1: '0x992A81FA34aa6ecD9520F39f858abc51fee6994a',
-          1: undefined,
-          10: undefined,
-          100: undefined,
+          100: '0x1E34A77868E19A6647b1f2F47B51ed72dEDE95DD',
+          1000: '0xdf231d99Ff8b6c6CBF4E9B9a945CBAcEF9339178',
+          10000: '0xaf4c0B70B2Ea9FB7487C7CbB37aDa259579fe040',
+          100000: '0xa5C2254e4253490C54cef0a4347fddb8f75A4998',
         },
         symbol: 'MATIC',
         decimals: 18,
       },
     },
-    proxyLight: '0xDC16d16341A62c60E7C9889F9d1FcE4cde57a90F',
+    proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
   },
 }
 
