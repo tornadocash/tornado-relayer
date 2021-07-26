@@ -13,7 +13,7 @@
     "prettier:fix": "npx prettier --write . --config .prettierrc",
     "lint": "yarn eslint && yarn prettier:check",
     "test": "mocha",
-    "start": "yarn server & yarn priceWatcher & yarn treeWatcher & yarn worker & yarn healthWatcher"
+    "start": "yarn server & yarn worker"
   },
   "author": "tornado.cash",
   "license": "MIT",
@@ -35,7 +35,8 @@
     "uuid": "^8.3.0",
     "web3": "^1.3.0",
     "web3-core-promievent": "^1.3.0",
-    "web3-utils": "^1.2.2"
+    "web3-utils": "^1.2.2",
+    "worker-threads": "^1.0.0"
   },
   "devDependencies": {
     "chai": "^4.2.0",
