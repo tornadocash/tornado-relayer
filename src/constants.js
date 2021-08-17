@@ -35,6 +35,28 @@ const networkConfig = {
     },
     proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
   },
+  netId100: {
+    gasPrices: {
+      instant: 5,
+      fast: 4,
+      standard: 3,
+      low: 1,
+    },
+    nativeCurrency: 'xdai',
+    instances: {
+      xdai: {
+        instanceAddress: {
+          100: '0x980C75f9b2A62d1206C2C146aE4aa1a19E4A21C0',
+          1000: undefined,
+          10000: undefined,
+          100000: undefined,
+        },
+        symbol: 'xDAI',
+        decimals: 18,
+      },
+    },
+    proxyLight: '0xa77350E1a72bE5bC7634d359C5011b4E359f4320',
+  },
   netId137: {
     gasPrices: {
       instant: 7.5,
