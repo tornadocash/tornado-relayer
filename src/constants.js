@@ -37,25 +37,25 @@ const networkConfig = {
   },
   netId100: {
     gasPrices: {
-      instant: 5,
-      fast: 4,
-      standard: 3,
+      instant: 6,
+      fast: 5,
+      standard: 4,
       low: 1,
     },
     nativeCurrency: 'xdai',
     instances: {
       xdai: {
         instanceAddress: {
-          100: '0x980C75f9b2A62d1206C2C146aE4aa1a19E4A21C0',
-          1000: undefined,
-          10000: undefined,
-          100000: undefined,
+          100: '0x1E34A77868E19A6647b1f2F47B51ed72dEDE95DD',
+          1000: '0xdf231d99Ff8b6c6CBF4E9B9a945CBAcEF9339178',
+          10000: '0xaf4c0B70B2Ea9FB7487C7CbB37aDa259579fe040',
+          100000: '0xa5C2254e4253490C54cef0a4347fddb8f75A4998',
         },
         symbol: 'xDAI',
         decimals: 18,
       },
     },
-    proxyLight: '0xa77350E1a72bE5bC7634d359C5011b4E359f4320',
+    proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
   },
   netId137: {
     gasPrices: {
