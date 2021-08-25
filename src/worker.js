@@ -50,7 +50,7 @@ function start() {
 }
 
 async function getGasPrices() {
-  const networksWithOracle = [56, 137]
+  const networksWithOracle = [56, 100, 137]
   if (networksWithOracle.includes(netId)) {
     return await gasPriceOracle.gasPrices()
   }
