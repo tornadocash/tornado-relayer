@@ -79,7 +79,7 @@ async function start() {
     txManager = new TxManager({
       privateKey,
       rpcUrl: httpRpcUrl,
-      config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false },
+      config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false, BASE_FEE_RESERVE_PERCENTAGE: 25 },
     })
     swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
     minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
@@ -105,17 +105,32 @@ function checkFee({ data }) {
   return checkMiningFee(data)
 }
 
+async function getGasPrice() {
+  const block = await web3.eth.getBlock('latest')
+
+  if (block && block.baseFeePerGas) {
+    const baseFeePerGas = toBN(block.baseFeePerGas)
+    return baseFeePerGas
+  }
+
+  const { fast } = await gasPriceOracle.gasPrices()
+  const gasPrice = toBN(toWei(fast.toString(), 'gwei'))
+  return gasPrice
+}
+
 async function checkTornadoFee({ args, contract }) {
   const { currency, amount } = getInstance(contract)
   const { decimals } = instances[`netId${netId}`][currency]
   const [fee, refund] = [args[4], args[5]].map(toBN)
-  const { fast } = await gasPriceOracle.gasPrices()
+  const gasPrice = await getGasPrice()
 
   const ethPrice = await redis.hget('prices', currency)
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
+  const expense = gasPrice.mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
+
   const feePercent = toBN(fromDecimals(amount, decimals))
     .mul(toBN(parseInt(tornadoServiceFee * 1e10)))
     .div(toBN(1e10 * 100))
+
   let desiredFee
   switch (currency) {
     case 'eth': {
@@ -143,12 +158,12 @@ async function checkTornadoFee({ args, contract }) {
 }
 
 async function checkMiningFee({ args }) {
-  const { fast } = await gasPriceOracle.gasPrices()
+  const gasPrice = await getGasPrice()
   const ethPrice = await redis.hget('prices', 'torn')
   const isMiningReward = currentJob.data.type === jobType.MINING_REWARD
   const providedFee = isMiningReward ? toBN(args.fee) : toBN(args.extData.fee)
 
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[currentJob.data.type]))
+  const expense = gasPrice.mul(toBN(gasLimits[currentJob.data.type]))
   const expenseInTorn = expense.mul(toBN(1e18)).div(toBN(ethPrice))
   // todo make aggregator for ethPrices and rewardSwap data
   const balance = await swap.methods.tornVirtualBalance().call()
