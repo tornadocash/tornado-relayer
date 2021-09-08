@@ -22,6 +22,7 @@ const {
   privateKey,
   httpRpcUrl,
   oracleRpcUrl,
+  baseFeeReserve,
   miningServiceFee,
   tornadoServiceFee,
   tornadoGoerliProxy,
@@ -79,7 +80,12 @@ async function start() {
     txManager = new TxManager({
       privateKey,
       rpcUrl: httpRpcUrl,
-      config: { CONFIRMATIONS, MAX_GAS_PRICE, THROW_ON_REVERT: false, BASE_FEE_RESERVE_PERCENTAGE: 25 },
+      config: {
+        CONFIRMATIONS,
+        MAX_GAS_PRICE,
+        THROW_ON_REVERT: false,
+        BASE_FEE_RESERVE_PERCENTAGE: baseFeeReserve,
+      },
     })
     swap = new web3.eth.Contract(swapABI, await resolver.resolve(torn.rewardSwap.address))
     minerContract = new web3.eth.Contract(miningABI, await resolver.resolve(torn.miningV2.address))
