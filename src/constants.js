@@ -79,6 +79,27 @@ const networkConfig = {
     },
     proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
   },
+  netId43114: {
+    gasPrices: {
+      instant: 225,
+      fast: 225,
+      standard: 225,
+      low: 225,
+    },
+    nativeCurrency: 'avax',
+    instances: {
+      avax: {
+        instanceAddress: {
+          10: '0x330bdFADE01eE9bF63C209Ee33102DD334618e0a',
+          100: '0x1E34A77868E19A6647b1f2F47B51ed72dEDE95DD',
+          500: '0xaf8d1839c3c67cf571aa74B5c12398d4901147B3',
+        },
+        symbol: 'AVAX',
+        decimals: 18,
+      },
+    },
+    proxyLight: '0x0D5550d52428E7e3175bfc9550207e4ad3859b17',
+  },
 }
 
 module.exports = {
