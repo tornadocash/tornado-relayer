@@ -106,10 +106,22 @@ async function init() {
     const miner = await resolver.resolve(torn.miningV2.address)
     contract = new web3.eth.Contract(MinerABI, miner)
     const block = await web3.eth.getBlockNumber()
-    const events = await fetchEvents(0, block)
-    tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })
+
+    // ETH Mainnet problem: There are too many events (about 20k) to get back in the max result set of 10k
+    // Split up requests and combine for MerkleTree build
+    let allevents = []
+    let inc =     100000
+    let rounds = (block / inc) + 1
+    for(let i = 0; i < rounds; i++ ) {
+            console.log('Fetch events ', i * inc, ' to ', (i+1) * inc)
+            const events = await fetchEvents(i * inc, (i + 1) * inc)
+            allevents.push(...events)
+            console.log('Received event count: ', events.length)
+    }
+    console.log(`Merkle rebuild tree with ${allevents.length} elements`)
+    tree = new MerkleTree(minerMerkleTreeHeight, allevents, { hashFunction: poseidonHash2 })
+    console.log(`Rebuilt tree with ${allevents.length} elements, root: ${tree.root()}`)
     await updateRedis()
-    console.log(`Rebuilt tree with ${events.length} elements, root: ${tree.root()}`)
     eventSubscription = contract.events.NewAccount({ fromBlock: block + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
   } catch (e) {
