@@ -1,5 +1,5 @@
 const MerkleTree = require('fixed-merkle-tree')
-const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, torn } = require('./config')
+const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, torn, netId } = require('./config')
 const { poseidonHash2 } = require('./utils')
 const { toBN } = require('web3-utils')
 const Redis = require('ioredis')
@@ -21,19 +21,26 @@ let contract
 // eslint-disable-next-line no-unused-vars
 let tree, eventSubscription, blockSubscription
 
-// todo handle the situation when we have two rewards in one block
-async function fetchEvents(from = 0, to = 'latest') {
-  try {
-    const events = await contract.getPastEvents('NewAccount', {
-      fromBlock: from,
-      toBlock: to,
-    })
-    return events
-      .sort((a, b) => a.returnValues.index - b.returnValues.index)
-      .map(e => toBN(e.returnValues.commitment))
-  } catch (e) {
-    console.error('error fetching events', e)
+async function fetchEvents(fromBlock, toBlock) {
+  if (fromBlock <= toBlock) {
+    try {
+      return await contract.getPastEvents('NewAccount', {
+        fromBlock,
+        toBlock,
+      })
+    } catch (error) {
+      const midBlock = (fromBlock + toBlock) >> 1
+
+      if (midBlock - fromBlock < 2) {
+        throw new Error(`error fetching events: ${error.message}`)
+      }
+
+      const arr1 = await fetchEvents(fromBlock, midBlock)
+      const arr2 = await fetchEvents(midBlock + 1, toBlock)
+      return [...arr1, ...arr2]
+    }
   }
+  return []
 }
 
 async function processNewEvent(err, event) {
@@ -105,12 +112,26 @@ async function init() {
     console.log('Initializing')
     const miner = await resolver.resolve(torn.miningV2.address)
     contract = new web3.eth.Contract(MinerABI, miner)
-    const block = await web3.eth.getBlockNumber()
-    const events = await fetchEvents(0, block)
-    tree = new MerkleTree(minerMerkleTreeHeight, events, { hashFunction: poseidonHash2 })
+
+    const cachedEvents = require(`../cache/accounts_farmer_${netId}.json`)
+    const cachedCommitments = cachedEvents.map(e => toBN(e.commitment))
+
+    const toBlock = await web3.eth.getBlockNumber()
+    const [{ blockNumber: fromBlock }] = cachedEvents.slice(-1)
+
+    const newEvents = await fetchEvents(fromBlock + 1, toBlock)
+    const newCommitments = newEvents
+      .sort((a, b) => a.returnValues.index - b.returnValues.index)
+      .map(e => toBN(e.returnValues.commitment))
+      .filter((item, index, arr) => !index || item != arr[index - 1])
+
+    const commitments = cachedCommitments.concat(newCommitments)
+
+    tree = new MerkleTree(minerMerkleTreeHeight, commitments, { hashFunction: poseidonHash2 })
     await updateRedis()
-    console.log(`Rebuilt tree with ${events.length} elements, root: ${tree.root()}`)
-    eventSubscription = contract.events.NewAccount({ fromBlock: block + 1 }, processNewEvent)
+    console.log(`Rebuilt tree with ${commitments.length} elements, root: ${tree.root()}`)
+
+    eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
   } catch (e) {
     console.error('error on init treeWatcher', e.message)
