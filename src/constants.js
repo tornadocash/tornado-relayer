@@ -59,10 +59,10 @@ const networkConfig = {
   },
   netId137: {
     gasPrices: {
-      instant: 7.5,
-      fast: 5,
-      standard: 1,
-      low: 1,
+      instant: 100,
+      fast: 75,
+      standard: 50,
+      low: 30,
     },
     nativeCurrency: 'matic',
     instances: {
@@ -82,9 +82,9 @@ const networkConfig = {
   netId43114: {
     gasPrices: {
       instant: 225,
-      fast: 225,
-      standard: 225,
-      low: 225,
+      fast: 35,
+      standard: 25,
+      low: 25,
     },
     nativeCurrency: 'avax',
     instances: {
