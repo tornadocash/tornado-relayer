@@ -50,12 +50,18 @@ function start() {
 }
 
 async function getGasPrices() {
-  const networksWithOracle = [56, 100, 137, 43114]
+  const networksWithOracle = [56, 100, 137, 43114, 42161]
   if (networksWithOracle.includes(netId)) {
     return await gasPriceOracle.gasPrices()
   }
 
   return gasPrices
+}
+
+function getGasLimit() {
+  const action = Number(netId) === 42161 ? jobType.ARB_TORNADO_WITHDRAW : jobType.TORNADO_WITHDRAW
+
+  return gasLimits[action]
 }
 
 async function checkTornadoFee({ args, contract }) {
@@ -65,7 +71,7 @@ async function checkTornadoFee({ args, contract }) {
 
   const { fast } = await getGasPrices()
 
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(gasLimits[jobType.TORNADO_WITHDRAW]))
+  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(getGasLimit()))
   const feePercent = toBN(fromDecimals(amount, decimals))
     .mul(toBN(parseInt(tornadoServiceFee * 1e10)))
     .div(toBN(1e10 * 100))
@@ -93,7 +99,7 @@ async function getTxObject({ data }) {
     value: data.args[5],
     to: contract._address,
     data: calldata,
-    gasLimit: gasLimits[jobType.TORNADO_WITHDRAW],
+    gasLimit: getGasLimit(),
     gasPrice: toHex(toWei(fast.toString(), 'gwei')),
   }
 }
