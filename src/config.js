@@ -19,6 +19,7 @@ module.exports = {
   gasPrices,
   gasLimits: {
     [jobType.TORNADO_WITHDRAW]: 390000,
+    [jobType.ARB_TORNADO_WITHDRAW]: 1900000,
   },
   proxyLight,
   nativeCurrency,
