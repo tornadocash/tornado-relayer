@@ -1,0 +1,186 @@
+# Restrict access to 10051/tcp on public ip
+
+version: '3.5'
+services:
+ zabbix-server:
+  image: zabbix/zabbix-server-pgsql:alpine-5.2-latest
+  restart: always
+  ports:
+   - "10051:10051"
+  volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro 
+   - ./zbx_env/usr/lib/zabbix/alertscripts:/usr/lib/zabbix/alertscripts:ro
+   - ./zbx_env/usr/lib/zabbix/externalscripts:/usr/lib/zabbix/externalscripts:ro
+   - ./zbx_env/var/lib/zabbix/export:/var/lib/zabbix/export:rw
+   - ./zbx_env/var/lib/zabbix/modules:/var/lib/zabbix/modules:ro
+   - ./zbx_env/var/lib/zabbix/enc:/var/lib/zabbix/enc:ro
+   - ./zbx_env/var/lib/zabbix/ssh_keys:/var/lib/zabbix/ssh_keys:ro
+   - ./zbx_env/var/lib/zabbix/mibs:/var/lib/zabbix/mibs:ro
+   - ./zbx_env/var/lib/zabbix/snmptraps:/var/lib/zabbix/snmptraps:ro
+  ulimits:
+   nproc: 65535
+   nofile:
+    soft: 20000
+    hard: 40000
+  deploy:
+   resources:
+    limits:
+      cpus: '0.70'
+      memory: 1G
+    reservations:
+      cpus: '0.5'
+      memory: 512M
+  env_file:
+   - .env_db_pgsql
+   - .env_srv
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  depends_on:
+   - postgres-server
+  networks:
+   zbx_net_backend:
+     aliases:
+      - zabbix-server
+      - zabbix-server-pgsql
+      - zabbix-server-alpine-pgsql
+      - zabbix-server-pgsql-alpine
+   zbx_net_frontend:
+  stop_grace_period: 30s
+  sysctls:
+   - net.ipv4.ip_local_port_range=1024 65000
+   - net.ipv4.conf.all.accept_redirects=0
+   - net.ipv4.conf.all.secure_redirects=0
+   - net.ipv4.conf.all.send_redirects=0
+  labels:
+   com.zabbix.description: "Zabbix server with PostgreSQL database support"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-server"
+   com.zabbix.dbtype: "pgsql"
+   com.zabbix.os: "alpine"
+
+ zabbix-web:
+  image: zabbix/zabbix-web-nginx-pgsql:alpine-5.2-latest
+  restart: always
+  ports:
+   - "8080:8080"
+  volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+   - ./zbx_env/etc/ssl/nginx:/etc/ssl/nginx:ro
+   - ./zbx_env/usr/share/zabbix/modules/:/usr/share/zabbix/modules/:ro
+  deploy:
+   resources:
+    limits:
+      cpus: '0.70'
+      memory: 512M
+    reservations:
+      cpus: '0.5'
+      memory: 256M
+  env_file:
+   - .env_db_pgsql
+   - .env_web
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  depends_on:
+   - postgres-server
+   - zabbix-server
+  healthcheck:
+   test: ["CMD", "curl", "-f", "http://localhost:8080/"]
+   interval: 10s
+   timeout: 5s
+   retries: 3
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-web-nginx-pgsql
+     - zabbix-web-nginx-alpine-pgsql
+     - zabbix-web-nginx-pgsql-alpine
+   zbx_net_frontend:
+  stop_grace_period: 10s
+  sysctls:
+   - net.core.somaxconn=65535
+  labels:
+   com.zabbix.description: "Zabbix frontend on Nginx web-server with PostgreSQL database support"
+   com.zabbix.company: "Zabbix LLC"
+   com.zabbix.component: "zabbix-frontend"
+   com.zabbix.webserver: "nginx"
+   com.zabbix.dbtype: "pgsql"
+   com.zabbix.os: "alpine"
+
+ zabbix-agent:
+  image: zabbix/zabbix-agent2:alpine-5.2-latest
+  restart: always
+  volumes:
+   - /etc/localtime:/etc/localtime:ro
+   - /etc/timezone:/etc/timezone:ro
+   - /var/run/docker.sock:/var/run/docker.sock
+  env_file:
+   - .env_agent
+  privileged: true
+  user: root
+  pid: "host"
+  networks:
+   zbx_net_backend:
+    aliases:
+     - zabbix-agent
+     - zabbix-agent-passive
+     - zabbix-agent-alpine
+  stop_grace_period: 5s
+
+ postgres-server:
+  image: postgres:alpine
+  restart: always
+  volumes:
+   - ./zbx_env/var/lib/postgresql/data:/var/lib/postgresql/data:rw
+  env_file:
+   - .env_db_pgsql
+  secrets:
+   - POSTGRES_USER
+   - POSTGRES_PASSWORD
+  stop_grace_period: 1m
+  networks:
+   zbx_net_backend:
+    aliases:
+     - postgres-server
+     - pgsql-server
+     - pgsql-database
+
+ portainer:
+  image: portainer/portainer:latest
+  restart: always
+  ports:
+   - "9000:9000"
+  volumes:
+   - /var/run/docker.sock:/var/run/docker.sock
+   - portainer-data:/data
+
+networks:
+  zbx_net_frontend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.238.0/24
+  zbx_net_backend:
+    driver: bridge
+    driver_opts:
+      com.docker.network.enable_ipv6: "false"
+    internal: true
+    ipam:
+      driver: default
+      config:
+      - subnet: 172.16.239.0/24
+
+secrets:
+  POSTGRES_USER:
+    file: ./.POSTGRES_USER
+  POSTGRES_PASSWORD:
+    file: ./.POSTGRES_PASSWORD
+
+volumes:
+  portainer-data:

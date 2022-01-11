@@ -1,0 +1,484 @@
+zabbix_export:
+  version: '5.2'
+  date: '2021-11-29T12:29:17Z'
+  groups:
+    -
+      name: Docker
+  templates:
+    -
+      template: Docker
+      name: Docker
+      description: |
+        Get Docker engine metrics from plugin for the New Zabbix Agent (zabbix-agent2).
+        
+        You can discuss this template or leave feedback on our forum 
+        
+        Template tooling version used: 0.38
+      groups:
+        -
+          name: Docker
+      applications:
+        -
+          name: Docker
+        -
+          name: 'Zabbix raw items'
+      items:
+        -
+          name: 'Docker: Get containers'
+          key: docker.containers
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          applications:
+            -
+              name: 'Zabbix raw items'
+        -
+          name: 'Docker: Containers paused'
+          type: DEPENDENT
+          key: docker.containers.paused
+          delay: '0'
+          history: 7d
+          description: 'Total number of containers paused on this host'
+          applications:
+            -
+              name: Docker
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ContainersPaused
+          master_item:
+            key: docker.info
+        -
+          name: 'Docker: Containers running'
+          type: DEPENDENT
+          key: docker.containers.running
+          delay: '0'
+          history: 7d
+          description: 'Total number of containers running on this host'
+          applications:
+            -
+              name: Docker
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ContainersRunning
+          master_item:
+            key: docker.info
+        -
+          name: 'Docker: Containers stopped'
+          type: DEPENDENT
+          key: docker.containers.stopped
+          delay: '0'
+          history: 7d
+          description: 'Total number of containers stopped on this host'
+          applications:
+            -
+              name: Docker
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.ContainersStopped
+          master_item:
+            key: docker.info
+          triggers:
+            -
+              expression: '{avg(5m)}>=1'
+              name: 'Docker: containers is stopped'
+              priority: HIGH
+        -
+          name: 'Docker: Containers total'
+          type: DEPENDENT
+          key: docker.containers.total
+          delay: '0'
+          history: 7d
+          description: 'Total number of containers on this host'
+          applications:
+            -
+              name: Docker
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.Containers
+          master_item:
+            key: docker.info
+        -
+          name: 'Docker: Get images'
+          key: docker.images
+          history: '0'
+          trends: '0'
+          status: DISABLED
+          value_type: TEXT
+          applications:
+            -
+              name: 'Zabbix raw items'
+        -
+          name: 'Docker: Get info'
+          key: docker.info
+          history: '0'
+          trends: '0'
+          value_type: TEXT
+          applications:
+            -
+              name: 'Zabbix raw items'
+        -
+          name: 'Docker: Memory total'
+          type: DEPENDENT
+          key: docker.mem.total
+          delay: '0'
+          history: 7d
+          status: DISABLED
+          units: B
+          applications:
+            -
+              name: Docker
+          preprocessing:
+            -
+              type: JSONPATH
+              parameters:
+                - $.MemTotal
+          master_item:
+            key: docker.info
+        -
+          name: 'Docker: Ping'
+          key: docker.ping
+          history: 7h
+          applications:
+            -
+              name: Docker
+          valuemap:
+            name: 'Service state'
+          preprocessing:
+            -
+              type: DISCARD_UNCHANGED_HEARTBEAT
+              parameters:
+                - 10m
+          triggers:
+            -
+              expression: '{last()}=0'
+              name: 'Docker: Service is down'
+              priority: AVERAGE
+              manual_close: 'YES'
+      discovery_rules:
+        -
+          name: 'Containers discovery'
+          key: 'docker.containers.discovery[true]'
+          delay: 15m
+          filter:
+            evaltype: AND
+            conditions:
+              -
+                macro: '{#NAME}'
+                value: '{$DOCKER.LLD.FILTER.CONTAINER.MATCHES}'
+                formulaid: A
+              -
+                macro: '{#NAME}'
+                value: '{$DOCKER.LLD.FILTER.CONTAINER.NOT_MATCHES}'
+                operator: NOT_MATCHES_REGEX
+                formulaid: B
+          description: |
+            Discovery for containers metrics
+            
+            Parameter:
+            true  - Returns all containers
+            false - Returns only running containers
+          item_prototypes:
+            -
+              name: 'Container {#NAME}: Finished at'
+              type: DEPENDENT
+              key: 'docker.container_info.finished["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: unixtime
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.FinishedAt
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Restart count'
+              type: DEPENDENT
+              key: 'docker.container_info.restart_count["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.RestartCount
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+              trigger_prototypes:
+                -
+                  expression: '{last()}>5'
+                  name: 'Container {#NAME}: restarting constantly'
+                  opdata: '{ITEM.VALUE}'
+                  priority: HIGH
+            -
+              name: 'Container {#NAME}: Started at'
+              type: DEPENDENT
+              key: 'docker.container_info.started["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              value_type: FLOAT
+              units: unixtime
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.StartedAt
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Error'
+              type: DEPENDENT
+              key: 'docker.container_info.state.error["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.Error
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+              trigger_prototypes:
+                -
+                  expression: '{diff()}=1 and {strlen()}>0'
+                  name: 'Container {#NAME}: An error has occurred in the container'
+                  priority: WARNING
+                  description: 'Container {#NAME} has an error. Ack to close.'
+                  manual_close: 'YES'
+            -
+              name: 'Container {#NAME}: Exit code'
+              type: DEPENDENT
+              key: 'docker.container_info.state.exitcode["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.ExitCode
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1d
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Paused'
+              type: DEPENDENT
+              key: 'docker.container_info.state.paused["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              valuemap:
+                name: 'Docker flag'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.Paused
+                -
+                  type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Restarting'
+              type: DEPENDENT
+              key: 'docker.container_info.state.restarting["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              valuemap:
+                name: 'Docker flag'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.Restarting
+                -
+                  type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Running'
+              type: DEPENDENT
+              key: 'docker.container_info.state.running["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              valuemap:
+                name: 'Docker flag'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.Running
+                -
+                  type: BOOL_TO_DECIMAL
+                  parameters:
+                    - ''
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Status'
+              type: DEPENDENT
+              key: 'docker.container_info.state.status["{#NAME}"]'
+              delay: '0'
+              history: 7d
+              trends: '0'
+              value_type: CHAR
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+              preprocessing:
+                -
+                  type: JSONPATH
+                  parameters:
+                    - $.State.Status
+                -
+                  type: DISCARD_UNCHANGED_HEARTBEAT
+                  parameters:
+                    - 1h
+              master_item:
+                key: 'docker.container_info["{#NAME}"]'
+            -
+              name: 'Container {#NAME}: Get info'
+              key: 'docker.container_info["{#NAME}"]'
+              history: '0'
+              trends: '0'
+              value_type: CHAR
+              description: 'Return low-level information about a container'
+              application_prototypes:
+                -
+                  name: 'Docker: Container {#NAME}'
+          trigger_prototypes:
+            -
+              expression: '{Docker:docker.container_info.state.exitcode["{#NAME}"].last()}>0 and {Docker:docker.container_info.state.running["{#NAME}"].last()}=0'
+              name: 'Container {#NAME}: Container has been stopped with error code'
+              opdata: 'Exit code: {ITEM.LASTVALUE1}'
+              priority: AVERAGE
+              manual_close: 'YES'
+      macros:
+        -
+          macro: '{$DOCKER.LLD.FILTER.CONTAINER.MATCHES}'
+          value: '.*'
+          description: 'Filter of discoverable containers'
+        -
+          macro: '{$DOCKER.LLD.FILTER.CONTAINER.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+          description: 'Filter to exclude discovered containers'
+        -
+          macro: '{$DOCKER.LLD.FILTER.IMAGE.MATCHES}'
+          value: '.*'
+          description: 'Filter of discoverable images'
+        -
+          macro: '{$DOCKER.LLD.FILTER.IMAGE.NOT_MATCHES}'
+          value: CHANGE_IF_NEEDED
+          description: 'Filter to exclude discovered images'
+  graphs:
+    -
+      name: 'Docker: Containers'
+      graph_items:
+        -
+          drawtype: GRADIENT_LINE
+          color: 1A7C11
+          item:
+            host: Docker
+            key: docker.containers.running
+        -
+          sortorder: '1'
+          drawtype: BOLD_LINE
+          color: 2774A4
+          item:
+            host: Docker
+            key: docker.containers.paused
+        -
+          sortorder: '2'
+          drawtype: BOLD_LINE
+          color: F63100
+          item:
+            host: Docker
+            key: docker.containers.stopped
+        -
+          sortorder: '3'
+          drawtype: BOLD_LINE
+          color: A54F10
+          item:
+            host: Docker
+            key: docker.containers.total
+    -
+      name: 'Docker: Memory total'
+      graph_items:
+        -
+          drawtype: BOLD_LINE
+          color: 1A7C11
+          item:
+            host: Docker
+            key: docker.mem.total
+  value_maps:
+    -
+      name: 'Docker flag'
+      mappings:
+        -
+          value: '0'
+          newvalue: 'False'
+        -
+          value: '1'
+          newvalue: 'True'
+    -
+      name: 'Service state'
+      mappings:
+        -
+          value: '0'
+          newvalue: Down
+        -
+          value: '1'
+          newvalue: Up
