@@ -30,6 +30,7 @@ function start() {
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
     const gasPriceOracleConfig = {
       chainId: netId,
+      defaultRpc: httpRpcUrl,
       defaultFallbackGasPrices: gasPrices,
     }
 
@@ -49,13 +50,8 @@ function start() {
   }
 }
 
-async function getGasPrices() {
-  const networksWithOracle = [56, 100, 137, 43114, 42161]
-  if (networksWithOracle.includes(netId)) {
-    return await gasPriceOracle.gasPrices()
-  }
-
-  return gasPrices
+function getGasPrices() {
+  return gasPriceOracle.gasPrices()
 }
 
 function getGasLimit() {
