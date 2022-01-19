@@ -2,84 +2,69 @@ zabbix_export:
   version: '5.2'
   date: '2021-12-01T13:26:59Z'
   groups:
-    -
-      name: Templates/Applications
+    - name: Templates/Applications
   templates:
-    -
-      template: Tornado-relayer
+    - template: Tornado-relayer
       name: Tornado-relayer
       groups:
-        -
-          name: Templates/Applications
+        - name: Templates/Applications
       items:
-        -
-          name: 'tornado-relayer: health.error'
+        - name: 'tornado-relayer: health.error'
           type: DEPENDENT
           key: tornado-relayer.health.error
           delay: '0'
           trends: '0'
           value_type: TEXT
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.health.error
           master_item:
             key: 'web.page.get[{$URL}]'
           triggers:
-            -
-              expression: '{last()}<>""'
+            - expression: '{last()}<>""'
               name: 'tornado-relayer: health error'
               priority: AVERAGE
-        -
-          name: 'tornado-relayer: health.status'
+        - name: 'tornado-relayer: health.status'
           type: DEPENDENT
           key: tornado-relayer.health.status
           delay: '0'
           trends: '0'
           value_type: TEXT
           preprocessing:
-            -
-              type: JSONPATH
+            - type: JSONPATH
               parameters:
                 - $.health.status
           master_item:
             key: 'web.page.get[{$URL}]'
           triggers:
-            -
-              expression: '{last(#3)}<>"true"'
+            - expression: '{last(#3)}<>"true"'
               name: 'tornado-relayer: health status <> true'
               priority: HIGH
-        -
-          name: 'tornado-relayer: data'
+        - name: 'tornado-relayer: data'
           type: ZABBIX_ACTIVE
           key: 'web.page.get[{$URL}]'
           history: '0'
           trends: '0'
           value_type: TEXT
           preprocessing:
-            -
-              type: REGEX
+            - type: REGEX
               parameters:
                 - '\n\s?\n([\s\S]*)'
                 - \1
       httptests:
-        -
-          name: 'tornado-relayer: status page'
+        - name: 'tornado-relayer: status page'
           agent: 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Ubuntu Chromium/80.0.3987.87 Chrome/80.0.3987.87 Safari/537.36'
           steps:
-            -
-              name: 'status page'
+            - name: 'status page'
               url: '{$URL}'
               follow_redirects: 'NO'
               required: status
               status_codes: '200'
   triggers:
-    -
-      expression: '{Tornado-relayer:web.test.fail[tornado-relayer: status page].last()}>0'
+    - expression: '{Tornado-relayer:web.test.fail[tornado-relayer: status page].last()}>0'
       name: 'tornado-relayer: status page failed'
       priority: AVERAGE
-    -
-      expression: '{Tornado-relayer:web.test.rspcode[tornado-relayer: status page,status page].last(#3)}<>200'
+    - expression: '{Tornado-relayer:web.test.rspcode[tornado-relayer: status page,status page].last(#3)}<>200'
       name: 'tornado-relayer: status page rspcode <>200'
       priority: HIGH

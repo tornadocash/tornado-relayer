@@ -1,6 +1,7 @@
-# Installing the Zabbix server 
+# Installing the Zabbix server
 
 Change default passwords, ports and set listen IP (ports `8080/tcp` and `10051/tcp` will be open on all interfaces, use a firewall or specify the address of the required interface), then run:
+
 ```bash
 wget https://github.com/tornadocash/tornado-relayer/raw/master/monitoring/zabbix.tar.gz
 mkdir $HOME/monitoring/
@@ -12,18 +13,21 @@ docker-compose up -d
 # Installing the Zabbix agent
 
 Download package from repository [https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix/](https://repo.zabbix.com/zabbix/5.2/ubuntu/pool/main/z/zabbix/) and run:
+
 ```bash
 sudo dpkg -i zabbix-agent_5.2.*.deb
 sudo usermod -aG docker zabbix
 ```
+
 Change default values in `/etc/zabbix/zabbix_agent2.conf`:
 
-* `Hostname` the same as in the zabbix-server web interface;
-* `Server` and `ServerActive` set zabbix server IP or DNS name;
-* `ListenIP` to local network IP available from zabbix server or set firewall rules to restrict access to port `10050`;
-* uncomment `Plugins.Docker.Endpoint=unix:///var/run/docker.sock`.
+- `Hostname` the same as in the zabbix-server web interface;
+- `Server` and `ServerActive` set zabbix server IP or DNS name;
+- `ListenIP` to local network IP available from zabbix server or set firewall rules to restrict access to port `10050`;
+- uncomment `Plugins.Docker.Endpoint=unix:///var/run/docker.sock`.
 
 Then run:
+
 ```bash
 sudo systemctl enable zabbix-agent2.service
 sudo systemctl restart zabbix-agent2.service
@@ -35,15 +39,17 @@ Log into your Zabbix server (defaul login and passord: `Admin` - `zabbix`) and c
 
 # Import templates
 
-Import templates using the WebUI: 
-* [Docker-template.yaml](/monitoring/templates/Docker-template.yaml);
-* [Tornado-relayer-template.yaml](/monitoring/templates/Tornado-relayer-template.yaml).
+Import templates using the WebUI:
 
-Link templates with added host. It is also recommended to link `Linux CPU by Zabbix agent`, `Linux filesystems by Zabbix agent` and `Linux memory by Zabbix agent` templates to the host. 
+- [Docker-template.yaml](/monitoring/templates/Docker-template.yaml);
+- [Tornado-relayer-template.yaml](/monitoring/templates/Tornado-relayer-template.yaml).
+
+Link templates with added host. It is also recommended to link `Linux CPU by Zabbix agent`, `Linux filesystems by Zabbix agent` and `Linux memory by Zabbix agent` templates to the host.
 
 # Alerts
 
 In WebUI - Administration -> Media types -> Telegram:
+
 ```
 https://git.zabbix.com/projects/ZBX/repos/zabbix/browse/templates/media/telegram
 
