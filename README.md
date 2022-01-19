@@ -70,6 +70,10 @@ Relayer should return a transaction hash
 In that case you will need to add https termination yourself because browsers with default settings will prevent https
 tornado.cash UI from submitting your request over http connection
 
+## Monitoring
+
+You can find the guide on how to install the Zabbix server in the [/monitoring/README.md](/monitoring/README.md).
+
 ## Architecture
 
 1. TreeWatcher module keeps track of Account Tree changes and automatically caches the actual state in Redis and emits `treeUpdate` event to redis pub/sub channel
