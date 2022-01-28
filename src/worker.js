@@ -55,7 +55,18 @@ function getGasPrices() {
 }
 
 function getGasLimit() {
-  const action = Number(netId) === 42161 ? jobType.ARB_TORNADO_WITHDRAW : jobType.TORNADO_WITHDRAW
+  let action
+
+  switch (Number(netId)) {
+    case 10:
+      action = jobType.OP_TORNADO_WITHDRAW
+      break
+    case 42161:
+      action = jobType.ARB_TORNADO_WITHDRAW
+      break
+    default:
+      action = jobType.TORNADO_WITHDRAW
+  }
 
   return gasLimits[action]
 }
