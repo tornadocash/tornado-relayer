@@ -1,6 +1,6 @@
 {
   "name": "relay",
-  "version": "4.1.1",
+  "version": "4.1.2",
   "description": "Relayer for Tornado.cash privacy solution. https://tornado.cash",
   "scripts": {
     "server": "node src/server.js",
@@ -29,7 +29,7 @@
     "gas-price-oracle": "^0.3.5",
     "ioredis": "^4.14.1",
     "node-fetch": "^2.6.7",
-    "torn-token": "1.0.4",
+    "torn-token": "1.0.6",
     "tornado-anonymity-mining": "^2.1.2",
     "tx-manager": "^0.4.1",
     "uuid": "^8.3.0",

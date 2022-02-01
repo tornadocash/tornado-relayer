@@ -10,6 +10,7 @@ const swapABI = require('../abis/swap.abi.json')
 const miningABI = require('../abis/mining.abi.json')
 const tornadoABI = require('../abis/tornadoABI.json')
 const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
+const aggregatorAbi = require('../abis/Aggregator.abi.json')
 const { queue } = require('./queue')
 const { poseidonHash2, getInstance, fromDecimals, sleep } = require('./utils')
 const { jobType, status } = require('./constants')
@@ -26,6 +27,8 @@ const {
   miningServiceFee,
   tornadoServiceFee,
   tornadoGoerliProxy,
+  governanceAddress,
+  aggregatorAddress,
 } = require('./config')
 const ENSResolver = require('./resolver')
 const resolver = new ENSResolver()
@@ -195,15 +198,30 @@ async function checkMiningFee({ args }) {
   }
 }
 
+async function isLatestProposalExecuted() {
+  const PROPOSAL_EXECUTED_STATUS = 5
+  const expectedProposalId = 10
+  try {
+    const aggregator = new web3.eth.Contract(aggregatorAbi, aggregatorAddress)
+    const proposals = await aggregator.methods.getAllProposals(governanceAddress).call()
+    const expectedProposal = proposals[expectedProposalId - 1]
+    return expectedProposal && Number(expectedProposal['state']) === PROPOSAL_EXECUTED_STATUS
+  } catch (e) {
+    console.error(e.message)
+    return false
+  }
+}
+
 async function getProxyContract() {
   let proxyAddress
-
   if (netId === 5) {
     proxyAddress = tornadoGoerliProxy
   } else {
-    proxyAddress = await resolver.resolve(torn.tornadoProxy.address)
+    const latestProposalExecuted = await isLatestProposalExecuted()
+    proxyAddress = latestProposalExecuted
+      ? await resolver.resolve(torn.tornadoRouter.address)
+      : await resolver.resolve(torn.tornadoProxy.address)
   }
-
   const contract = new web3.eth.Contract(tornadoProxyABI, proxyAddress)
 
   return {

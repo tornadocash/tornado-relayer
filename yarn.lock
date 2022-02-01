@@ -4887,10 +4887,10 @@ toidentifier@1.0.0:
   resolved "https://registry.yarnpkg.com/toidentifier/-/toidentifier-1.0.0.tgz#7e1be3470f1e77948bc43d94a3c8f4d7752ba553"
   integrity sha512-yaOH/Pk/VEhBWWTlhI+qXxDFXlejDGcQipMlyxda9nthulaxLZUNcUqFxokp0vcYnvteJln5FNQDRrxj3YcbVw==
 
-torn-token@1.0.4:
-  version "1.0.4"
-  resolved "https://registry.npmjs.org/torn-token/-/torn-token-1.0.4.tgz#c638b6899f3e899a3bdb1d7a04194b500f100c71"
-  integrity sha512-3377n2Wi9TO9JfTzPBKi4j+gdyJ35NCNkELT+3nXZn56j6z6o/Fh9tuAlEaP9E24jhx4gewRSrhsdim8v9/hjg==
+torn-token@1.0.6:
+  version "1.0.6"
+  resolved "https://registry.yarnpkg.com/torn-token/-/torn-token-1.0.6.tgz#66cde5f85b611033918c807b4a8d9d4e5bb3fcfc"
+  integrity sha512-ilCS7fN+JM2O8l1Iw5cEWXyiQQg8GxEeYYvqALJcn5cO6qSpD+xJb3Dji4EHXa1Yu1OBd/19ktWNvUkWNvuAaQ==
   dependencies:
     "@openzeppelin/contracts" "^3.1.0"
     eth-sig-util "^2.5.3"
