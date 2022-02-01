@@ -73,6 +73,8 @@ jobs:
             🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:mining`.
 
             ❗️Please update your mainnet nodes ❗️
+            DO NOT TOUCH SIDECHAINS AND NOVA RELAYERS.
+            
           debug: true
           format: markdown
 
@@ -85,6 +87,7 @@ jobs:
             🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:mining`.
 
             ❗️Please update your mainnet nodes ❗️
+            DO NOT TOUCH SIDECHAINS AND NOVA RELAYERS.
 
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
