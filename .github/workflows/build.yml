@@ -84,7 +84,6 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            @Relayers
             🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:mining`.
 
             ❗️Please update your mainnet nodes ❗️
