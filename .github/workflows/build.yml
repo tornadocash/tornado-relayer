@@ -19,10 +19,10 @@ jobs:
       - run: yarn test
       - run: yarn lint
       - name: Telegram Failure Notification
-        uses: appleboy/telegram-action@0.0.7
+        uses: appleboy/telegram-action@master
         if: failure()
         with:
-          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
+          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) for sidechains because of ${{ github.actor }}
           format: markdown
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
@@ -56,31 +56,43 @@ jobs:
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Telegram Message Notify
-        uses: appleboy/telegram-action@0.0.7
+        uses: appleboy/telegram-action@master
         with:
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-          message: 🚀 Published a [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}) version ${{ steps.vars.outputs.version }} to docker hub
+          message: 🚀 Published a [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}) for sidechains version ${{ steps.vars.outputs.version }} to docker hub
           debug: true
           format: markdown
 
-      #- name: Telegram Relayer Channel Notification
-      #  uses: appleboy/telegram-action@0.0.7
-      #  with:
-      #    to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
-      #    token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      #    message: |
-      #      🚀 Published a new version of the relayer node service to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:mining`.
+      - name: Telegram Relayer Channel Notification
+       uses: appleboy/telegram-action@master
+       with:
+         to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
+         token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+         message: |
+           🚀 Published a new version of the sidechains relayer node service to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:light`.
 
-      #      ❗️Please update your nodes ❗️
-      #    debug: true
-      #    format: markdown
+           ❗️Please update your sidechains nodes ❗️
+           DO NOT TOUCH MAINNET AND NOVA RELAYERS. 
+         debug: true
+         format: markdown
+
+      - name: Discord Relayer Channel Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_RELAYER_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+           🚀 Published a new version of the sidechains relayer node service to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:light`.
+
+           ❗️Please update your sidechains nodes ❗️
+           DO NOT TOUCH MAINNET AND NOVA RELAYERS. 
 
       - name: Telegram Failure Notification
-        uses: appleboy/telegram-action@0.0.7
+        uses: appleboy/telegram-action@master
         if: failure()
         with:
-          message: ❗ Failed to publish [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
+          message: ❗ Failed to publish [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}/actions) for sidechains because of ${{ github.actor }}
           format: markdown
           to: ${{ secrets.TELEGRAM_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
