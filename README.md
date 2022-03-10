@@ -49,6 +49,10 @@ Relayer should return a transaction hash
 In that case you will need to add https termination yourself because browsers with default settings will prevent https
 tornado.cash UI from submitting your request over http connection
 
+## Run geth node
+
+It is strongly recommended that you use your own RPC node. Instruction on how to run full node with `geth` can be found [here](https://github.com/feshchenkod/rpc-nodes).
+
 ## Monitoring
 
 You can find the guide on how to install the Zabbix server in the [/monitoring/README.md](/monitoring/README.md).
