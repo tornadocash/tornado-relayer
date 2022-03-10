@@ -44,6 +44,10 @@ Relayer should return a transaction hash
 In that case you will need to add https termination yourself because browsers with default settings will prevent https
 tornado.cash UI from submitting your request over http connection
 
+## Run own RPC nodes
+
+It is strongly recommended that you use your own RPC nodes. Instruction on how to run full nodes can be found [here](https://github.com/feshchenkod/rpc-nodes).
+
 ## Architecture
 
 1. TreeWatcher module keeps track of Account Tree changes and automatically caches the actual state in Redis and emits `treeUpdate` event to redis pub/sub channel
