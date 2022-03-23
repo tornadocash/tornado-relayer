@@ -1,21 +1,10 @@
 const MerkleTree = require('fixed-merkle-tree')
-const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, torn, netId } = require('./config')
-const { poseidonHash2 } = require('./utils')
-const { toBN } = require('web3-utils')
-const Redis = require('ioredis')
-const redis = new Redis(redisUrl)
-const ENSResolver = require('./resolver')
-const resolver = new ENSResolver()
-const Web3 = require('web3')
-const web3 = new Web3(
-  new Web3.providers.WebsocketProvider(wsRpcUrl, {
-    clientConfig: {
-      maxReceivedFrameSize: 100000000,
-      maxReceivedMessageSize: 100000000,
-    },
-  }),
-)
+const { minerMerkleTreeHeight, torn, netId } = require('./config')
+const { poseidonHash2, toBN } = require('./utils')
+const resolver = require('./modules/resolver')
+const web3 = require('./modules/web3')('ws')
 const MinerABI = require('../abis/mining.abi.json')
+const { redis } = require('./modules/redis')
 let contract
 
 // eslint-disable-next-line no-unused-vars
@@ -123,7 +112,7 @@ async function init() {
     const newCommitments = newEvents
       .sort((a, b) => a.returnValues.index - b.returnValues.index)
       .map(e => toBN(e.returnValues.commitment))
-      .filter((item, index, arr) => !index || item != arr[index - 1])
+      .filter((item, index, arr) => !index || item !== arr[index - 1])
 
     const commitments = cachedCommitments.concat(newCommitments)
 
@@ -134,6 +123,7 @@ async function init() {
     eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
   } catch (e) {
+    redis.zadd('errors', new Date().getTime(), e.message)
     console.error('error on init treeWatcher', e.message)
   }
 }

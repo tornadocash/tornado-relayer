@@ -1,8 +1,7 @@
-const queue = require('./queue')
-const { netId, tornadoServiceFee, miningServiceFee, instances, redisUrl, rewardAccount } = require('./config')
-const { version } = require('../package.json')
-const Redis = require('ioredis')
-const redis = new Redis(redisUrl)
+const queue = require('../queue')
+const { netId, tornadoServiceFee, miningServiceFee, instances, rewardAccount } = require('../config')
+const { version } = require('../../package.json')
+const { redis } = require('../modules/redis')
 
 async function status(req, res) {
   const ethPrices = await redis.hgetall('prices')

@@ -1,21 +1,12 @@
-const Redis = require('ioredis')
-const { redisUrl, offchainOracleAddress, oracleRpcUrl } = require('./config')
-const { getArgsForOracle, setSafeInterval } = require('./utils')
-const { toChecksumAddress } = require('web3-utils')
-const redis = new Redis(redisUrl)
-const Web3 = require('web3')
-const web3 = new Web3(
-  new Web3.providers.HttpProvider(oracleRpcUrl, {
-    timeout: 200000, // ms
-  }),
-)
+const { offchainOracleAddress } = require('./config')
+const { getArgsForOracle, setSafeInterval, toChecksumAddress, toBN } = require('./utils')
+const { redis } = require('./modules/redis')
+const web3 = require('./modules/web3')()
 
 const offchainOracleABI = require('../abis/OffchainOracle.abi.json')
 
 const offchainOracle = new web3.eth.Contract(offchainOracleABI, offchainOracleAddress)
 const { tokenAddresses, oneUintAmount, currencyLookup } = getArgsForOracle()
-
-const { toBN } = require('web3-utils')
 
 async function main() {
   try {
@@ -40,6 +31,7 @@ async function main() {
     await redis.hmset('prices', ethPrices)
     console.log('Wrote following prices to redis', ethPrices)
   } catch (e) {
+    redis.zadd('errors', new Date().getTime(), e.message)
     console.error('priceWatcher error', e)
   }
 }

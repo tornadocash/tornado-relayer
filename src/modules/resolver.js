@@ -1,7 +1,7 @@
-const { httpRpcUrl, aggregatorAddress } = require('./config')
-const Web3 = require('web3')
-const web3 = new Web3(httpRpcUrl)
-const aggregator = new web3.eth.Contract(require('../abis/Aggregator.abi.json'), aggregatorAddress)
+const { aggregatorAddress } = require('../config')
+const web3 = require('./web3')()
+
+const aggregator = new web3.eth.Contract(require('../../abis/Aggregator.abi.json'), aggregatorAddress)
 const ens = require('eth-ens-namehash')
 
 class ENSResolver {
@@ -26,5 +26,4 @@ class ENSResolver {
     return addresses.length === 1 ? addresses[0] : addresses
   }
 }
-
-module.exports = ENSResolver
+module.exports = new ENSResolver()

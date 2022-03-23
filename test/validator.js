@@ -4,7 +4,7 @@ const {
   getTornadoWithdrawInputError,
   getMiningRewardInputError,
   getMiningWithdrawInputError,
-} = require('../src/validator')
+} = require('../src/modules/validator')
 
 describe('Validator', () => {
   describe('#getTornadoWithdrawInputError', () => {
