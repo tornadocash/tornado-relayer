@@ -1,6 +1,6 @@
 const { instances, netId } = require('./config')
 const { poseidon } = require('circomlib')
-const { toBN, toChecksumAddress, BN } = require('web3-utils')
+const { toBN, toChecksumAddress, BN, fromWei, isAddress, toWei } = require('web3-utils')
 
 const TOKENS = {
   torn: {
@@ -118,6 +118,13 @@ function fromDecimals(value, decimals) {
   return new BN(wei.toString(10), 10)
 }
 
+class RelayerError extends Error {
+  constructor(message, score = 0) {
+    super(message)
+    this.score = score
+  }
+}
+
 module.exports = {
   getInstance,
   setSafeInterval,
@@ -126,4 +133,11 @@ module.exports = {
   when,
   getArgsForOracle,
   fromDecimals,
+  toBN,
+  toChecksumAddress,
+  fromWei,
+  toWei,
+  BN,
+  isAddress,
+  RelayerError,
 }

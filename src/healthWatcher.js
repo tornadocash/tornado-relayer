@@ -1,18 +1,18 @@
-const Web3 = require('web3')
-const Redis = require('ioredis')
-const { toBN, fromWei } = require('web3-utils')
-
-const { setSafeInterval } = require('./utils')
-const { redisUrl, httpRpcUrl, privateKey, minimumBalance } = require('./config')
-
-const web3 = new Web3(httpRpcUrl)
-const redis = new Redis(redisUrl)
+const { setSafeInterval, toBN, fromWei } = require('./utils')
+const { privateKey, minimumBalance } = require('./config')
+const { redis } = require('./modules/redis')
+const web3 = require('./modules/web3')()
 
 async function main() {
   try {
     const { address } = web3.eth.accounts.privateKeyToAccount(privateKey)
     const balance = await web3.eth.getBalance(address)
 
+    const errors = await redis.zrevrange('errors', 0, -1)
+    if (errors.length > 3) {
+      console.log({ errors })
+      throw new Error('Too many errors on relayer')
+    }
     if (toBN(balance).lt(toBN(minimumBalance))) {
       throw new Error(`Not enough balance, less than ${fromWei(minimumBalance)} ETH`)
     }

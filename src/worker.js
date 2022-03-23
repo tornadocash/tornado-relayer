@@ -1,8 +1,5 @@
 const fs = require('fs')
-const Web3 = require('web3')
-const { toBN, toWei, fromWei, toChecksumAddress } = require('web3-utils')
 const MerkleTree = require('fixed-merkle-tree')
-const Redis = require('ioredis')
 const { GasPriceOracle } = require('gas-price-oracle')
 const { Utils, Controller } = require('tornado-anonymity-mining')
 
@@ -10,14 +7,22 @@ const swapABI = require('../abis/swap.abi.json')
 const miningABI = require('../abis/mining.abi.json')
 const tornadoABI = require('../abis/tornadoABI.json')
 const tornadoProxyABI = require('../abis/tornadoProxyABI.json')
-const aggregatorAbi = require('../abis/Aggregator.abi.json')
 const { queue } = require('./queue')
-const { poseidonHash2, getInstance, fromDecimals, sleep } = require('./utils')
+const {
+  poseidonHash2,
+  getInstance,
+  fromDecimals,
+  sleep,
+  toBN,
+  toWei,
+  fromWei,
+  toChecksumAddress,
+  RelayerError,
+} = require('./utils')
 const { jobType, status } = require('./constants')
 const {
   torn,
   netId,
-  redisUrl,
   gasLimits,
   instances,
   privateKey,
@@ -28,9 +33,10 @@ const {
   tornadoServiceFee,
   tornadoGoerliProxy,
 } = require('./config')
-const ENSResolver = require('./resolver')
-const resolver = new ENSResolver()
+const resolver = require('./modules/resolver')
 const { TxManager } = require('tx-manager')
+const { redis, redisSubscribe } = require('./modules/redis')
+const getWeb3 = require('./modules/web3')
 
 let web3
 let currentTx
@@ -40,8 +46,6 @@ let txManager
 let controller
 let swap
 let minerContract
-const redis = new Redis(redisUrl)
-const redisSubscribe = new Redis(redisUrl)
 const gasPriceOracle = new GasPriceOracle({ defaultRpc: oracleRpcUrl })
 
 async function fetchTree() {
@@ -76,7 +80,8 @@ async function fetchTree() {
 
 async function start() {
   try {
-    web3 = new Web3(httpRpcUrl)
+    await clearErrors()
+    web3 = getWeb3()
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
     txManager = new TxManager({
       privateKey,
@@ -101,6 +106,7 @@ async function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
+    redis.zadd('errors', new Date().getTime(), e.message)
     console.error('error on start worker', e.message)
   }
 }
@@ -116,13 +122,11 @@ async function getGasPrice() {
   const block = await web3.eth.getBlock('latest')
 
   if (block && block.baseFeePerGas) {
-    const baseFeePerGas = toBN(block.baseFeePerGas)
-    return baseFeePerGas
+    return toBN(block.baseFeePerGas)
   }
 
   const { fast } = await gasPriceOracle.gasPrices()
-  const gasPrice = toBN(toWei(fast.toString(), 'gwei'))
-  return gasPrice
+  return toBN(toWei(fast.toString(), 'gwei'))
 }
 
 async function checkTornadoFee({ args, contract }) {
@@ -160,7 +164,10 @@ async function checkTornadoFee({ args, contract }) {
     fromWei(feePercent.toString()),
   )
   if (fee.lt(desiredFee)) {
-    throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
+    throw new RelayerError(
+      'Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.',
+      0,
+    )
   }
 }
 
@@ -195,7 +202,6 @@ async function checkMiningFee({ args }) {
     throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
   }
 }
-
 
 async function getProxyContract() {
   let proxyAddress
@@ -262,7 +268,7 @@ async function isOutdatedTreeRevert(receipt, currentTx) {
 async function processJob(job) {
   try {
     if (!jobType[job.data.type]) {
-      throw new Error(`Unknown job type: ${job.data.type}`)
+      throw new RelayerError(`Unknown job type: ${job.data.type}`)
     }
     currentJob = job
     await updateStatus(status.ACCEPTED)
@@ -304,10 +310,10 @@ async function submitTx(job, retry = 0) {
           await updateStatus(status.RESUBMITTED)
           await submitTx(job, retry + 1)
         } else {
-          throw new Error('Tree update retry limit exceeded')
+          throw new RelayerError('Tree update retry limit exceeded')
         }
       } else {
-        throw new Error('Submitted transaction failed')
+        throw new RelayerError('Submitted transaction failed')
       }
     }
   } catch (e) {
@@ -323,10 +329,10 @@ async function submitTx(job, retry = 0) {
         console.log('Tree is still not up to date, resubmitting')
         await submitTx(job, retry + 1)
       } else {
-        throw new Error('Tree update retry limit exceeded')
+        throw new RelayerError('Tree update retry limit exceeded')
       }
     } else {
-      throw new Error(`Revert by smart contract ${e.message}`)
+      throw new RelayerError(`Revert by smart contract ${e.message}`)
     }
   }
 }
@@ -347,6 +353,11 @@ async function updateStatus(status) {
   console.log(`Job status updated ${status}`)
   currentJob.data.status = status
   await currentJob.update(currentJob.data)
+}
+
+async function clearErrors() {
+  console.log('Errors list cleared')
+  await redis.del('errors')
 }
 
 start()
