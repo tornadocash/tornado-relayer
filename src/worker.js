@@ -106,7 +106,11 @@ async function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
-    redis.zadd('errors', new Date().getTime(), e.message)
+    if (e instanceof RelayerError) {
+      if (e.score > 0) redis.zadd('errors', e.score, e.message)
+    } else {
+      redis.zadd('errors', 1, e.message)
+    }
     console.error('error on start worker', e.message)
   }
 }
@@ -187,9 +191,9 @@ async function checkMiningFee({ args }) {
   const serviceFeePercent = isMiningReward
     ? toBN(0)
     : toBN(args.amount)
-        .sub(providedFee) // args.amount includes fee
-        .mul(toBN(parseInt(miningServiceFee * 1e10)))
-        .div(toBN(1e10 * 100))
+      .sub(providedFee) // args.amount includes fee
+      .mul(toBN(parseInt(miningServiceFee * 1e10)))
+      .div(toBN(1e10 * 100))
   /* eslint-enable */
   const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
   console.log(
@@ -199,7 +203,7 @@ async function checkMiningFee({ args }) {
     serviceFeePercent.toString(),
   )
   if (toBN(providedFee).lt(desiredFee)) {
-    throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
+    throw new RelayerError('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.')
   }
 }
 
@@ -277,7 +281,7 @@ async function processJob(job) {
   } catch (e) {
     console.error('processJob', e.message)
     await updateStatus(status.FAILED)
-    throw e
+    throw new RelayerError(e.message)
   }
 }
 
