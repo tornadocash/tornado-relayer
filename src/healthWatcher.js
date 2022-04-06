@@ -1,4 +1,4 @@
-const { setSafeInterval, toBN, fromWei } = require('./utils')
+const { setSafeInterval, toBN, fromWei, RelayerError } = require('./utils')
 const { privateKey, minimumBalance } = require('./config')
 const { redis } = require('./modules/redis')
 const web3 = require('./modules/web3')()
@@ -14,7 +14,7 @@ async function main() {
       throw new Error('Too many errors on relayer')
     }
     if (toBN(balance).lt(toBN(minimumBalance))) {
-      throw new Error(`Not enough balance, less than ${fromWei(minimumBalance)} ETH`)
+      throw new RelayerError(`Not enough balance, less than ${fromWei(minimumBalance)} ETH`, 1)
     }
 
     await redis.hset('health', { status: true, error: '' })
