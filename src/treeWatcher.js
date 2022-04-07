@@ -123,7 +123,7 @@ async function init() {
     eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
   } catch (e) {
-    redis.zadd('errors', new Date().getTime(), e.message)
+    redis.zadd('errors', 1, e.message)
     console.error('error on init treeWatcher', e.message)
   }
 }

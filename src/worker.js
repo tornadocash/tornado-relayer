@@ -106,11 +106,7 @@ async function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
-    if (e instanceof RelayerError) {
-      if (e.score > 0) redis.zadd('errors', e.score, e.message)
-    } else {
-      redis.zadd('errors', 1, e.message)
-    }
+    redis.zadd('errors', e.score || 1, e.message)
     console.error('error on start worker', e.message)
   }
 }
@@ -191,9 +187,9 @@ async function checkMiningFee({ args }) {
   const serviceFeePercent = isMiningReward
     ? toBN(0)
     : toBN(args.amount)
-      .sub(providedFee) // args.amount includes fee
-      .mul(toBN(parseInt(miningServiceFee * 1e10)))
-      .div(toBN(1e10 * 100))
+        .sub(providedFee) // args.amount includes fee
+        .mul(toBN(parseInt(miningServiceFee * 1e10)))
+        .div(toBN(1e10 * 100))
   /* eslint-enable */
   const desiredFee = expenseInPoints.add(serviceFeePercent) // in points
   console.log(
