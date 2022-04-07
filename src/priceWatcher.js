@@ -1,5 +1,5 @@
 const { offchainOracleAddress } = require('./config')
-const { getArgsForOracle, setSafeInterval, toChecksumAddress, toBN } = require('./utils')
+const { getArgsForOracle, setSafeInterval, toChecksumAddress, toBN, RelayerError } = require('./utils')
 const { redis } = require('./modules/redis')
 const web3 = require('./modules/web3')()
 
@@ -21,17 +21,18 @@ async function main() {
         const numerator = toBN(oneUintAmount[i])
         const denominator = toBN(10).pow(toBN(18)) // eth decimals
         const priceFormatted = toBN(price).mul(numerator).div(denominator)
-
         ethPrices[currencyLookup[tokenAddresses[i]]] = priceFormatted.toString()
       } catch (e) {
         console.error('cant get price of ', tokenAddresses[i])
       }
     }
-
+    if (!Object.values(ethPrices).length) {
+      throw new RelayerError('Can`t update prices', 1)
+    }
     await redis.hmset('prices', ethPrices)
     console.log('Wrote following prices to redis', ethPrices)
   } catch (e) {
-    redis.zadd('errors', new Date().getTime(), e.message)
+    redis.zadd('errors', e.score || 1, e.message)
     console.error('priceWatcher error', e)
   }
 }

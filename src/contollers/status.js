@@ -6,6 +6,7 @@ const { redis } = require('../modules/redis')
 async function status(req, res) {
   const ethPrices = await redis.hgetall('prices')
   const health = await redis.hgetall('health')
+  const errors = await redis.zrevrange('errors', 0, -1)
 
   const { waiting: currentQueue } = await queue.queue.getJobCounts()
 
@@ -18,6 +19,7 @@ async function status(req, res) {
     miningServiceFee,
     version,
     health,
+    errors,
     currentQueue,
   })
 }
