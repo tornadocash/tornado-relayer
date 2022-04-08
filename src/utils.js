@@ -125,6 +125,20 @@ class RelayerError extends Error {
   }
 }
 
+const logRelayerError = async (redis, e) => {
+  await redis.zadd('errors', 'INCR', 1, e.message)
+}
+
+const readRelayerErrors = async redis => {
+  const set = await redis.zrevrange('errors', 0, -1, 'WITHSCORES')
+  const errors = []
+  while (set.length) {
+    const [message, score] = set.splice(0, 2)
+    errors.push({ message, score })
+  }
+  return errors
+}
+
 module.exports = {
   getInstance,
   setSafeInterval,
@@ -140,4 +154,6 @@ module.exports = {
   BN,
   isAddress,
   RelayerError,
+  logRelayerError,
+  readRelayerErrors,
 }

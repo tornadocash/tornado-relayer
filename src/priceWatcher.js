@@ -1,5 +1,12 @@
 const { offchainOracleAddress } = require('./config')
-const { getArgsForOracle, setSafeInterval, toChecksumAddress, toBN, RelayerError } = require('./utils')
+const {
+  getArgsForOracle,
+  setSafeInterval,
+  toChecksumAddress,
+  toBN,
+  RelayerError,
+  logRelayerError,
+} = require('./utils')
 const { redis } = require('./modules/redis')
 const web3 = require('./modules/web3')()
 
@@ -32,7 +39,7 @@ async function main() {
     await redis.hmset('prices', ethPrices)
     console.log('Wrote following prices to redis', ethPrices)
   } catch (e) {
-    redis.zadd('errors', e.score || 1, e.message)
+    await logRelayerError(redis, e.message)
     console.error('priceWatcher error', e)
   }
 }

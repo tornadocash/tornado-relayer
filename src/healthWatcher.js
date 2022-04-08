@@ -14,7 +14,6 @@ async function main() {
     await redis.hset('health', { status: true, error: '' })
   } catch (e) {
     console.error('healthWatcher', e.message)
-    redis.zadd('errors', e.score || 0, e.message)
     await redis.hset('health', { status: false, error: e.message })
   }
 }
