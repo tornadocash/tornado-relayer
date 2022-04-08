@@ -18,6 +18,7 @@ const {
   fromWei,
   toChecksumAddress,
   RelayerError,
+  logRelayerError,
 } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
@@ -106,7 +107,7 @@ async function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
-    redis.zadd('errors', e.score || 1, e.message)
+    await logRelayerError(redis, e.message)
     console.error('error on start worker', e.message)
   }
 }

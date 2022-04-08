@@ -2,11 +2,12 @@ const queue = require('../queue')
 const { netId, tornadoServiceFee, miningServiceFee, instances, rewardAccount } = require('../config')
 const { version } = require('../../package.json')
 const { redis } = require('../modules/redis')
+const { readRelayerErrors } = require('../utils')
 
 async function status(req, res) {
   const ethPrices = await redis.hgetall('prices')
   const health = await redis.hgetall('health')
-  const errors = await redis.zrevrange('errors', 0, -1)
+  const errors = await readRelayerErrors(redis)
 
   const { waiting: currentQueue } = await queue.queue.getJobCounts()
 

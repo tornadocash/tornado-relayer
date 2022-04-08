@@ -1,6 +1,6 @@
 const MerkleTree = require('fixed-merkle-tree')
 const { minerMerkleTreeHeight, torn, netId } = require('./config')
-const { poseidonHash2, toBN } = require('./utils')
+const { poseidonHash2, toBN, logRelayerError } = require('./utils')
 const resolver = require('./modules/resolver')
 const web3 = require('./modules/web3')('ws')
 const MinerABI = require('../abis/mining.abi.json')
@@ -123,7 +123,7 @@ async function init() {
     eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
   } catch (e) {
-    redis.zadd('errors', 1, e.message)
+    await logRelayerError(redis, e.message)
     console.error('error on init treeWatcher', e.message)
   }
 }

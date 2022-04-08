@@ -1,8 +1,8 @@
-const Redis = require('ioredis')
+const { createClient } = require('ioredis')
 const { redisUrl } = require('../config')
 
-const redis = new Redis(redisUrl)
-const redisSubscribe = new Redis(redisUrl)
+const redis = createClient(redisUrl)
+const redisSubscribe = createClient(redisUrl)
 
 module.exports = {
   redis,
