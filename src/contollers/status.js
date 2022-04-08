@@ -7,8 +7,7 @@ const { readRelayerErrors } = require('../utils')
 async function status(req, res) {
   const ethPrices = await redis.hgetall('prices')
   const health = await redis.hgetall('health')
-  const errors = await readRelayerErrors(redis)
-
+  health.errorsLog = await readRelayerErrors(redis)
   const { waiting: currentQueue } = await queue.queue.getJobCounts()
 
   res.json({
@@ -20,7 +19,6 @@ async function status(req, res) {
     miningServiceFee,
     version,
     health,
-    errors,
     currentQueue,
   })
 }
