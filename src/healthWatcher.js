@@ -4,7 +4,7 @@ const { setSafeInterval } = require('./utils')
 const { httpRpcUrl, privateKey, minimumBalance, nativeCurrency, instances } = require('./config')
 
 const web3 = new Web3(httpRpcUrl)
-const { redis } = require('modules/redis')
+const { redis } = require('./modules/redis')
 
 async function main() {
   try {

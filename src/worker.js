@@ -1,7 +1,7 @@
 const Web3 = require('web3')
 const { GasPriceOracle } = require('gas-price-oracle')
 const { toBN, toWei, fromWei, toHex } = require('web3-utils')
-const { redis } = require('modules/redis')
+const { redis } = require('./modules/redis')
 const proxyLightABI = require('../abis/proxyLightABI.json')
 const { queue } = require('./queue')
 const { getInstance, fromDecimals, logRelayerError } = require('./utils')
