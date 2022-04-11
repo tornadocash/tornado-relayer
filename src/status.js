@@ -6,7 +6,7 @@ const { redis } = require('./modules/redis')
 
 async function status(req, res) {
   const health = await redis.hgetall('health')
-  health.errorsLog = readRelayerErrors(redis)
+  health.errorsLog = await readRelayerErrors(redis)
   const { waiting: currentQueue } = await queue.queue.getJobCounts()
 
   res.json({
