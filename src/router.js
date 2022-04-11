@@ -1,4 +1,5 @@
-const { controller, status } = require('./contollers')
+const controller = require('./controller')
+const status = require('./status')
 const router = require('express').Router()
 
 // Add CORS headers

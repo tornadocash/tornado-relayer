@@ -1,9 +1,8 @@
 const queue = require('./queue')
-const { netId, tornadoServiceFee, instances, redisUrl, rewardAccount } = require('./config')
+const { netId, tornadoServiceFee, instances, rewardAccount } = require('./config')
 const { version } = require('../package.json')
-const Redis = require('ioredis')
 const { readRelayerErrors } = require('./utils')
-const redis = new Redis(redisUrl)
+const { redis } = require('./modules/redis')
 
 async function status(req, res) {
   const health = await redis.hgetall('health')
