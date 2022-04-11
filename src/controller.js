@@ -1,4 +1,4 @@
-const { getTornadoWithdrawInputError } = require('./validator')
+const { getTornadoWithdrawInputError } = require('./modules/validator')
 const { postJob } = require('./queue')
 const { jobType } = require('./constants')
 

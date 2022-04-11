@@ -1,12 +1,10 @@
 const Web3 = require('web3')
-const Redis = require('ioredis')
 const { toBN, fromWei } = require('web3-utils')
-
 const { setSafeInterval } = require('./utils')
-const { redisUrl, httpRpcUrl, privateKey, minimumBalance, nativeCurrency, instances } = require('./config')
+const { httpRpcUrl, privateKey, minimumBalance, nativeCurrency, instances } = require('./config')
 
 const web3 = new Web3(httpRpcUrl)
-const redis = new Redis(redisUrl)
+const { redis } = require('modules/redis')
 
 async function main() {
   try {

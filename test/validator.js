@@ -1,6 +1,6 @@
 require('chai').should()
 
-const { getTornadoWithdrawInputError } = require('../src/validator')
+const { getTornadoWithdrawInputError } = require('../src/modules/validator')
 
 describe('Validator', () => {
   describe('#getTornadoWithdrawInputError', () => {
