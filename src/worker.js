@@ -1,10 +1,10 @@
 const Web3 = require('web3')
 const { GasPriceOracle } = require('gas-price-oracle')
 const { toBN, toWei, fromWei, toHex } = require('web3-utils')
-
+const { redis } = require('modules/redis')
 const proxyLightABI = require('../abis/proxyLightABI.json')
 const { queue } = require('./queue')
-const { getInstance, fromDecimals } = require('./utils')
+const { getInstance, fromDecimals, logRelayerError } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
   netId,
@@ -46,6 +46,7 @@ function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
+    logRelayerError(redis, e.message)
     console.error('error on start worker', e.message)
   }
 }

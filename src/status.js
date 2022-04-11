@@ -2,11 +2,12 @@ const queue = require('./queue')
 const { netId, tornadoServiceFee, instances, redisUrl, rewardAccount } = require('./config')
 const { version } = require('../package.json')
 const Redis = require('ioredis')
+const { readRelayerErrors } = require('./utils')
 const redis = new Redis(redisUrl)
 
 async function status(req, res) {
   const health = await redis.hgetall('health')
-
+  health.errorsLog = readRelayerErrors(redis)
   const { waiting: currentQueue } = await queue.queue.getJobCounts()
 
   res.json({

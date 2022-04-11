@@ -1,9 +1,7 @@
 const { v4: uuid } = require('uuid')
 const Queue = require('bull')
-const Redis = require('ioredis')
-const { redisUrl } = require('./config')
 const { status } = require('./constants')
-const redis = new Redis(redisUrl)
+const { redis, redisUrl } = require('./modules/redis')
 
 const queue = new Queue('proofs', redisUrl, {
   lockDuration: 300000, // Key expiration time for job locks.

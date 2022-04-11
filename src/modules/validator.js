@@ -1,6 +1,6 @@
 const { isAddress, toChecksumAddress } = require('web3-utils')
-const { getInstance } = require('./utils')
-const { rewardAccount } = require('./config')
+const { getInstance } = require('../utils')
+const { rewardAccount } = require('../config')
 
 const Ajv = require('ajv')
 const ajv = new Ajv({ format: 'fast' })
