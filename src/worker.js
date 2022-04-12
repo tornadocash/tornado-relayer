@@ -4,7 +4,7 @@ const { toBN, toWei, fromWei, toHex } = require('web3-utils')
 const { redis } = require('./modules/redis')
 const proxyLightABI = require('../abis/proxyLightABI.json')
 const { queue } = require('./queue')
-const { getInstance, fromDecimals, logRelayerError } = require('./utils')
+const { getInstance, fromDecimals, logRelayerError, clearRelayerErrors } = require('./utils')
 const { jobType, status } = require('./constants')
 const {
   netId,
@@ -27,6 +27,7 @@ let gasPriceOracle
 function start() {
   try {
     web3 = new Web3(httpRpcUrl)
+    clearRelayerErrors(redis)
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
     const gasPriceOracleConfig = {
       chainId: netId,

@@ -84,10 +84,14 @@ const readRelayerErrors = async redis => {
   return errors
 }
 
+const clearRelayerErrors = redis => {
+  redis.del('errors')
+}
 module.exports = {
   getInstance,
   setSafeInterval,
   fromDecimals,
   logRelayerError,
   readRelayerErrors,
+  clearRelayerErrors,
 }
