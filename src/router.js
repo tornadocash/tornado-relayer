@@ -3,6 +3,7 @@ const router = require('express').Router()
 
 // Add CORS headers
 router.use((req, res, next) => {
+  res.header('X-Frame-Options', 'DENY')
   res.header('Access-Control-Allow-Origin', '*')
   res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept')
   next()
