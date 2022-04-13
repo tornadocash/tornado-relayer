@@ -33,10 +33,10 @@ wget https://raw.githubusercontent.com/tornadocash/tornado-relayer/master/.env.e
 
 ## Run locally
 
-1. `npm i`
+1. `yarn`
 2. `cp .env.example .env`
 3. Modify `.env` as needed
-4. `npm run start`
+4. `yarn start`
 5. Go to `http://127.0.0.1:8000`
 6. In order to execute withdraw request, you can run following command
 
