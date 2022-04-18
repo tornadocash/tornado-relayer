@@ -15,14 +15,12 @@ for (const [key, value] of Object.entries(instances)) {
   const netId = Number(key.substring(5))
   for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(value)) {
     Object.entries(instanceAddress).forEach(([amount, address]) =>
-      addressMap.set(`${netId}_${address}`,
-        {
-          currency,
-          amount,
-          symbol,
-          decimals,
-        },
-      ),
+      addressMap.set(`${netId}_${address}`, {
+        currency,
+        amount,
+        symbol,
+        decimals,
+      }),
     )
   }
 }
