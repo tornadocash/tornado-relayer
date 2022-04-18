@@ -15,8 +15,7 @@ for (const [key, value] of Object.entries(instances)) {
   const netId = Number(key.substring(5))
   for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(value)) {
     Object.entries(instanceAddress).forEach(([amount, address]) =>
-      addressMap.set(
-        { netId, address },
+      addressMap.set(`${netId}_${address}`,
         {
           currency,
           amount,
@@ -31,9 +30,9 @@ for (const [key, value] of Object.entries(instances)) {
 const sleep = ms => new Promise(res => setTimeout(res, ms))
 
 function getInstance(address) {
-  address = toChecksumAddress(address)
-  if (addressMap.has({ netId, address })) {
-    return addressMap.get({ netId, address })
+  const key = `${netId}_${toChecksumAddress(address)}`
+  if (addressMap.has(key)) {
+    return addressMap.get(key)
   } else {
     throw new Error('Unknown contact address')
   }
