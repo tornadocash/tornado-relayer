@@ -10,7 +10,6 @@ const {
   netId,
   gasPrices,
   gasLimits,
-  instances,
   privateKey,
   proxyLight,
   httpRpcUrl,
@@ -74,8 +73,7 @@ function getGasLimit() {
 }
 
 async function checkTornadoFee({ args, contract }) {
-  const { currency, amount } = getInstance(contract)
-  const { decimals } = instances[currency]
+  const { amount, decimals } = getInstance(contract)
   const fee = toBN(args[4])
 
   const { fast } = await getGasPrices()

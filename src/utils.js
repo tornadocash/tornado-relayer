@@ -1,16 +1,26 @@
 const { instances } = require('./config')
 const { toChecksumAddress, BN } = require('web3-utils')
 
+const addressMap = new Map()
+for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(instances)) {
+  Object.entries(instanceAddress).forEach(([amount, address]) =>
+    addressMap.set(address, {
+      currency,
+      amount,
+      symbol,
+      decimals,
+    }),
+  )
+}
+
 function getInstance(address) {
   address = toChecksumAddress(address)
-  for (const currency of Object.keys(instances)) {
-    for (const amount of Object.keys(instances[currency].instanceAddress)) {
-      if (instances[currency].instanceAddress[amount] === address) {
-        return { currency, amount }
-      }
-    }
+  const key = toChecksumAddress(address)
+  if (addressMap.has(key)) {
+    return addressMap.get(key)
+  } else {
+    throw new Error('Unknown contact address')
   }
-  return null
 }
 
 function setSafeInterval(func, interval) {
