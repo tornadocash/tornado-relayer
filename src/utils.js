@@ -11,18 +11,17 @@ const TOKENS = {
 }
 
 const addressMap = new Map()
-for (const [key, value] of Object.entries(instances)) {
-  const netId = Number(key.substring(5))
-  for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(value)) {
-    Object.entries(instanceAddress).forEach(([amount, address]) =>
-      addressMap.set(`${netId}_${address}`, {
-        currency,
-        amount,
-        symbol,
-        decimals,
-      }),
-    )
-  }
+const instance = instances[`netId${netId}`]
+
+for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(instance)) {
+  Object.entries(instanceAddress).forEach(([amount, address]) =>
+    addressMap.set(`${netId}_${address}`, {
+      currency,
+      amount,
+      symbol,
+      decimals,
+    }),
+  )
 }
 
 const sleep = ms => new Promise(res => setTimeout(res, ms))
