@@ -10,19 +10,33 @@ const TOKENS = {
   },
 }
 
+const addressMap = new Map()
+for (const [key, value] of Object.entries(instances)) {
+  const netId = Number(key.substring(5))
+  for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(value)) {
+    Object.entries(instanceAddress).forEach(([amount, address]) =>
+      addressMap.set(
+        { netId, address },
+        {
+          currency,
+          amount,
+          symbol,
+          decimals,
+        },
+      ),
+    )
+  }
+}
+
 const sleep = ms => new Promise(res => setTimeout(res, ms))
 
 function getInstance(address) {
   address = toChecksumAddress(address)
-  const inst = instances[`netId${netId}`]
-  for (const currency of Object.keys(inst)) {
-    for (const amount of Object.keys(inst[currency].instanceAddress)) {
-      if (inst[currency].instanceAddress[amount] === address) {
-        return { currency, amount }
-      }
-    }
+  if (addressMap.has({ netId, address })) {
+    return addressMap.get({ netId, address })
+  } else {
+    throw new Error('Unknown contact address')
   }
-  return null
 }
 
 const poseidonHash = items => toBN(poseidon(items).toString())

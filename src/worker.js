@@ -19,7 +19,6 @@ const {
   netId,
   redisUrl,
   gasLimits,
-  instances,
   privateKey,
   httpRpcUrl,
   oracleRpcUrl,
@@ -128,8 +127,7 @@ async function getGasPrice() {
 }
 
 async function checkTornadoFee({ args, contract }) {
-  const { currency, amount } = getInstance(contract)
-  const { decimals } = instances[`netId${netId}`][currency]
+  const { currency, amount, decimals } = getInstance(contract)
   const [fee, refund] = [args[4], args[5]].map(toBN)
   const gasPrice = await getGasPrice()
 
