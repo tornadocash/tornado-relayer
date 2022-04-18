@@ -15,7 +15,13 @@ describe('Validator', () => {
         '.proof should match pattern "^0x[a-fA-F0-9]{512}$"',
       )
     })
-
+    it('should throw if unknown contract', () => {
+      const malformedData = { ...withdrawData }
+      malformedData.contract = '0xf17f52151ebef6c7334fad080c5704d77216b732'
+      getTornadoWithdrawInputError(malformedData).should.be.equal(
+        '.contract should pass "isKnownContract" keyword validation',
+      )
+    })
     it('should throw something is missing', () => {
       const malformedData = { ...withdrawData }
       delete malformedData.proof
