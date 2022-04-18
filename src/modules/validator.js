@@ -19,7 +19,7 @@ ajv.addKeyword('isAddress', {
 ajv.addKeyword('isKnownContract', {
   validate: (schema, data) => {
     try {
-      return getInstance(data) !== null
+      return !!getInstance(data)
     } catch (e) {
       return false
     }
