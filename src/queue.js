@@ -1,11 +1,11 @@
 const { v4: uuid } = require('uuid')
 const Queue = require('bull')
 const Redis = require('ioredis')
-const { redisUrl } = require('./config')
+const { redisUrl, netId } = require('./config')
 const { status } = require('./constants')
 const redis = new Redis(redisUrl)
 
-const queue = new Queue('proofs', redisUrl, {
+const queue = new Queue(`proofs_${netId}`, redisUrl, {
   lockDuration: 300000, // Key expiration time for job locks.
   lockRenewTime: 30000, // Interval on which to acquire the job lock
   stalledInterval: 30000, // How often check for stalled jobs (use 0 for never checking).
