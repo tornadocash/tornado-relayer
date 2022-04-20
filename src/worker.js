@@ -106,7 +106,7 @@ async function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
-    await logRelayerError(redis, e.message)
+    await logRelayerError(redis, e)
     console.error('error on start worker', e.message)
   }
 }
