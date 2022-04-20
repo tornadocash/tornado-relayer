@@ -39,7 +39,7 @@ async function main() {
     await redis.hmset('prices', ethPrices)
     console.log('Wrote following prices to redis', ethPrices)
   } catch (e) {
-    await logRelayerError(redis, e.message)
+    await logRelayerError(redis, e)
     console.error('priceWatcher error', e)
   }
 }

@@ -123,7 +123,7 @@ async function init() {
     eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent)
     blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
   } catch (e) {
-    await logRelayerError(redis, e.message)
+    await logRelayerError(redis, e)
     console.error('error on init treeWatcher', e.message)
   }
 }

@@ -136,7 +136,7 @@ class RelayerError extends Error {
 }
 
 const logRelayerError = async (redis, e) => {
-  await redis.zadd('errors', 'INCR', 1, e.message)
+  await redis.zadd('errors', 'INCR', e.score || 1, e.message)
 }
 
 const readRelayerErrors = async redis => {
