@@ -46,7 +46,7 @@ function start() {
     queue.process(processJob)
     console.log('Worker started')
   } catch (e) {
-    logRelayerError(redis, e.message)
+    logRelayerError(redis, e)
     console.error('error on start worker', e.message)
   }
 }
