@@ -207,7 +207,7 @@ async function getProxyContract() {
   if (netId === 5) {
     proxyAddress = tornadoGoerliProxy
   } else {
-    proxyAddress = await resolver.resolve(torn.tornadoProxy.address)
+    proxyAddress = await resolver.resolve(torn.tornadoRouter.address)
   }
   const contract = new web3.eth.Contract(tornadoProxyABI, proxyAddress)
 
