@@ -8,7 +8,7 @@ const {
   logRelayerError,
 } = require('./utils')
 const { redis } = require('./modules/redis')
-const web3 = require('./modules/web3')()
+const web3 = require('./modules/web3')('oracle')
 
 const offchainOracleABI = require('../abis/OffchainOracle.abi.json')
 
