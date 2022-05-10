@@ -1,17 +1,11 @@
-const { isAddress, toChecksumAddress } = require('web3-utils');
-const { getInstance } = require('./utils');
-const { rewardAccount } = require('./config');
+const addressType = { type: 'string', pattern: '^0x[a-fA-F0-9]{40}$', isAddress: true } as const;
+const proofType = { type: 'string', pattern: '^0x[a-fA-F0-9]{512}$' } as const;
+const encryptedAccountType = { type: 'string', pattern: '^0x[a-fA-F0-9]{392}$' } as const;
+const bytes32Type = { type: 'string', pattern: '^0x[a-fA-F0-9]{64}$' } as const;
+const instanceType = { ...addressType, isKnownContract: true } as const;
+const relayerType = { ...addressType, isFeeRecipient: true } as const;
 
-const Ajv = require('ajv');
-
-const addressType = { type: 'string', pattern: '^0x[a-fA-F0-9]{40}$', isAddress: true };
-const proofType = { type: 'string', pattern: '^0x[a-fA-F0-9]{512}$' };
-const encryptedAccountType = { type: 'string', pattern: '^0x[a-fA-F0-9]{392}$' };
-const bytes32Type = { type: 'string', pattern: '^0x[a-fA-F0-9]{64}$' };
-const instanceType = { ...addressType, isKnownContract: true };
-const relayerType = { ...addressType, isFeeRecipient: true };
-
-const tornadoWithdrawSchema = {
+export const withdrawBodySchema = {
   type: 'object',
   properties: {
     proof: proofType,
@@ -25,8 +19,28 @@ const tornadoWithdrawSchema = {
   },
   additionalProperties: false,
   required: ['proof', 'contract', 'args'],
-};
+} as const;
 
+export const withdrawSchema = {
+  body: withdrawBodySchema,
+  response: {
+    200: {
+      type: 'boolean',
+    },
+  },
+};
+const statusResponseSchema = {
+  type: 'object',
+  properties: {
+    status: { type: 'string' },
+  },
+} as const;
+
+export const statusSchema = {
+  response: {
+    200: statusResponseSchema,
+  },
+};
 const miningRewardSchema = {
   type: 'object',
   properties: {
@@ -85,7 +99,7 @@ const miningRewardSchema = {
   },
   additionalProperties: false,
   required: ['proof', 'args'],
-};
+} as const;
 
 const miningWithdrawSchema = {
   type: 'object',
@@ -132,35 +146,4 @@ const miningWithdrawSchema = {
   },
   additionalProperties: false,
   required: ['proof', 'args'],
-};
-
-const validateTornadoWithdraw = ajv.compile(tornadoWithdrawSchema);
-const validateMiningReward = ajv.compile(miningRewardSchema);
-const validateMiningWithdraw = ajv.compile(miningWithdrawSchema);
-
-function getInputError(validator, data) {
-  validator(data);
-  if (validator.errors) {
-    const error = validator.errors[0];
-    return `${error.dataPath} ${error.message}`;
-  }
-  return null;
-}
-
-function getTornadoWithdrawInputError(data) {
-  return getInputError(validateTornadoWithdraw, data);
-}
-
-function getMiningRewardInputError(data) {
-  return getInputError(validateMiningReward, data);
-}
-
-function getMiningWithdrawInputError(data) {
-  return getInputError(validateMiningWithdraw, data);
-}
-
-module.exports = {
-  getTornadoWithdrawInputError,
-  getMiningRewardInputError,
-  getMiningWithdrawInputError,
 };

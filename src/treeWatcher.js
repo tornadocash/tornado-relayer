@@ -1,12 +1,12 @@
-const MerkleTree = require('fixed-merkle-tree')
-const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, torn, netId } = require('./config')
-const { poseidonHash2 } = require('./utils')
-const { toBN } = require('web3-utils')
-const Redis = require('ioredis')
-const redis = new Redis(redisUrl)
-const ENSResolver = require('./resolver')
-const resolver = new ENSResolver()
-const Web3 = require('web3')
+const MerkleTree = require('fixed-merkle-tree');
+const { redisUrl, wsRpcUrl, minerMerkleTreeHeight, torn, netId } = require('./config');
+const { poseidonHash2 } = require('./utils');
+const { toBN } = require('web3-utils');
+const Redis = require('ioredis');
+const redis = new Redis(redisUrl);
+const ENSResolver = require('./resolver');
+const resolver = new ENSResolver();
+const Web3 = require('web3');
 const web3 = new Web3(
   new Web3.providers.WebsocketProvider(wsRpcUrl, {
     clientConfig: {
@@ -14,12 +14,12 @@ const web3 = new Web3(
       maxReceivedMessageSize: 100000000,
     },
   }),
-)
-const MinerABI = require('../abis/mining.abi.json')
-let contract
+);
+const MinerABI = require('../abis/mining.abi.json');
+let contract;
 
 // eslint-disable-next-line no-unused-vars
-let tree, eventSubscription, blockSubscription
+let tree, eventSubscription, blockSubscription;
 
 async function fetchEvents(fromBlock, toBlock) {
   if (fromBlock <= toBlock) {
@@ -27,25 +27,25 @@ async function fetchEvents(fromBlock, toBlock) {
       return await contract.getPastEvents('NewAccount', {
         fromBlock,
         toBlock,
-      })
+      });
     } catch (error) {
-      const midBlock = (fromBlock + toBlock) >> 1
+      const midBlock = (fromBlock + toBlock) >> 1;
 
       if (midBlock - fromBlock < 2) {
-        throw new Error(`error fetching events: ${error.message}`)
+        throw new Error(`error fetching events: ${error.message}`);
       }
 
-      const arr1 = await fetchEvents(fromBlock, midBlock)
-      const arr2 = await fetchEvents(midBlock + 1, toBlock)
-      return [...arr1, ...arr2]
+      const arr1 = await fetchEvents(fromBlock, midBlock);
+      const arr2 = await fetchEvents(midBlock + 1, toBlock);
+      return [...arr1, ...arr2];
     }
   }
-  return []
+  return [];
 }
 
 async function processNewEvent(err, event) {
   if (err) {
-    throw new Error(`Event handler error: ${err}`)
+    throw new Error(`Event handler error: ${err}`);
     // console.error(err)
     // return
   }
@@ -56,52 +56,52 @@ async function processNewEvent(err, event) {
     Commitment: ${event.returnValues.commitment}
     Nullifier: ${event.returnValues.nullifier}
     EncAcc: ${event.returnValues.encryptedAccount}`,
-  )
-  const { commitment, index } = event.returnValues
+  );
+  const { commitment, index } = event.returnValues;
   if (tree.elements().length === Number(index)) {
-    tree.insert(toBN(commitment))
-    await updateRedis()
+    tree.insert(toBN(commitment));
+    await updateRedis();
   } else if (tree.elements().length === Number(index) + 1) {
-    console.log('Replacing element', index)
-    tree.update(index, toBN(commitment))
-    await updateRedis()
+    console.log('Replacing element', index);
+    tree.update(index, toBN(commitment));
+    await updateRedis();
   } else {
-    console.log(`Invalid element index ${index}, rebuilding tree`)
-    rebuild()
+    console.log(`Invalid element index ${index}, rebuilding tree`);
+    rebuild();
   }
 }
 
 async function processNewBlock(err) {
   if (err) {
-    throw new Error(`Event handler error: ${err}`)
+    throw new Error(`Event handler error: ${err}`);
     // console.error(err)
     // return
   }
   // what if updateRedis takes more than 15 sec?
-  await updateRedis()
+  await updateRedis();
 }
 
 async function updateRedis() {
-  const rootOnContract = await contract.methods.getLastAccountRoot().call()
+  const rootOnContract = await contract.methods.getLastAccountRoot().call();
   if (!tree.root().eq(toBN(rootOnContract))) {
-    console.log(`Invalid tree root: ${tree.root()} != ${toBN(rootOnContract)}, rebuilding tree`)
-    rebuild()
-    return
+    console.log(`Invalid tree root: ${tree.root()} != ${toBN(rootOnContract)}, rebuilding tree`);
+    rebuild();
+    return;
   }
-  const rootInRedis = await redis.get('tree:root')
+  const rootInRedis = await redis.get('tree:root');
   if (!rootInRedis || !tree.root().eq(toBN(rootInRedis))) {
-    const serializedTree = JSON.stringify(tree.serialize())
-    await redis.set('tree:elements', serializedTree)
-    await redis.set('tree:root', tree.root().toString())
-    await redis.publish('treeUpdate', tree.root().toString())
-    console.log('Updated tree in redis, new root:', tree.root().toString())
+    const serializedTree = JSON.stringify(tree.serialize());
+    await redis.set('tree:elements', serializedTree);
+    await redis.set('tree:root', tree.root().toString());
+    await redis.publish('treeUpdate', tree.root().toString());
+    console.log('Updated tree in redis, new root:', tree.root().toString());
   } else {
-    console.log('Tree in redis is up to date, skipping update')
+    console.log('Tree in redis is up to date, skipping update');
   }
 }
 
 function rebuild() {
-  process.exit(1)
+  process.exit(1);
   // await eventSubscription.unsubscribe()
   // await blockSubscription.unsubscribe()
   // setTimeout(init, 3000)
@@ -109,38 +109,38 @@ function rebuild() {
 
 async function init() {
   try {
-    console.log('Initializing')
-    const miner = await resolver.resolve(torn.miningV2.address)
-    contract = new web3.eth.Contract(MinerABI, miner)
+    console.log('Initializing');
+    const miner = await resolver.resolve(torn.miningV2.address);
+    contract = new web3.eth.Contract(MinerABI, miner);
 
-    const cachedEvents = require(`../cache/accounts_farmer_${netId}.json`)
-    const cachedCommitments = cachedEvents.map(e => toBN(e.commitment))
+    const cachedEvents = require(`../cache/accounts_farmer_${netId}.json`);
+    const cachedCommitments = cachedEvents.map(e => toBN(e.commitment));
 
-    const toBlock = await web3.eth.getBlockNumber()
-    const [{ blockNumber: fromBlock }] = cachedEvents.slice(-1)
+    const toBlock = await web3.eth.getBlockNumber();
+    const [{ blockNumber: fromBlock }] = cachedEvents.slice(-1);
 
-    const newEvents = await fetchEvents(fromBlock + 1, toBlock)
+    const newEvents = await fetchEvents(fromBlock + 1, toBlock);
     const newCommitments = newEvents
       .sort((a, b) => a.returnValues.index - b.returnValues.index)
       .map(e => toBN(e.returnValues.commitment))
-      .filter((item, index, arr) => !index || item != arr[index - 1])
+      .filter((item, index, arr) => !index || item !== arr[index - 1]);
 
-    const commitments = cachedCommitments.concat(newCommitments)
+    const commitments = cachedCommitments.concat(newCommitments);
 
-    tree = new MerkleTree(minerMerkleTreeHeight, commitments, { hashFunction: poseidonHash2 })
-    await updateRedis()
-    console.log(`Rebuilt tree with ${commitments.length} elements, root: ${tree.root()}`)
+    tree = new MerkleTree(minerMerkleTreeHeight, commitments, { hashFunction: poseidonHash2 });
+    await updateRedis();
+    console.log(`Rebuilt tree with ${commitments.length} elements, root: ${tree.root()}`);
 
-    eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent)
-    blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock)
+    eventSubscription = contract.events.NewAccount({ fromBlock: toBlock + 1 }, processNewEvent);
+    blockSubscription = web3.eth.subscribe('newBlockHeaders', processNewBlock);
   } catch (e) {
-    console.error('error on init treeWatcher', e.message)
+    console.error('error on init treeWatcher', e.message);
   }
 }
 
-init()
+init();
 
 process.on('unhandledRejection', error => {
-  console.error('Unhandled promise rejection', error)
-  process.exit(1)
-})
+  console.error('Unhandled promise rejection', error);
+  process.exit(1);
+});

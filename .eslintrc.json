@@ -1,45 +1,35 @@
 {
   "env": {
     "node": true,
-    "browser": true,
-    "es6": true,
-    "mocha": true
+    "commonjs": true,
+    "es2020": true
   },
-  "extends": "eslint:recommended",
-  "globals": {
-    "Atomics": "readonly",
-    "SharedArrayBuffer": "readonly"
-  },
+  "extends": [
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
+  "parser": "@typescript-eslint/parser",
   "parserOptions": {
-    "ecmaVersion": 2018
+    "ecmaVersion": 11
   },
+  "plugins": [
+    "@typescript-eslint"
+  ],
   "rules": {
-    "indent": [
+    "linebreak-style": [
       "error",
-      2,
-      {
-        "SwitchCase": 1
-      }
+      "unix"
     ],
-    "linebreak-style": ["error", "unix"],
     "quotes": [
       "error",
-      "single",
-      {
-        "avoidEscape": true
-      }
+      "single"
     ],
-    "semi": ["error", "never"],
-    "object-curly-spacing": ["error", "always"],
-    "require-await": "error",
-    "comma-dangle": ["error", "only-multiline"],
-    "space-before-function-paren": [
+    "semi": [
       "error",
-      {
-        "anonymous": "always",
-        "named": "never",
-        "asyncArrow": "always"
-      }
-    ]
+      "always"
+    ],
+    "no-useless-catch": "off",
+    "@typescript-eslint/no-var-requires": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
   }
 }
