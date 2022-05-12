@@ -173,6 +173,8 @@ export declare namespace Miner {
 }
 
 export interface MiningAbiInterface extends utils.Interface {
+  contractName: "MiningAbi";
+
   functions: {
     "ACCOUNT_ROOT_HISTORY_SIZE()": FunctionFragment;
     "accountCount()": FunctionFragment;
@@ -540,6 +542,8 @@ export type WithdrawalDataEvent = TypedEvent<
 export type WithdrawalDataEventFilter = TypedEventFilter<WithdrawalDataEvent>;
 
 export interface MiningAbi extends BaseContract {
+  contractName: "MiningAbi";
+
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

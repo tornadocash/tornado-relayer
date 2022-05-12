@@ -28,6 +28,8 @@ import type {
 } from "./common";
 
 export interface TornadoABIInterface extends utils.Interface {
+  contractName: "TornadoABI";
+
   functions: {
     "changeOperator(address)": FunctionFragment;
     "nullifierHashes(bytes32)": FunctionFragment;
@@ -243,6 +245,8 @@ export type WithdrawalEvent = TypedEvent<
 export type WithdrawalEventFilter = TypedEventFilter<WithdrawalEvent>;
 
 export interface TornadoABI extends BaseContract {
+  contractName: "TornadoABI";
+
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

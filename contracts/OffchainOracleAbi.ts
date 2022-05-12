@@ -27,6 +27,8 @@ import type {
 } from "./common";
 
 export interface OffchainOracleAbiInterface extends utils.Interface {
+  contractName: "OffchainOracleAbi";
+
   functions: {
     "addConnector(address)": FunctionFragment;
     "addOracle(address,uint8)": FunctionFragment;
@@ -64,56 +66,44 @@ export interface OffchainOracleAbiInterface extends utils.Interface {
     functionFragment: "addConnector",
     values: [string]
   ): string;
-
   encodeFunctionData(
     functionFragment: "addOracle",
     values: [string, BigNumberish]
   ): string;
-
   encodeFunctionData(
     functionFragment: "connectors",
     values?: undefined
   ): string;
-
   encodeFunctionData(
     functionFragment: "getRate",
     values: [string, string, boolean]
   ): string;
-
   encodeFunctionData(
     functionFragment: "getRateToEth",
     values: [string, boolean]
   ): string;
-
   encodeFunctionData(
     functionFragment: "multiWrapper",
     values?: undefined
   ): string;
-
   encodeFunctionData(functionFragment: "oracles", values?: undefined): string;
-
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
-
   encodeFunctionData(
     functionFragment: "removeConnector",
     values: [string]
   ): string;
-
   encodeFunctionData(
     functionFragment: "removeOracle",
     values: [string, BigNumberish]
   ): string;
-
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
-
   encodeFunctionData(
     functionFragment: "setMultiWrapper",
     values: [string]
   ): string;
-
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
@@ -123,47 +113,35 @@ export interface OffchainOracleAbiInterface extends utils.Interface {
     functionFragment: "addConnector",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(functionFragment: "addOracle", data: BytesLike): Result;
-
   decodeFunctionResult(functionFragment: "connectors", data: BytesLike): Result;
-
   decodeFunctionResult(functionFragment: "getRate", data: BytesLike): Result;
-
   decodeFunctionResult(
     functionFragment: "getRateToEth",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(
     functionFragment: "multiWrapper",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(functionFragment: "oracles", data: BytesLike): Result;
-
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-
   decodeFunctionResult(
     functionFragment: "removeConnector",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(
     functionFragment: "removeOracle",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(
     functionFragment: "setMultiWrapper",
     data: BytesLike
   ): Result;
-
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -179,33 +157,30 @@ export interface OffchainOracleAbiInterface extends utils.Interface {
   };
 
   getEvent(nameOrSignatureOrTopic: "ConnectorAdded"): EventFragment;
-
   getEvent(nameOrSignatureOrTopic: "ConnectorRemoved"): EventFragment;
-
   getEvent(nameOrSignatureOrTopic: "MultiWrapperUpdated"): EventFragment;
-
   getEvent(nameOrSignatureOrTopic: "OracleAdded"): EventFragment;
-
   getEvent(nameOrSignatureOrTopic: "OracleRemoved"): EventFragment;
-
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
 export interface ConnectorAddedEventObject {
   connector: string;
 }
-
-export type ConnectorAddedEvent = TypedEvent<[string],
-  ConnectorAddedEventObject>;
+export type ConnectorAddedEvent = TypedEvent<
+  [string],
+  ConnectorAddedEventObject
+>;
 
 export type ConnectorAddedEventFilter = TypedEventFilter<ConnectorAddedEvent>;
 
 export interface ConnectorRemovedEventObject {
   connector: string;
 }
-
-export type ConnectorRemovedEvent = TypedEvent<[string],
-  ConnectorRemovedEventObject>;
+export type ConnectorRemovedEvent = TypedEvent<
+  [string],
+  ConnectorRemovedEventObject
+>;
 
 export type ConnectorRemovedEventFilter =
   TypedEventFilter<ConnectorRemovedEvent>;
@@ -213,9 +188,10 @@ export type ConnectorRemovedEventFilter =
 export interface MultiWrapperUpdatedEventObject {
   multiWrapper: string;
 }
-
-export type MultiWrapperUpdatedEvent = TypedEvent<[string],
-  MultiWrapperUpdatedEventObject>;
+export type MultiWrapperUpdatedEvent = TypedEvent<
+  [string],
+  MultiWrapperUpdatedEventObject
+>;
 
 export type MultiWrapperUpdatedEventFilter =
   TypedEventFilter<MultiWrapperUpdatedEvent>;
@@ -224,9 +200,10 @@ export interface OracleAddedEventObject {
   oracle: string;
   oracleType: number;
 }
-
-export type OracleAddedEvent = TypedEvent<[string, number],
-  OracleAddedEventObject>;
+export type OracleAddedEvent = TypedEvent<
+  [string, number],
+  OracleAddedEventObject
+>;
 
 export type OracleAddedEventFilter = TypedEventFilter<OracleAddedEvent>;
 
@@ -234,9 +211,10 @@ export interface OracleRemovedEventObject {
   oracle: string;
   oracleType: number;
 }
-
-export type OracleRemovedEvent = TypedEvent<[string, number],
-  OracleRemovedEventObject>;
+export type OracleRemovedEvent = TypedEvent<
+  [string, number],
+  OracleRemovedEventObject
+>;
 
 export type OracleRemovedEventFilter = TypedEventFilter<OracleRemovedEvent>;
 
@@ -244,18 +222,19 @@ export interface OwnershipTransferredEventObject {
   previousOwner: string;
   newOwner: string;
 }
-
-export type OwnershipTransferredEvent = TypedEvent<[string, string],
-  OwnershipTransferredEventObject>;
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
 
 export type OwnershipTransferredEventFilter =
   TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface OffchainOracleAbi extends BaseContract {
+  contractName: "OffchainOracleAbi";
+
   connect(signerOrProvider: Signer | Provider | string): this;
-
   attach(addressOrName: string): this;
-
   deployed(): Promise<this>;
 
   interface: OffchainOracleAbiInterface;
@@ -269,15 +248,11 @@ export interface OffchainOracleAbi extends BaseContract {
   listeners<TEvent extends TypedEvent>(
     eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
-
   listeners(eventName?: string): Array<Listener>;
-
   removeAllListeners<TEvent extends TypedEvent>(
     eventFilter: TypedEventFilter<TEvent>
   ): this;
-
   removeAllListeners(eventName?: string): this;
-
   off: OnEvent<this>;
   on: OnEvent<this>;
   once: OnEvent<this>;
@@ -316,7 +291,9 @@ export interface OffchainOracleAbi extends BaseContract {
 
     oracles(
       overrides?: CallOverrides
-    ): Promise<[string[], number[]] & { allOracles: string[]; oracleTypes: number[] }>;
+    ): Promise<
+      [string[], number[]] & { allOracles: string[]; oracleTypes: number[] }
+    >;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
@@ -376,7 +353,9 @@ export interface OffchainOracleAbi extends BaseContract {
 
   oracles(
     overrides?: CallOverrides
-  ): Promise<[string[], number[]] & { allOracles: string[]; oracleTypes: number[] }>;
+  ): Promise<
+    [string[], number[]] & { allOracles: string[]; oracleTypes: number[] }
+  >;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
@@ -433,7 +412,9 @@ export interface OffchainOracleAbi extends BaseContract {
 
     oracles(
       overrides?: CallOverrides
-    ): Promise<[string[], number[]] & { allOracles: string[]; oracleTypes: number[] }>;
+    ): Promise<
+      [string[], number[]] & { allOracles: string[]; oracleTypes: number[] }
+    >;
 
     owner(overrides?: CallOverrides): Promise<string>;
 

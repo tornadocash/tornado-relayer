@@ -24,6 +24,8 @@ import type {
 } from "./common";
 
 export interface TornadoProxyABIInterface extends utils.Interface {
+  contractName: "TornadoProxyABI";
+
   functions: {
     "governance()": FunctionFragment;
     "instances(address)": FunctionFragment;
@@ -95,6 +97,8 @@ export interface TornadoProxyABIInterface extends utils.Interface {
 }
 
 export interface TornadoProxyABI extends BaseContract {
+  contractName: "TornadoProxyABI";
+
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

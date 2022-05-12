@@ -9,15 +9,15 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from 'ethers';
-import type { FunctionFragment, Result } from '@ethersproject/abi';
-import type { Listener, Provider } from '@ethersproject/providers';
+} from "ethers";
+import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
   TypedEvent,
   TypedListener,
   OnEvent,
-} from './common';
+} from "./common";
 
 export declare namespace MultiCall {
   export type CallStruct = { to: string; data: BytesLike };
@@ -29,27 +29,29 @@ export declare namespace MultiCall {
 }
 
 export interface MulticallAbiInterface extends utils.Interface {
+  contractName: "MulticallAbi";
+
   functions: {
-    'multicall((address,bytes)[])': FunctionFragment;
+    "multicall((address,bytes)[])": FunctionFragment;
   };
 
-  getFunction(nameOrSignatureOrTopic: 'multicall'): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: "multicall"): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: 'multicall',
-    values: [MultiCall.CallStruct[]],
+    functionFragment: "multicall",
+    values: [MultiCall.CallStruct[]]
   ): string;
 
-  decodeFunctionResult(functionFragment: 'multicall', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "multicall", data: BytesLike): Result;
 
   events: {};
 }
 
 export interface MulticallAbi extends BaseContract {
+  contractName: "MulticallAbi";
+
   connect(signerOrProvider: Signer | Provider | string): this;
-
   attach(addressOrName: string): this;
-
   deployed(): Promise<this>;
 
   interface: MulticallAbiInterface;
@@ -57,21 +59,17 @@ export interface MulticallAbi extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined,
+    toBlock?: string | number | undefined
   ): Promise<Array<TEvent>>;
 
   listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>,
+    eventFilter?: TypedEventFilter<TEvent>
   ): Array<TypedListener<TEvent>>;
-
   listeners(eventName?: string): Array<Listener>;
-
   removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>,
+    eventFilter: TypedEventFilter<TEvent>
   ): this;
-
   removeAllListeners(eventName?: string): this;
-
   off: OnEvent<this>;
   on: OnEvent<this>;
   once: OnEvent<this>;
@@ -80,20 +78,24 @@ export interface MulticallAbi extends BaseContract {
   functions: {
     multicall(
       calls: MultiCall.CallStruct[],
-      overrides?: CallOverrides,
-    ): Promise<[string[], boolean[]] & { results: string[]; success: boolean[] }>;
+      overrides?: CallOverrides
+    ): Promise<
+      [string[], boolean[]] & { results: string[]; success: boolean[] }
+    >;
   };
 
   multicall(
     calls: MultiCall.CallStruct[],
-    overrides?: CallOverrides,
+    overrides?: CallOverrides
   ): Promise<[string[], boolean[]] & { results: string[]; success: boolean[] }>;
 
   callStatic: {
     multicall(
       calls: MultiCall.CallStruct[],
-      overrides?: CallOverrides,
-    ): Promise<[string[], boolean[]] & { results: string[]; success: boolean[] }>;
+      overrides?: CallOverrides
+    ): Promise<
+      [string[], boolean[]] & { results: string[]; success: boolean[] }
+    >;
   };
 
   filters: {};
@@ -101,14 +103,14 @@ export interface MulticallAbi extends BaseContract {
   estimateGas: {
     multicall(
       calls: MultiCall.CallStruct[],
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     multicall(
       calls: MultiCall.CallStruct[],
-      overrides?: CallOverrides,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }
