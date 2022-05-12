@@ -13,7 +13,11 @@ import type {
   Signer,
   utils,
 } from "ethers";
-import type { FunctionFragment, Result } from "@ethersproject/abi";
+import type {
+  FunctionFragment,
+  Result,
+  EventFragment,
+} from "@ethersproject/abi";
 import type { Listener, Provider } from "@ethersproject/providers";
 import type {
   TypedEventFilter,
@@ -22,135 +26,213 @@ import type {
   OnEvent,
 } from "./common";
 
-export declare namespace GovernanceAggregator {
-  export type ProposalStruct = {
-    proposer: string;
-    target: string;
-    startTime: BigNumberish;
-    endTime: BigNumberish;
-    forVotes: BigNumberish;
-    againstVotes: BigNumberish;
-    executed: boolean;
-    extended: boolean;
-    state: BigNumberish;
-  };
-
-  export type ProposalStructOutput = [
-    string,
-    string,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    BigNumber,
-    boolean,
-    boolean,
-    number
-  ] & {
-    proposer: string;
-    target: string;
-    startTime: BigNumber;
-    endTime: BigNumber;
-    forVotes: BigNumber;
-    againstVotes: BigNumber;
-    executed: boolean;
-    extended: boolean;
-    state: number;
-  };
-}
-
 export interface AggregatorAbiInterface extends utils.Interface {
+  contractName: "AggregatorAbi";
+
   functions: {
-    "bulkResolve(bytes32[])": FunctionFragment;
-    "getAllProposals(address)": FunctionFragment;
-    "getGovernanceBalances(address,address[])": FunctionFragment;
-    "getPricesInETH(address[],uint256[])": FunctionFragment;
-    "getUserData(address,address)": FunctionFragment;
-    "minerRates(address,address[])": FunctionFragment;
-    "resolve(bytes32)": FunctionFragment;
-    "swapState(address)": FunctionFragment;
-    "miningData(address,address[],address)": FunctionFragment;
-    "marketData(address[],uint256[],address)": FunctionFragment;
+    "addConnector(address)": FunctionFragment;
+    "addOracle(address,uint8)": FunctionFragment;
+    "connectors()": FunctionFragment;
+    "getRate(address,address,bool)": FunctionFragment;
+    "getRateToEth(address,bool)": FunctionFragment;
+    "multiWrapper()": FunctionFragment;
+    "oracles()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "removeConnector(address)": FunctionFragment;
+    "removeOracle(address,uint8)": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "setMultiWrapper(address)": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
   };
 
   getFunction(
     nameOrSignatureOrTopic:
-      | "bulkResolve"
-      | "getAllProposals"
-      | "getGovernanceBalances"
-      | "getPricesInETH"
-      | "getUserData"
-      | "minerRates"
-      | "resolve"
-      | "swapState"
-      | "miningData"
-      | "marketData"
+      | "addConnector"
+      | "addOracle"
+      | "connectors"
+      | "getRate"
+      | "getRateToEth"
+      | "multiWrapper"
+      | "oracles"
+      | "owner"
+      | "removeConnector"
+      | "removeOracle"
+      | "renounceOwnership"
+      | "setMultiWrapper"
+      | "transferOwnership"
   ): FunctionFragment;
 
   encodeFunctionData(
-    functionFragment: "bulkResolve",
-    values: [BytesLike[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "getAllProposals",
+    functionFragment: "addConnector",
     values: [string]
   ): string;
   encodeFunctionData(
-    functionFragment: "getGovernanceBalances",
-    values: [string, string[]]
+    functionFragment: "addOracle",
+    values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
-    functionFragment: "getPricesInETH",
-    values: [string[], BigNumberish[]]
+    functionFragment: "connectors",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "getUserData",
-    values: [string, string]
+    functionFragment: "getRate",
+    values: [string, string, boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "minerRates",
-    values: [string, string[]]
-  ): string;
-  encodeFunctionData(functionFragment: "resolve", values: [BytesLike]): string;
-  encodeFunctionData(functionFragment: "swapState", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "miningData",
-    values: [string, string[], string]
+    functionFragment: "getRateToEth",
+    values: [string, boolean]
   ): string;
   encodeFunctionData(
-    functionFragment: "marketData",
-    values: [string[], BigNumberish[], string]
+    functionFragment: "multiWrapper",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "oracles", values?: undefined): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "removeConnector",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "removeOracle",
+    values: [string, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setMultiWrapper",
+    values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "transferOwnership",
+    values: [string]
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "bulkResolve",
+    functionFragment: "addConnector",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "addOracle", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "connectors", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getRate", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getRateToEth",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getAllProposals",
+    functionFragment: "multiWrapper",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "oracles", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "removeConnector",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getGovernanceBalances",
+    functionFragment: "removeOracle",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getPricesInETH",
+    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "getUserData",
+    functionFragment: "setMultiWrapper",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "minerRates", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "resolve", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "swapState", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "miningData", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "marketData", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "transferOwnership",
+    data: BytesLike
+  ): Result;
 
-  events: {};
+  events: {
+    "ConnectorAdded(address)": EventFragment;
+    "ConnectorRemoved(address)": EventFragment;
+    "MultiWrapperUpdated(address)": EventFragment;
+    "OracleAdded(address,uint8)": EventFragment;
+    "OracleRemoved(address,uint8)": EventFragment;
+    "OwnershipTransferred(address,address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "ConnectorAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "ConnectorRemoved"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "MultiWrapperUpdated"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OracleAdded"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OracleRemoved"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
 
+export interface ConnectorAddedEventObject {
+  connector: string;
+}
+export type ConnectorAddedEvent = TypedEvent<
+  [string],
+  ConnectorAddedEventObject
+>;
+
+export type ConnectorAddedEventFilter = TypedEventFilter<ConnectorAddedEvent>;
+
+export interface ConnectorRemovedEventObject {
+  connector: string;
+}
+export type ConnectorRemovedEvent = TypedEvent<
+  [string],
+  ConnectorRemovedEventObject
+>;
+
+export type ConnectorRemovedEventFilter =
+  TypedEventFilter<ConnectorRemovedEvent>;
+
+export interface MultiWrapperUpdatedEventObject {
+  multiWrapper: string;
+}
+export type MultiWrapperUpdatedEvent = TypedEvent<
+  [string],
+  MultiWrapperUpdatedEventObject
+>;
+
+export type MultiWrapperUpdatedEventFilter =
+  TypedEventFilter<MultiWrapperUpdatedEvent>;
+
+export interface OracleAddedEventObject {
+  oracle: string;
+  oracleType: number;
+}
+export type OracleAddedEvent = TypedEvent<
+  [string, number],
+  OracleAddedEventObject
+>;
+
+export type OracleAddedEventFilter = TypedEventFilter<OracleAddedEvent>;
+
+export interface OracleRemovedEventObject {
+  oracle: string;
+  oracleType: number;
+}
+export type OracleRemovedEvent = TypedEvent<
+  [string, number],
+  OracleRemovedEventObject
+>;
+
+export type OracleRemovedEventFilter = TypedEventFilter<OracleRemovedEvent>;
+
+export interface OwnershipTransferredEventObject {
+  previousOwner: string;
+  newOwner: string;
+}
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string],
+  OwnershipTransferredEventObject
+>;
+
+export type OwnershipTransferredEventFilter =
+  TypedEventFilter<OwnershipTransferredEvent>;
+
 export interface AggregatorAbi extends BaseContract {
+  contractName: "AggregatorAbi";
+
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -177,345 +259,338 @@ export interface AggregatorAbi extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    bulkResolve(
-      domains: BytesLike[],
+    addConnector(
+      connector: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    getAllProposals(
-      governance: string,
+    addOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    connectors(
+      overrides?: CallOverrides
+    ): Promise<[string[]] & { allConnectors: string[] }>;
+
+    getRate(
+      srcToken: string,
+      dstToken: string,
+      useWrappers: boolean,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { weightedRate: BigNumber }>;
+
+    getRateToEth(
+      srcToken: string,
+      useSrcWrappers: boolean,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber] & { weightedRate: BigNumber }>;
+
+    multiWrapper(overrides?: CallOverrides): Promise<[string]>;
+
+    oracles(
       overrides?: CallOverrides
     ): Promise<
-      [GovernanceAggregator.ProposalStructOutput[]] & {
-        proposals: GovernanceAggregator.ProposalStructOutput[];
-      }
+      [string[], number[]] & { allOracles: string[]; oracleTypes: number[] }
     >;
 
-    getGovernanceBalances(
-      governance: string,
-      accs: string[],
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]] & { amounts: BigNumber[] }>;
+    owner(overrides?: CallOverrides): Promise<[string]>;
 
-    getPricesInETH(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]] & { prices: BigNumber[] }>;
+    removeConnector(
+      connector: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-    getUserData(
-      governance: string,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber, string] & {
-        balance: BigNumber;
-        latestProposalId: BigNumber;
-        latestProposalIdState: BigNumber;
-        timelock: BigNumber;
-        delegatee: string;
-      }
-    >;
+    removeOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-    minerRates(
-      miner: string,
-      instances: string[],
-      overrides?: CallOverrides
-    ): Promise<[BigNumber[]] & { _rates: BigNumber[] }>;
+    renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<[string]>;
+    setMultiWrapper(
+      _multiWrapper: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
-    swapState(
-      swap: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber] & { balance: BigNumber; poolWeight: BigNumber }
-    >;
-
-    miningData(
-      miner: string,
-      instances: string[],
-      swap: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber[], BigNumber, BigNumber] & {
-        _rates: BigNumber[];
-        balance: BigNumber;
-        poolWeight: BigNumber;
-      }
-    >;
-
-    marketData(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      swap: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber[], BigNumber] & { prices: BigNumber[]; balance: BigNumber }
-    >;
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
-  bulkResolve(
-    domains: BytesLike[],
+  addConnector(
+    connector: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  getAllProposals(
-    governance: string,
+  addOracle(
+    oracle: string,
+    oracleKind: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  connectors(overrides?: CallOverrides): Promise<string[]>;
+
+  getRate(
+    srcToken: string,
+    dstToken: string,
+    useWrappers: boolean,
     overrides?: CallOverrides
-  ): Promise<GovernanceAggregator.ProposalStructOutput[]>;
+  ): Promise<BigNumber>;
 
-  getGovernanceBalances(
-    governance: string,
-    accs: string[],
+  getRateToEth(
+    srcToken: string,
+    useSrcWrappers: boolean,
     overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
+  ): Promise<BigNumber>;
 
-  getPricesInETH(
-    fromTokens: string[],
-    oneUnitAmounts: BigNumberish[],
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
+  multiWrapper(overrides?: CallOverrides): Promise<string>;
 
-  getUserData(
-    governance: string,
-    account: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber, BigNumber, BigNumber, BigNumber, string] & {
-      balance: BigNumber;
-      latestProposalId: BigNumber;
-      latestProposalIdState: BigNumber;
-      timelock: BigNumber;
-      delegatee: string;
-    }
-  >;
-
-  minerRates(
-    miner: string,
-    instances: string[],
-    overrides?: CallOverrides
-  ): Promise<BigNumber[]>;
-
-  resolve(node: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-  swapState(
-    swap: string,
+  oracles(
     overrides?: CallOverrides
   ): Promise<
-    [BigNumber, BigNumber] & { balance: BigNumber; poolWeight: BigNumber }
+    [string[], number[]] & { allOracles: string[]; oracleTypes: number[] }
   >;
 
-  miningData(
-    miner: string,
-    instances: string[],
-    swap: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber[], BigNumber, BigNumber] & {
-      _rates: BigNumber[];
-      balance: BigNumber;
-      poolWeight: BigNumber;
-    }
-  >;
+  owner(overrides?: CallOverrides): Promise<string>;
 
-  marketData(
-    fromTokens: string[],
-    oneUnitAmounts: BigNumberish[],
-    swap: string,
-    overrides?: CallOverrides
-  ): Promise<
-    [BigNumber[], BigNumber] & { prices: BigNumber[]; balance: BigNumber }
-  >;
+  removeConnector(
+    connector: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  removeOracle(
+    oracle: string,
+    oracleKind: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  renounceOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setMultiWrapper(
+    _multiWrapper: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  transferOwnership(
+    newOwner: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   callStatic: {
-    bulkResolve(
-      domains: BytesLike[],
+    addConnector(connector: string, overrides?: CallOverrides): Promise<void>;
+
+    addOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
       overrides?: CallOverrides
-    ): Promise<string[]>;
+    ): Promise<void>;
 
-    getAllProposals(
-      governance: string,
+    connectors(overrides?: CallOverrides): Promise<string[]>;
+
+    getRate(
+      srcToken: string,
+      dstToken: string,
+      useWrappers: boolean,
       overrides?: CallOverrides
-    ): Promise<GovernanceAggregator.ProposalStructOutput[]>;
+    ): Promise<BigNumber>;
 
-    getGovernanceBalances(
-      governance: string,
-      accs: string[],
+    getRateToEth(
+      srcToken: string,
+      useSrcWrappers: boolean,
       overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
+    ): Promise<BigNumber>;
 
-    getPricesInETH(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
+    multiWrapper(overrides?: CallOverrides): Promise<string>;
 
-    getUserData(
-      governance: string,
-      account: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber, BigNumber, BigNumber, BigNumber, string] & {
-        balance: BigNumber;
-        latestProposalId: BigNumber;
-        latestProposalIdState: BigNumber;
-        timelock: BigNumber;
-        delegatee: string;
-      }
-    >;
-
-    minerRates(
-      miner: string,
-      instances: string[],
-      overrides?: CallOverrides
-    ): Promise<BigNumber[]>;
-
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<string>;
-
-    swapState(
-      swap: string,
+    oracles(
       overrides?: CallOverrides
     ): Promise<
-      [BigNumber, BigNumber] & { balance: BigNumber; poolWeight: BigNumber }
+      [string[], number[]] & { allOracles: string[]; oracleTypes: number[] }
     >;
 
-    miningData(
-      miner: string,
-      instances: string[],
-      swap: string,
-      overrides?: CallOverrides
-    ): Promise<
-      [BigNumber[], BigNumber, BigNumber] & {
-        _rates: BigNumber[];
-        balance: BigNumber;
-        poolWeight: BigNumber;
-      }
-    >;
+    owner(overrides?: CallOverrides): Promise<string>;
 
-    marketData(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      swap: string,
+    removeConnector(
+      connector: string,
       overrides?: CallOverrides
-    ): Promise<
-      [BigNumber[], BigNumber] & { prices: BigNumber[]; balance: BigNumber }
-    >;
+    ): Promise<void>;
+
+    removeOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setMultiWrapper(
+      _multiWrapper: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    transferOwnership(
+      newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "ConnectorAdded(address)"(connector?: null): ConnectorAddedEventFilter;
+    ConnectorAdded(connector?: null): ConnectorAddedEventFilter;
+
+    "ConnectorRemoved(address)"(connector?: null): ConnectorRemovedEventFilter;
+    ConnectorRemoved(connector?: null): ConnectorRemovedEventFilter;
+
+    "MultiWrapperUpdated(address)"(
+      multiWrapper?: null
+    ): MultiWrapperUpdatedEventFilter;
+    MultiWrapperUpdated(multiWrapper?: null): MultiWrapperUpdatedEventFilter;
+
+    "OracleAdded(address,uint8)"(
+      oracle?: null,
+      oracleType?: null
+    ): OracleAddedEventFilter;
+    OracleAdded(oracle?: null, oracleType?: null): OracleAddedEventFilter;
+
+    "OracleRemoved(address,uint8)"(
+      oracle?: null,
+      oracleType?: null
+    ): OracleRemovedEventFilter;
+    OracleRemoved(oracle?: null, oracleType?: null): OracleRemovedEventFilter;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): OwnershipTransferredEventFilter;
+  };
 
   estimateGas: {
-    bulkResolve(
-      domains: BytesLike[],
+    addConnector(
+      connector: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getAllProposals(
-      governance: string,
+    addOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    connectors(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getRate(
+      srcToken: string,
+      dstToken: string,
+      useWrappers: boolean,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getGovernanceBalances(
-      governance: string,
-      accs: string[],
+    getRateToEth(
+      srcToken: string,
+      useSrcWrappers: boolean,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    getPricesInETH(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      overrides?: CallOverrides
+    multiWrapper(overrides?: CallOverrides): Promise<BigNumber>;
+
+    oracles(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    removeConnector(
+      connector: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    getUserData(
-      governance: string,
-      account: string,
-      overrides?: CallOverrides
+    removeOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    minerRates(
-      miner: string,
-      instances: string[],
-      overrides?: CallOverrides
+    renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
-
-    swapState(swap: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    miningData(
-      miner: string,
-      instances: string[],
-      swap: string,
-      overrides?: CallOverrides
+    setMultiWrapper(
+      _multiWrapper: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    marketData(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      swap: string,
-      overrides?: CallOverrides
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    bulkResolve(
-      domains: BytesLike[],
+    addConnector(
+      connector: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getAllProposals(
-      governance: string,
+    addOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    connectors(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getRate(
+      srcToken: string,
+      dstToken: string,
+      useWrappers: boolean,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getGovernanceBalances(
-      governance: string,
-      accs: string[],
+    getRateToEth(
+      srcToken: string,
+      useSrcWrappers: boolean,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    getPricesInETH(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      overrides?: CallOverrides
+    multiWrapper(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    oracles(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    removeConnector(
+      connector: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    getUserData(
-      governance: string,
-      account: string,
-      overrides?: CallOverrides
+    removeOracle(
+      oracle: string,
+      oracleKind: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    minerRates(
-      miner: string,
-      instances: string[],
-      overrides?: CallOverrides
+    renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    resolve(
-      node: BytesLike,
-      overrides?: CallOverrides
+    setMultiWrapper(
+      _multiWrapper: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    swapState(
-      swap: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    miningData(
-      miner: string,
-      instances: string[],
-      swap: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    marketData(
-      fromTokens: string[],
-      oneUnitAmounts: BigNumberish[],
-      swap: string,
-      overrides?: CallOverrides
+    transferOwnership(
+      newOwner: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
 }
