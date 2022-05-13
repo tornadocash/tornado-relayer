@@ -1,6 +1,6 @@
 const Web3 = require('web3')
 const { toBN, fromWei } = require('web3-utils')
-const { setSafeInterval } = require('./utils')
+const { setSafeInterval, logRelayerError } = require('./utils')
 const { httpRpcUrl, privateKey, minimumBalance, nativeCurrency, instances } = require('./config')
 
 const web3 = new Web3(httpRpcUrl)
@@ -19,6 +19,7 @@ async function main() {
     await redis.hset('health', { status: true, error: '' })
   } catch (e) {
     console.error('healthWatcher', e.message)
+    await logRelayerError(redis, e)
     await redis.hset('health', { status: false, error: e.message })
   }
 }
