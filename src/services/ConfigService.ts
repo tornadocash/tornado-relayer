@@ -1,9 +1,9 @@
-import { instances, netId, torn, tornadoGoerliProxy, tornToken } from '../config';
+import { httpRpcUrl, instances, netId, privateKey, torn, tornadoGoerliProxy, tornToken } from '../config';
 import { Token } from '../types';
 import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract } from '../modules/contracts';
 import { EnsResolver } from '../modules';
 import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
-import { availableIds, netIds } from '../../../torn-token';
+import { availableIds, netIds, NetInstances } from '../../../torn-token';
 import { getAddress } from 'ethers/lib/utils';
 
 const resolver = new EnsResolver(getProvider());
@@ -14,24 +14,32 @@ export class ConfigService {
   netId: availableIds;
   netIdKey: netIds;
   tokens: Token[];
+  privateKey: string;
+  rpcUrl: string;
   private _proxyAddress: string;
   private _proxyContract: TornadoProxyABI | ProxyLightABI;
   addressMap = new Map<string, InstanceProps>();
   isLightMode: boolean;
+  instances: NetInstances;
 
   constructor() {
     this.netId = netId;
     this.netIdKey = `netId${this.netId}`;
     this.isLightMode = ![1, 5].includes(netId);
-
-    for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(instances[this.netIdKey])) {
-      Object.entries(instanceAddress).forEach(([amount, address]) =>
-        this.addressMap.set(getAddress(address), {
-          currency,
-          amount,
-          symbol,
-          decimals,
-        }),
+    this.privateKey = privateKey;
+    this.rpcUrl = httpRpcUrl;
+    this.instances = instances[this.netIdKey];
+    for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(this.instances)) {
+      Object.entries(instanceAddress).forEach(([amount, address]) => {
+          if (address) {
+            this.addressMap.set(getAddress(address), {
+              currency,
+              amount,
+              symbol,
+              decimals,
+            });
+          }
+        },
       );
     }
   }

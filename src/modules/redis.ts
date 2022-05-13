@@ -1,8 +1,8 @@
 import Redis from 'ioredis';
 import { redisUrl } from '../config';
 
-const redisClient = new Redis(redisUrl);
-const redisSubscriber = new Redis(redisUrl);
+const redisClient = new Redis(redisUrl, { maxRetriesPerRequest: null });
+const redisSubscriber = new Redis(redisUrl, { maxRetriesPerRequest: null });
 
 export const getClient = () => redisClient;
 export const getSubscriber = () => redisSubscriber;

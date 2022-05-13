@@ -9,7 +9,6 @@ export type { TornadoABI } from './TornadoABI';
 export type { TornadoProxyABI } from './TornadoProxyABI';
 export * as factories from './factories';
 export { AggregatorAbi__factory } from './factories/AggregatorAbi__factory';
-export { MiningAbi__factory } from './factories/MiningAbi__factory';
 export { MulticallAbi__factory } from './factories/MulticallAbi__factory';
 export { OffchainOracleAbi__factory } from './factories/OffchainOracleAbi__factory';
 export { ProxyLightABI__factory } from './factories/ProxyLightABI__factory';

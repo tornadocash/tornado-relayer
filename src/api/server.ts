@@ -1,7 +1,7 @@
 import fastify from 'fastify';
 import cors from 'fastify-cors';
 import validator from './plugins/validator';
-import { relayerHandler } from './routes';
+import { mainHandler, relayerHandler } from './routes';
 
 
 function createServer() {
@@ -12,7 +12,8 @@ function createServer() {
   });
   server.register(cors);
   server.register(validator);
-  server.register(relayerHandler);
+  server.register(mainHandler);
+  server.register(relayerHandler, { prefix: '/v1' });
 
 
   server.setErrorHandler((error, req, res) => {

@@ -1,8 +1,8 @@
-import priceService from '../services/PriceService';
+import { priceService } from '../services';
 import { Job } from 'bullmq';
 
 export const priceProcessor = async (job: Job) => {
-  const { tokens } = job.data;
-  const prices = await priceService.getPrices(tokens);
-  console.log(prices);
+  const prices = await priceService.fetchPrices(job.data);
+  console.log(job.name, prices);
+  return prices;
 };

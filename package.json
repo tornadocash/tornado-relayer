@@ -31,7 +31,7 @@
     "json-schema-to-ts": "^2.2.0",
     "node-fetch": "^2.6.7",
     "torn-token": "link:../torn-token",
-    "tx-manager": "^0.4.6",
+    "tx-manager": "link:../tx-manager",
     "uuid": "^8.3.0",
     "web3": "^1.3.0",
     "web3-core-promievent": "^1.3.0",

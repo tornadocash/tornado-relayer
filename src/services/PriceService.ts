@@ -4,6 +4,9 @@ import { MultiCall } from '../../contracts/MulticallAbi';
 import { BigNumber } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { Token } from '../types';
+import { redis } from '../modules';
+
+const redisClient = redis.getClient();
 
 export class PriceService {
   oracle: OffchainOracleAbi;
@@ -23,7 +26,7 @@ export class PriceService {
     }));
   }
 
-  async getPrices(tokens: Token[]) {
+  async fetchPrices(tokens: Token[]) {
     const names = tokens.reduce((p, c) => {
       p[c.address] = c.symbol;
       return p;
@@ -42,6 +45,10 @@ export class PriceService {
       prices[names[tokens[i].address]] = price.toString();
     }
     return prices;
+  }
+
+  async getPrice(symbol: string) {
+    return await redisClient.hget('prices', symbol);
   }
 }
 
