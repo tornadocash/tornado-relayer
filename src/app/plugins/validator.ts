@@ -2,6 +2,7 @@ import Ajv from 'ajv';
 import fp from 'fastify-plugin';
 import { rewardAccount } from '../../config';
 import { getAddress, isAddress } from 'ethers/lib/utils';
+import { configService } from '../../services';
 
 export default fp(async server => {
   const ajv = new Ajv();
@@ -17,16 +18,16 @@ export default fp(async server => {
     errors: true,
   });
 
-  // ajv.addKeyword('isKnownContract', {
-  //   validate: (schema, data) => {
-  //     try {
-  //       return !!getInstance(data);
-  //     } catch (e) {
-  //       return false;
-  //     }
-  //   },
-  //   errors: true,
-  // });
+  ajv.addKeyword('isKnownContract', {
+    validate: (schema, data) => {
+      try {
+        return !!configService.getInstance(data);
+      } catch (e) {
+        return false;
+      }
+    },
+    errors: true,
+  });
 
   ajv.addKeyword('isFeeRecipient', {
     validate: (schema, data) => {
@@ -39,7 +40,7 @@ export default fp(async server => {
     errors: true,
   });
 
-  server.setValidatorCompiler(({ schema, method, url, httpPart }) => {
+  server.setValidatorCompiler(({ schema }) => {
     return ajv.compile(schema);
   });
   console.log('validator plugin registered');

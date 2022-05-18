@@ -1,4 +1,4 @@
-import { jobType } from './types';
+import { JobType } from './types';
 import tornConfig, { availableIds } from 'torn-token';
 
 require('dotenv').config();
@@ -22,10 +22,10 @@ export const rewardAccount = process.env.REWARD_ACCOUNT;
 export const governanceAddress = '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce';
 export const tornadoGoerliProxy = '0x454d870a72e29d5E5697f635128D18077BD04C60';
 export const gasLimits = {
-  [jobType.TORNADO_WITHDRAW]: 390000,
+  [JobType.TORNADO_WITHDRAW]: 390000,
   WITHDRAW_WITH_EXTRA: 700000,
-  [jobType.MINING_REWARD]: 455000,
-  [jobType.MINING_WITHDRAW]: 400000,
+  [JobType.MINING_REWARD]: 455000,
+  [JobType.MINING_WITHDRAW]: 400000,
 };
 export const minimumBalance = '1000000000000000000';
 export const baseFeeReserve = Number(process.env.BASE_FEE_RESERVE_PERCENTAGE);

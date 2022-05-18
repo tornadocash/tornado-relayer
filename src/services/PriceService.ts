@@ -47,9 +47,17 @@ export class PriceService {
     return prices;
   }
 
-  async getPrice(symbol: string) {
-    return await redisClient.hget('prices', symbol);
+  async getPrice(currency: string) {
+    return await redisClient.hget('prices', currency);
+  }
+
+  async getPrices() {
+    return await redisClient.hgetall('prices');
+  }
+
+  async savePrices(prices: Record<string, string>) {
+    await redisClient.hset('prices', prices);
   }
 }
 
-export default new PriceService();
+export default () => new PriceService();

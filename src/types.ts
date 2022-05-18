@@ -1,10 +1,10 @@
-export enum jobType {
+export enum JobType {
   TORNADO_WITHDRAW = 'TORNADO_WITHDRAW',
   MINING_REWARD = 'MINING_REWARD',
   MINING_WITHDRAW = 'MINING_WITHDRAW',
 }
 
-export enum jobStatus {
+export enum JobStatus {
   QUEUED = 'QUEUED',
   ACCEPTED = 'ACCEPTED',
   SENT = 'SENT',

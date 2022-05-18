@@ -1,3 +1,3 @@
-import initWorker from './queue/worker';
+import { relayerWorker, schedulerWorker } from './queue/worker';
 
-initWorker();
+schedulerWorker();

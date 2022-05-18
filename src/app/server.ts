@@ -1,5 +1,8 @@
 import fastify from 'fastify';
-import cors from 'fastify-cors';
+import cors from '@fastify/cors';
+import fastifySensible from '@fastify/sensible';
+import helmet from '@fastify/helmet';
+
 import validator from './plugins/validator';
 import { mainHandler, relayerHandler } from './routes';
 
@@ -12,7 +15,10 @@ function createServer() {
   });
   server.register(cors);
   server.register(validator);
+  server.register(helmet, { contentSecurityPolicy: false, frameguard: true });
+  server.register(fastifySensible);
   server.register(mainHandler);
+  server.register(mainHandler, { prefix: '/v1' });
   server.register(relayerHandler, { prefix: '/v1' });
 
 
