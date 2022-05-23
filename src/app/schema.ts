@@ -46,6 +46,9 @@ export const jobsResponseSchema = {
   properties: {
     id: { type: 'string' },
     status: { type: 'string' },
+    type: { type: 'string' },
+    confirmations: { type: 'integer' },
+    txHash: { type: 'string' },
     ...withdrawBodySchema.properties,
     failedReason: { type: 'string' },
   },

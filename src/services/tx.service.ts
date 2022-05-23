@@ -3,11 +3,14 @@ import { GasPriceOracle } from 'gas-price-oracle';
 import { Provider } from '@ethersproject/providers';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
-import { configService, getPriceService } from './index';
 import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
 import { gasLimits, tornadoServiceFee } from '../config';
-import { RelayerJobType } from '../types';
+import { JobStatus, RelayerJobType } from '../types';
 import { PriceService } from './price.service';
+import { Job } from 'bullmq';
+import { RelayerJobData } from '../queue';
+import { ConfigService } from './config.service';
+import { container, injectable } from 'tsyringe';
 
 export type WithdrawalData = {
   contract: string,
@@ -22,29 +25,56 @@ export type WithdrawalData = {
   ]
 }
 
+@injectable()
 export class TxService {
+  set currentJob(value: Job) {
+    this._currentJob = value;
+  }
+
   txManager: TxManager;
   tornadoProxy: TornadoProxyABI | ProxyLightABI;
   oracle: GasPriceOracle;
   provider: Provider;
-  priceService: PriceService;
+  private _currentJob: Job;
 
-  constructor() {
-    const { privateKey, rpcUrl, netId } = configService;
-    this.txManager = new TxManager({ privateKey, rpcUrl });
-    this.tornadoProxy = configService.proxyContract;
+  constructor(private config: ConfigService, private priceService: PriceService) {
+    const { privateKey, rpcUrl, netId } = this.config;
+    this.txManager = new TxManager({ privateKey, rpcUrl, config: { THROW_ON_REVERT: true } });
+    this.tornadoProxy = this.config.proxyContract;
     this.provider = this.tornadoProxy.provider;
     this.oracle = new GasPriceOracle({ defaultRpc: rpcUrl, chainId: netId });
-    this.priceService = getPriceService();
+  }
+
+  async updateJobData(data: Partial<RelayerJobData>) {
+    const updatedData = { ...this._currentJob.data, ...data };
+    console.log({ updatedData });
+    await this._currentJob.update(updatedData);
   }
 
   async sendTx(tx: TransactionData) {
-    const currentTx = this.txManager.createTx(tx);
+    try {
+      const currentTx = this.txManager.createTx(tx);
 
-    return await currentTx.send()
-      .on('transactionHash', txHash => console.log({ txHash }))
-      .on('mined', receipt => console.log('Mined in block', receipt.blockNumber))
-      .on('confirmations', confirmations => console.log({ confirmations }));
+      const receipt = await currentTx.send()
+        .on('transactionHash', async txHash => {
+          console.log({ txHash });
+          await this.updateJobData({ txHash, status: JobStatus.SENT });
+        })
+        .on('mined', async receipt => {
+          console.log('Mined in block', receipt.blockNumber);
+          await this.updateJobData({ status: JobStatus.MINED });
+        })
+        .on('confirmations', async confirmations => {
+          console.log({ confirmations });
+          await this.updateJobData({ confirmations });
+        });
+      if (receipt.status === 1) {
+        await this.updateJobData({ status: JobStatus.CONFIRMED });
+      } else throw new Error('Submitted transaction failed');
+      return receipt;
+    } catch (e) {
+      throw new Error(e.message);
+    }
   }
 
   async prepareTxData(data: WithdrawalData): Promise<TransactionData> {
@@ -59,7 +89,7 @@ export class TxService {
   }
 
   async checkTornadoFee({ args, contract }: WithdrawalData) {
-    const instance = configService.getInstance(contract);
+    const instance = this.config.getInstance(contract);
     if (!instance) throw new Error('Instance not found');
     const { currency, amount, decimals } = instance;
     const [fee, refund] = [args[4], args[5]].map(BigNumber.from);
@@ -73,7 +103,7 @@ export class TxService {
 
     let desiredFee = operationCost.add(serviceFee);
 
-    if (!configService.isLightMode && currency !== 'eth') {
+    if (!this.config.isLightMode && currency !== 'eth') {
       const ethPrice = await this.priceService.getPrice(currency);
       const numerator = BigNumber.from(10).pow(decimals);
       desiredFee = operationCost
@@ -103,4 +133,4 @@ export class TxService {
   }
 }
 
-export default () => new TxService();
+export default () => container.resolve(TxService);
