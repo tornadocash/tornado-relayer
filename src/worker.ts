@@ -1,3 +1,4 @@
-import { schedulerWorker } from './queue/worker';
+import { schedulerWorker, relayerWorker } from './queue/worker';
 
 schedulerWorker();
+relayerWorker();

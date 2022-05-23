@@ -17,8 +17,9 @@ export const schedulerWorker = async () => {
 export const relayerWorker = async () => {
   await configService.init();
   const relayer = new RelayerQueueHelper();
+  console.log(relayer.queue.name, 'worker started');
   relayer.worker.on('completed', (job, result) => {
-    console.log(`Job ${job.id} completed with result: ${result}`);
+    console.log(`Job ${job.id} completed with result: `, result);
   });
   relayer.worker.on('failed', (job, error) => console.log(error));
 };

@@ -12,7 +12,6 @@ type relayerQueueName = `relayer_${availableIds}`
 
 @singleton()
 export class ConfigService {
-  static instance: ConfigService;
   netIdKey: netIds;
   queueName: relayerQueueName;
   tokens: Token[];
@@ -35,16 +34,11 @@ export class ConfigService {
     this.instances = instances[this.netIdKey];
     this.provider = getProvider(false);
     this.wallet = new Wallet(this.privateKey, this.provider);
-    console.log(this.wallet.address);
     this._fillInstanceMap();
   }
 
   get proxyContract(): TornadoProxyABI | ProxyLightABI {
     return this._proxyContract;
-  }
-
-  get proxyAddress(): string {
-    return this._proxyAddress;
   }
 
   private _fillInstanceMap() {

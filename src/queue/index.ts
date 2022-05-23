@@ -12,9 +12,10 @@ type PriceJobData = Token[]
 type PriceJobReturn = number
 type HealthJobReturn = { balance: BigNumber, isEnought: boolean }
 
-type RelayerJobData = WithdrawalData & { id: string, status: JobStatus, type: RelayerJobType }
-
-type RelayerJobReturn = any
+export type RelayerJobData =
+  WithdrawalData
+  & { id: string, status: JobStatus, type: RelayerJobType, txHash?: string, confirmations?: number }
+export type RelayerJobReturn = any
 
 export type RelayerProcessor = Processor<RelayerJobData, RelayerJobReturn, RelayerJobType>
 export type PriceProcessor = Processor<PriceJobData, PriceJobReturn, 'updatePrice'>
@@ -80,14 +81,20 @@ export class RelayerQueueHelper {
 
   get queue() {
     if (!this._queue) {
-      this._queue = new Queue<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, { connection: this.store.client });
+      this._queue = new Queue<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, {
+        connection: this.store.client,
+        defaultJobOptions: { stackTraceLimit: 100 },
+      });
     }
     return this._queue;
   }
 
   get worker() {
     if (!this._worker) {
-      this._worker = new Worker<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, relayerProcessor, { connection: this.store.client });
+      this._worker = new Worker<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, relayerProcessor, {
+        connection: this.store.client,
+        concurrency: 1,
+      });
     }
     return this._worker;
   }
