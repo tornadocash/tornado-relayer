@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 import createServer from './server';
 import { utils } from 'ethers';
 import { port, rewardAccount } from '../config';

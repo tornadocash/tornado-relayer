@@ -5,11 +5,12 @@ import {
   TornadoProxyABI__factory,
 } from '../../contracts';
 import { providers } from 'ethers';
-import { httpRpcUrl, multiCallAddress, netId, offchainOracleAddress, oracleRpcUrl } from '../config';
+import { rpcUrl, multiCallAddress, netId, offchainOracleAddress, oracleRpcUrl } from '../config';
 
-export function getProvider(isStatic = true, rpcUrl?: string) {
-  if (isStatic) return new providers.StaticJsonRpcProvider(rpcUrl || httpRpcUrl, netId);
-  else return new providers.JsonRpcProvider(rpcUrl || httpRpcUrl, netId);
+export function getProvider(isStatic = true, customRpcUrl?: string) {
+  if (isStatic) return new providers.StaticJsonRpcProvider(customRpcUrl || rpcUrl, netId);
+  else return new providers.JsonRpcProvider(customRpcUrl || rpcUrl, netId);
+
 }
 
 export const getTornadoProxyContract = (proxyAddress: string) => {

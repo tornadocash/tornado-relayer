@@ -1,4 +1,4 @@
-export enum JobType {
+export enum RelayerJobType {
   TORNADO_WITHDRAW = 'TORNADO_WITHDRAW',
   MINING_REWARD = 'MINING_REWARD',
   MINING_WITHDRAW = 'MINING_WITHDRAW',

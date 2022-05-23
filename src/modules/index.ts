@@ -1,2 +1,2 @@
-export { default as redis } from './redis';
+export { default as redisStore } from './redis';
 export { resolve } from './ensResolver';

@@ -1,12 +1,13 @@
-import { TxManager } from 'tx-manager';
-import { configService } from './index';
-import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
-import { formatEther, parseEther, parseUnits } from 'ethers/lib/utils';
-import { gasLimits, httpRpcUrl, tornadoServiceFee } from '../config';
-import { BigNumber, BigNumberish, BytesLike } from 'ethers';
-import { JobType } from '../types';
-import getPriceService from './PriceService';
+import { TransactionData, TxManager } from 'tx-manager';
 import { GasPriceOracle } from 'gas-price-oracle';
+import { Provider } from '@ethersproject/providers';
+import { formatEther, parseUnits } from 'ethers/lib/utils';
+import { BigNumber, BigNumberish, BytesLike } from 'ethers';
+import { configService, getPriceService } from './index';
+import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
+import { gasLimits, tornadoServiceFee } from '../config';
+import { RelayerJobType } from '../types';
+import { PriceService } from './price.service';
 
 export type WithdrawalData = {
   contract: string,
@@ -24,37 +25,33 @@ export type WithdrawalData = {
 export class TxService {
   txManager: TxManager;
   tornadoProxy: TornadoProxyABI | ProxyLightABI;
-  priceService: ReturnType<typeof getPriceService>;
   oracle: GasPriceOracle;
+  provider: Provider;
+  priceService: PriceService;
 
   constructor() {
     const { privateKey, rpcUrl, netId } = configService;
     this.txManager = new TxManager({ privateKey, rpcUrl });
     this.tornadoProxy = configService.proxyContract;
-    this.oracle = new GasPriceOracle({ defaultRpc: httpRpcUrl, chainId: netId });
+    this.provider = this.tornadoProxy.provider;
+    this.oracle = new GasPriceOracle({ defaultRpc: rpcUrl, chainId: netId });
     this.priceService = getPriceService();
   }
 
-  async init() {
-    const currentTx = this.txManager.createTx({
-      nonce: 123,
-      to: '0x2f04c418e91585222a7042FFF4aB7281D34FdfCC',
-      value: parseEther('1'),
-    });
+  async sendTx(tx: TransactionData) {
+    const currentTx = this.txManager.createTx(tx);
 
-    const receipt = await currentTx.send()
+    return await currentTx.send()
       .on('transactionHash', txHash => console.log({ txHash }))
       .on('mined', receipt => console.log('Mined in block', receipt.blockNumber))
       .on('confirmations', confirmations => console.log({ confirmations }));
-
-    return receipt;
   }
 
-  private async prepareCallData(data: WithdrawalData) {
+  async prepareTxData(data: WithdrawalData): Promise<TransactionData> {
     const { contract, proof, args } = data;
     const calldata = this.tornadoProxy.interface.encodeFunctionData('withdraw', [contract, proof, ...args]);
     return {
-      value: data.args[5],
+      value: args[5],
       to: this.tornadoProxy.address,
       data: calldata,
       gasLimit: gasLimits['WITHDRAW_WITH_EXTRA'],
@@ -62,21 +59,26 @@ export class TxService {
   }
 
   async checkTornadoFee({ args, contract }: WithdrawalData) {
-    const { currency, amount, decimals } = configService.getInstance(contract);
+    const instance = configService.getInstance(contract);
+    if (!instance) throw new Error('Instance not found');
+    const { currency, amount, decimals } = instance;
     const [fee, refund] = [args[4], args[5]].map(BigNumber.from);
     const gasPrice = await this.getGasPrice();
-    const ethPrice = await this.priceService.getPrice(currency);
-    const operationCost = gasPrice.mul((gasLimits[JobType.TORNADO_WITHDRAW]));
+    // TODO check refund value
+    const operationCost = gasPrice.mul((gasLimits[RelayerJobType.TORNADO_WITHDRAW]));
 
     const serviceFee = parseUnits(amount, decimals)
-      .mul(tornadoServiceFee * 1e10)
-      .div(100 * 1e10);
+      .mul(`${tornadoServiceFee * 1e10}`)
+      .div(`${100 * 1e10}`);
 
     let desiredFee = operationCost.add(serviceFee);
-    if (currency !== 'eth') {
+
+    if (!configService.isLightMode && currency !== 'eth') {
+      const ethPrice = await this.priceService.getPrice(currency);
+      const numerator = BigNumber.from(10).pow(decimals);
       desiredFee = operationCost
         .add(refund)
-        .mul(10 ** decimals)
+        .mul(numerator)
         .div(ethPrice)
         .add(serviceFee);
     }
@@ -90,17 +92,15 @@ export class TxService {
     if (fee.lt(desiredFee)) {
       throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.');
     }
-
   }
 
   async getGasPrice(): Promise<BigNumber> {
-    const { baseFeePerGas = 0 } = await this.tornadoProxy.provider.getBlock('latest');
-    // const gasPrice = await this.tornadoProxy.provider.getGasPrice();
-    if (baseFeePerGas) return baseFeePerGas;
+    // TODO eip https://eips.ethereum.org/EIPS/eip-1559
+    const { baseFeePerGas = 0 } = await this.provider.getBlock('latest');
+    if (baseFeePerGas) return await this.provider.getGasPrice();
     const { fast = 0 } = await this.oracle.gasPrices();
     return parseUnits(String(fast), 'gwei');
   }
-
 }
 
 export default () => new TxService();

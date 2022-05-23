@@ -4,12 +4,13 @@ import { FromSchema } from 'json-schema-to-ts';
 import { rewardAccount, tornadoServiceFee } from '../config';
 import { version } from '../../package.json';
 import { configService, getJobService, getPriceService } from '../services';
-import { JobType } from '../types';
+import { RelayerJobType } from '../types';
 
-const priceService = getPriceService();
-const jobService = getJobService();
 
 export function mainHandler(server: FastifyInstance, options, next) {
+  const jobService = getJobService();
+  const priceService = getPriceService();
+
   server.get('/',
     async (req, res) => {
       res.type('text/html')
@@ -42,6 +43,7 @@ export function mainHandler(server: FastifyInstance, options, next) {
 }
 
 export function relayerHandler(server: FastifyInstance, options, next) {
+  const jobService = getJobService();
   server.get<{ Params: { id: string } }>('/jobs/:id',
     { schema: jobsSchema },
     async (req, res) => {
@@ -54,7 +56,7 @@ export function relayerHandler(server: FastifyInstance, options, next) {
     { schema: withdrawSchema },
     async (req, res) => {
       console.log(req.body);
-      const id = await jobService.postJob(JobType.TORNADO_WITHDRAW, req.body);
+      const id = await jobService.postJob(RelayerJobType.TORNADO_WITHDRAW, req.body);
       res.send({ id });
     });
   next();

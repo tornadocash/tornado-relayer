@@ -1,48 +1,105 @@
-import { Job, Processor, Queue, Worker } from 'bullmq';
-import { redis } from '../modules';
-import { JobStatus, JobType, Token } from '../types';
-import { relayerProcessor } from './relayerProcessor';
-import { WithdrawalData } from '../services/TxService';
-import { schedulerProcessor } from './schedulerProcessor';
-import { configService } from '../services';
+import { Processor, Queue, QueueScheduler, Worker } from 'bullmq';
+import { JobStatus, RelayerJobType, Token } from '../types';
+import { WithdrawalData } from '../services/tx.service';
 import { BigNumber } from 'ethers';
+import { priceProcessor } from './price.processor';
+import { autoInjectable } from 'tsyringe';
+import { RedisStore } from '../modules/redis';
+import { ConfigService } from '../services/config.service';
+import { relayerProcessor } from './relayer.processor';
 
-const connection = redis.getClient();
+type PriceJobData = Token[]
+type PriceJobReturn = number
+type HealthJobReturn = { balance: BigNumber, isEnought: boolean }
 
-export type SchedulerJobProcessors = {
-  updatePrices: Processor,
-  checkBalance: Processor
+type RelayerJobData = WithdrawalData & { id: string, status: JobStatus, type: RelayerJobType }
+
+type RelayerJobReturn = any
+
+export type RelayerProcessor = Processor<RelayerJobData, RelayerJobReturn, RelayerJobType>
+export type PriceProcessor = Processor<PriceJobData, PriceJobReturn, 'updatePrice'>
+
+@autoInjectable()
+export class PriceQueueHelper {
+  _queue: Queue<PriceJobData, PriceJobReturn, 'updatePrice'>;
+  _worker: Worker<PriceJobData, PriceJobReturn, 'updatePrice'>;
+  _scheduler: QueueScheduler;
+
+  constructor(private store?: RedisStore) {
+  }
+
+  get queue() {
+    if (!this._queue) {
+      this._queue = new Queue<Token[], PriceJobReturn, 'updatePrice'>('price', {
+        connection: this.store.client,
+        defaultJobOptions: {
+          removeOnFail: 10,
+          removeOnComplete: 10,
+        },
+      });
+    }
+    return this._queue;
+  }
+
+  get worker() {
+    if (!this._worker) {
+      this._worker = new Worker<PriceJobData, PriceJobReturn, 'updatePrice'>('price', priceProcessor, {
+        connection: this.store.client,
+        concurrency: 1,
+      });
+    }
+    return this._worker;
+  }
+
+  get scheduler() {
+    if (!this._scheduler) {
+      this._scheduler = new QueueScheduler('price', { connection: this.store.client });
+    }
+    return this._scheduler;
+  }
+
+  async addRepeatable(tokens: PriceJobData) {
+    await this.queue.add('updatePrice', tokens, {
+      repeat: {
+        every: 30000,
+        immediately: true,
+      },
+    });
+  }
 }
 
-type SchedulerJobName = keyof SchedulerJobProcessors
-type SchedulerJobData = Token[] | null
-type SchedulerJobReturn = Record<string, string> | { balance: BigNumber, isEnought: boolean }
-type RelayerJobData = WithdrawalData & { id: string, status: JobStatus, type: JobType }
-type RelayerJobReturn = void
 
-// export interface SchedulerProcessor {
-//   <U extends SchedulerJobName>(job: Job<SchedulerJobData, SchedulerJobReturn, U>): SchedulerJobProcessors[U];
-//
-// }
+@autoInjectable()
+export class RelayerQueueHelper {
+  private _queue: Queue<RelayerJobData, RelayerJobReturn, RelayerJobType>;
+  private _worker: Worker<RelayerJobData, RelayerJobReturn, RelayerJobType>;
+  private _scheduler: QueueScheduler;
+
+  constructor(private store?: RedisStore, private config?: ConfigService) {
+  }
+
+  get queue() {
+    if (!this._queue) {
+      this._queue = new Queue<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, { connection: this.store.client });
+    }
+    return this._queue;
+  }
+
+  get worker() {
+    if (!this._worker) {
+      this._worker = new Worker<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, relayerProcessor, { connection: this.store.client });
+    }
+    return this._worker;
+  }
+
+  get scheduler() {
+    if (!this._scheduler) {
+      this._scheduler = new QueueScheduler(this.config.queueName, { connection: this.store.client });
+    }
+    return this._scheduler;
+  }
 
 
-export interface RelayerProcessor {
-  (job: Job<RelayerJobData, RelayerJobReturn, JobType>): Promise<void>;
 }
-
-export const schedulerQueue = new Queue<Token[], any, SchedulerJobName>('scheduler', {
-  connection,
-  defaultJobOptions: {
-    removeOnFail: 10,
-    removeOnComplete: 10,
-  },
-});
-export const getSchedulerWorker = () => new Worker<SchedulerJobData, SchedulerJobReturn, SchedulerJobName>(schedulerQueue.name, (job) => schedulerProcessor(job), {
-  connection,
-  concurrency: 3,
-});
-
-export const relayerQueue = new Queue<RelayerJobData, RelayerJobReturn, JobType>(configService.queueName, { connection });
-export const getRelayerWorker = () => new Worker<RelayerJobData, RelayerJobReturn, JobType>(relayerQueue.name, relayerProcessor, { connection });
 
 

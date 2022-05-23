@@ -1,13 +1,4 @@
-import {
-  httpRpcUrl,
-  instances,
-  minimumBalance,
-  netId,
-  privateKey,
-  torn,
-  tornadoGoerliProxy,
-  tornToken,
-} from '../config';
+import { instances, minimumBalance, netId, privateKey, rpcUrl, torn, tornadoGoerliProxy, tornToken } from '../config';
 import { Token } from '../types';
 import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract } from '../modules/contracts';
 import { resolve } from '../modules';
@@ -15,35 +6,36 @@ import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
 import { availableIds, netIds, NetInstances } from '../../../torn-token';
 import { getAddress } from 'ethers/lib/utils';
 import { providers, Wallet } from 'ethers';
+import { container, singleton } from 'tsyringe';
 
 type relayerQueueName = `relayer_${availableIds}`
 
+@singleton()
 export class ConfigService {
   static instance: ConfigService;
-  netId: availableIds;
   netIdKey: netIds;
   queueName: relayerQueueName;
   tokens: Token[];
-  privateKey: string;
-  rpcUrl: string;
   private _proxyAddress: string;
   private _proxyContract: TornadoProxyABI | ProxyLightABI;
   addressMap = new Map<string, InstanceProps>();
   isLightMode: boolean;
   instances: NetInstances;
-  provider: providers.StaticJsonRpcProvider;
+  provider: providers.JsonRpcProvider;
   wallet: Wallet;
+  public readonly netId: availableIds = netId;
+  public readonly privateKey = privateKey;
+  public readonly rpcUrl = rpcUrl;
+  isInit: boolean;
 
   constructor() {
-    this.netId = netId;
     this.netIdKey = `netId${this.netId}`;
     this.queueName = `relayer_${this.netId}`;
     this.isLightMode = ![1, 5].includes(netId);
-    this.privateKey = privateKey;
-    this.rpcUrl = httpRpcUrl;
     this.instances = instances[this.netIdKey];
     this.provider = getProvider(false);
     this.wallet = new Wallet(this.privateKey, this.provider);
+    console.log(this.wallet.address);
     this._fillInstanceMap();
   }
 
@@ -57,6 +49,7 @@ export class ConfigService {
 
   private _fillInstanceMap() {
     if (!this.instances) throw new Error('config mismatch, check your environment variables');
+    // TODO
     for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(this.instances)) {
       Object.entries(instanceAddress).forEach(([amount, address]) => {
           if (address) {
@@ -76,12 +69,13 @@ export class ConfigService {
     try {
       await this.provider.getNetwork();
     } catch (e) {
-      throw new Error(`Could not detect network, check your rpc url: ${this.rpcUrl}`);
+      throw new Error(`Could not detect network, check your rpc url: ${this.rpcUrl}. ` + e.message);
     }
   }
 
   async init() {
     try {
+      if (this.isInit) return;
       await this._checkNetwork();
       if (this.isLightMode) {
         this._proxyAddress = await resolve(torn.tornadoProxyLight.address);
@@ -92,14 +86,18 @@ export class ConfigService {
           this._proxyAddress = await resolve(torn.tornadoRouter.address);
         }
         this._proxyContract = getTornadoProxyContract(this._proxyAddress);
-        this.tokens = [tornToken, ...Object.values(torn.instances['netId1'])]
-          .map<Token>(el => (el.tokenAddress && {
-            address: getAddress(el.tokenAddress),
-            ...el,
-          })).filter(Boolean);
-        console.log(
-          `Configuration completed\n-- netId: ${this.netId}\n-- rpcUrl: ${this.rpcUrl}`);
       }
+      // TODO get instances from registry
+
+      this.tokens = [tornToken, ...Object.values(torn.instances['netId1'])]
+        .map<Token>(el => (el.tokenAddress && {
+          address: getAddress(el.tokenAddress),
+          decimals: el.decimals,
+          symbol: el.symbol,
+        })).filter(Boolean);
+      console.log(
+        `Configuration completed\n-- netId: ${this.netId}\n-- rpcUrl: ${this.rpcUrl}`);
+      this.isInit = true;
     } catch (e) {
       console.error(`${this.constructor.name} Error:`, e.message);
     }
@@ -115,12 +113,6 @@ export class ConfigService {
     return { balance, isEnougth };
   }
 
-  public static getServiceInstance() {
-    if (!ConfigService.instance) {
-      ConfigService.instance = new ConfigService();
-    }
-    return ConfigService.instance;
-  }
 }
 
 type InstanceProps = {
@@ -130,4 +122,4 @@ type InstanceProps = {
   decimals: number,
 }
 
-export default ConfigService.getServiceInstance();
+export default container.resolve(ConfigService);

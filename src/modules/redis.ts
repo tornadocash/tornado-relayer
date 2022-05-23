@@ -1,12 +1,25 @@
 import Redis from 'ioredis';
 import { redisUrl } from '../config';
+import { container, singleton } from 'tsyringe';
 
-const redisClient = new Redis(redisUrl, { maxRetriesPerRequest: null });
-const redisSubscriber = new Redis(redisUrl, { maxRetriesPerRequest: null });
+@singleton()
+export class RedisStore {
+  get client(): Redis.Redis {
+    return this._client;
+  }
 
-export const getClient = () => redisClient.on('error', (error) => {
-  throw error;
-});
-export const getSubscriber = () => redisSubscriber;
+  get subscriber(): Redis.Redis {
+    return this._subscriber;
+  }
 
-export default { getClient, getSubscriber };
+  private readonly _subscriber: Redis.Redis;
+  private readonly _client: Redis.Redis;
+
+  constructor() {
+    this._client = new Redis(redisUrl, { maxRetriesPerRequest: null });
+    this._subscriber = new Redis(redisUrl, { maxRetriesPerRequest: null });
+    console.log('RedisStore new instance');
+  }
+}
+
+export default () => container.resolve(RedisStore);

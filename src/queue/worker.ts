@@ -1,23 +1,24 @@
-import { getRelayerWorker, getSchedulerWorker } from './';
-import { configService, getPriceService } from '../services';
+import 'reflect-metadata';
+import { PriceQueueHelper, RelayerQueueHelper } from './';
+import { configService } from '../services';
 
 
 export const schedulerWorker = async () => {
   await configService.init();
-  const priceService = getPriceService();
-  const schedulerWorkerWorker = getSchedulerWorker();
-  console.log('price worker');
-  schedulerWorkerWorker.on('active', () => console.log('worker active'));
-  schedulerWorkerWorker.on('completed', async (job, result) => {
-    if (job.name === 'updatePrices') {
-      // await priceService.savePrices(result);
-    }
+  const price = new PriceQueueHelper();
+  console.log('price worker', price.queue.name);
+  price.worker.on('active', () => console.log('worker active'));
+  price.worker.on('completed', async (job, result) => {
+    console.log(`Job ${job.id} completed with result: ${result}`);
   });
-  schedulerWorkerWorker.on('failed', (job, error) => console.log(error));
+  price.worker.on('failed', (job, error) => console.log(error));
 };
 
 export const relayerWorker = async () => {
-  const relayerWorker = getRelayerWorker();
-  relayerWorker.on('completed', (job, result) => console.log(result));
-  relayerWorker.on('failed', (job, error) => console.log(error));
+  await configService.init();
+  const relayer = new RelayerQueueHelper();
+  relayer.worker.on('completed', (job, result) => {
+    console.log(`Job ${job.id} completed with result: ${result}`);
+  });
+  relayer.worker.on('failed', (job, error) => console.log(error));
 };

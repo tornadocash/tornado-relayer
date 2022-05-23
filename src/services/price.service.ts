@@ -4,15 +4,15 @@ import { MultiCall } from '../../contracts/MulticallAbi';
 import { BigNumber } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { Token } from '../types';
-import { redis } from '../modules';
+import { container, injectable } from 'tsyringe';
+import { RedisStore } from '../modules/redis';
 
-const redisClient = redis.getClient();
-
+@injectable()
 export class PriceService {
-  oracle: OffchainOracleAbi;
-  multiCall: MulticallAbi;
+  private oracle: OffchainOracleAbi;
+  private multiCall: MulticallAbi;
 
-  constructor() {
+  constructor(private store: RedisStore) {
     this.oracle = getOffchainOracleContract();
     this.multiCall = getMultiCallContract();
   }
@@ -28,12 +28,12 @@ export class PriceService {
 
   async fetchPrices(tokens: Token[]) {
     const names = tokens.reduce((p, c) => {
-      p[c.address] = c.symbol;
+      p[c.address] = c.symbol.toLowerCase();
       return p;
     }, {});
     const callData = this.prepareCallData(tokens);
     const { results, success } = await this.multiCall.multicall(callData);
-    const prices: { [p: string]: string } = {};
+    const prices: Record<string, string> = {};
     for (let i = 0; i < results.length; i++) {
       if (!success[i]) {
         continue;
@@ -48,16 +48,16 @@ export class PriceService {
   }
 
   async getPrice(currency: string) {
-    return await redisClient.hget('prices', currency);
+    return await this.store.client.hget('prices', currency);
   }
 
   async getPrices() {
-    return await redisClient.hgetall('prices');
+    return await this.store.client.hgetall('prices');
   }
 
   async savePrices(prices: Record<string, string>) {
-    await redisClient.hset('prices', prices);
+    return await this.store.client.hset('prices', prices);
   }
 }
 
-export default () => new PriceService();
+export default () => container.resolve(PriceService);
