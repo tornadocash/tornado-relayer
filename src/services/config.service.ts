@@ -1,4 +1,14 @@
-import { instances, minimumBalance, netId, privateKey, rpcUrl, torn, tornadoGoerliProxy, tornToken } from '../config';
+import {
+  instances,
+  minimumBalance,
+  netId,
+  networkConfig,
+  privateKey,
+  rpcUrl,
+  torn,
+  tornadoGoerliProxy,
+  tornToken,
+} from '../config';
 import { Token } from '../types';
 import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract } from '../modules/contracts';
 import { resolve } from '../modules';
@@ -7,6 +17,7 @@ import { availableIds, netIds, NetInstances } from '../../../torn-token';
 import { getAddress } from 'ethers/lib/utils';
 import { providers, Wallet } from 'ethers';
 import { container, singleton } from 'tsyringe';
+import { GasPrice } from 'gas-price-oracle/lib/types';
 
 type relayerQueueName = `relayer_${availableIds}`
 
@@ -26,6 +37,9 @@ export class ConfigService {
   public readonly privateKey = privateKey;
   public readonly rpcUrl = rpcUrl;
   isInit: boolean;
+  nativeCurrency: string;
+  fallbackGasPrices: GasPrice;
+
 
   constructor() {
     this.netIdKey = `netId${this.netId}`;
@@ -74,6 +88,9 @@ export class ConfigService {
       if (this.isLightMode) {
         this._proxyAddress = await resolve(torn.tornadoProxyLight.address);
         this._proxyContract = getTornadoProxyLightContract(this._proxyAddress);
+        const { gasPrices, nativeCurrency } = networkConfig[this.netIdKey];
+        this.nativeCurrency = nativeCurrency;
+        this.fallbackGasPrices = gasPrices;
       } else {
         this._proxyAddress = tornadoGoerliProxy;
         if (this.netId === 1) {
@@ -92,6 +109,7 @@ export class ConfigService {
       console.log(
         `Configuration completed\n-- netId: ${this.netId}\n-- rpcUrl: ${this.rpcUrl}`);
       this.isInit = true;
+      console.log(this);
     } catch (e) {
       console.error(`${this.constructor.name} Error:`, e.message);
     }

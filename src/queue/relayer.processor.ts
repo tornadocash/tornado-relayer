@@ -12,12 +12,10 @@ export const relayerProcessor: RelayerProcessor = async (job) => {
     const withdrawalData = job.data;
     await txService.checkTornadoFee(withdrawalData);
     const txData = await txService.prepareTxData(withdrawalData);
-    const receipt = await txService.sendTx(txData);
-    return receipt;
+    return await txService.sendTx(txData);
   } catch (e) {
     console.log(e);
     await job.update({ ...job.data, status: JobStatus.FAILED });
     throw new Error(e.message);
   }
-
 };

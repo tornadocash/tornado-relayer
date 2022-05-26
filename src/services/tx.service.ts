@@ -42,7 +42,11 @@ export class TxService {
     this.txManager = new TxManager({ privateKey, rpcUrl, config: { THROW_ON_REVERT: true } });
     this.tornadoProxy = this.config.proxyContract;
     this.provider = this.tornadoProxy.provider;
-    this.oracle = new GasPriceOracle({ defaultRpc: rpcUrl, chainId: netId });
+    this.oracle = new GasPriceOracle({
+      defaultRpc: rpcUrl,
+      chainId: netId,
+      defaultFallbackGasPrices: this.config?.fallbackGasPrices,
+    });
   }
 
   async updateJobData(data: Partial<RelayerJobData>) {
@@ -57,15 +61,15 @@ export class TxService {
 
       const receipt = await currentTx.send()
         .on('transactionHash', async txHash => {
-          console.log({ txHash });
+          console.log('Transaction sent, txHash: ', txHash);
           await this.updateJobData({ txHash, status: JobStatus.SENT });
         })
         .on('mined', async receipt => {
-          console.log('Mined in block', receipt.blockNumber);
+          console.log('Transaction mined in block', receipt.blockNumber);
           await this.updateJobData({ status: JobStatus.MINED });
         })
         .on('confirmations', async confirmations => {
-          console.log({ confirmations });
+          console.log('Transaction confirmations: ', confirmations);
           await this.updateJobData({ confirmations });
         });
       if (receipt.status === 1) {
