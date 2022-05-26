@@ -1,15 +1,16 @@
 import {
+  ERC20Abi__factory,
   MulticallAbi__factory,
   OffchainOracleAbi__factory,
   ProxyLightABI__factory,
   TornadoProxyABI__factory,
 } from '../../contracts';
 import { providers } from 'ethers';
-import { rpcUrl, multiCallAddress, netId, offchainOracleAddress, oracleRpcUrl } from '../config';
+import { multiCallAddress, netId, offchainOracleAddress, mainnetRpcUrl, rpcUrl } from '../config';
 
-export function getProvider(isStatic = true, customRpcUrl?: string) {
-  if (isStatic) return new providers.StaticJsonRpcProvider(customRpcUrl || rpcUrl, netId);
-  else return new providers.JsonRpcProvider(customRpcUrl || rpcUrl, netId);
+export function getProvider(isStatic = true, customRpcUrl?: string, chainId = netId) {
+  if (isStatic) return new providers.StaticJsonRpcProvider(customRpcUrl || rpcUrl, chainId);
+  else return new providers.JsonRpcProvider(customRpcUrl || rpcUrl, chainId);
 
 }
 
@@ -22,13 +23,16 @@ export const getTornadoProxyLightContract = (proxyAddress: string) => {
 
 
 export const getOffchainOracleContract = () => {
-  return OffchainOracleAbi__factory.connect(offchainOracleAddress, getProvider(true, oracleRpcUrl));
+  return OffchainOracleAbi__factory.connect(offchainOracleAddress, getProvider(true, mainnetRpcUrl));
 };
 
 export const getMultiCallContract = () => {
-  return MulticallAbi__factory.connect(multiCallAddress, getProvider(true, oracleRpcUrl));
+  return MulticallAbi__factory.connect(multiCallAddress, getProvider(true, mainnetRpcUrl));
 };
 
+export const getTornTokenContract = (tokenAddress: string) => {
+  return ERC20Abi__factory.connect(tokenAddress, getProvider(true, mainnetRpcUrl));
+};
 // export const getAggregatorContract = () => {
 //   return AggregatorAbi__factory.connect(aggregatorAddress, getProvider());
 // };

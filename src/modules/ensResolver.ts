@@ -1,10 +1,12 @@
 import { getProvider } from './contracts';
+import { mainnetRpcUrl } from '../config';
+import { ChainIds } from '../types';
 
 const addresses = new Map<string, string>();
-const provider = getProvider();
 
 async function resolve(domain: string) {
   try {
+    const provider = getProvider(true, mainnetRpcUrl, ChainIds.ethereum);
     if (!addresses.has(domain)) {
       const resolved = await provider.resolveName(domain);
       addresses.set(domain, resolved);

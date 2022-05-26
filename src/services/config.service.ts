@@ -1,6 +1,7 @@
 import {
   instances,
   minimumBalance,
+  minimumTornBalance,
   netId,
   networkConfig,
   privateKey,
@@ -10,14 +11,20 @@ import {
   tornToken,
 } from '../config';
 import { Token } from '../types';
-import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract } from '../modules/contracts';
+import {
+  getProvider,
+  getTornadoProxyContract,
+  getTornadoProxyLightContract,
+  getTornTokenContract,
+} from '../modules/contracts';
 import { resolve } from '../modules';
-import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
+import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../../contracts';
 import { availableIds, netIds, NetInstances } from '../../../torn-token';
-import { getAddress } from 'ethers/lib/utils';
+import { formatEther, getAddress } from 'ethers/lib/utils';
 import { providers, Wallet } from 'ethers';
 import { container, singleton } from 'tsyringe';
 import { GasPrice } from 'gas-price-oracle/lib/types';
+import { configService } from './index';
 
 type relayerQueueName = `relayer_${availableIds}`
 
@@ -39,6 +46,8 @@ export class ConfigService {
   isInit: boolean;
   nativeCurrency: string;
   fallbackGasPrices: GasPrice;
+  private _tokenAddress: string;
+  private _tokenContract: ERC20Abi;
 
 
   constructor() {
@@ -85,8 +94,10 @@ export class ConfigService {
     try {
       if (this.isInit) return;
       await this._checkNetwork();
+      this._tokenAddress = await resolve(torn.torn.address);
+      this._tokenContract = await getTornTokenContract(this._tokenAddress);
       if (this.isLightMode) {
-        this._proxyAddress = await resolve(torn.tornadoProxyLight.address);
+        this._proxyAddress = torn.tornadoProxyLight.address;
         this._proxyContract = getTornadoProxyLightContract(this._proxyAddress);
         const { gasPrices, nativeCurrency } = networkConfig[this.netIdKey];
         this.nativeCurrency = nativeCurrency;
@@ -106,10 +117,19 @@ export class ConfigService {
           decimals: el.decimals,
           symbol: el.symbol,
         })).filter(Boolean);
+      const { balance } = await configService.getBalance();
+      const { balance: tornBalance } = await configService.getTornBalance();
       console.log(
-        `Configuration completed\n-- netId: ${this.netId}\n-- rpcUrl: ${this.rpcUrl}`);
+        'Configuration completed\n',
+        `-- netId: ${this.netId}\n`,
+        `-- rpcUrl: ${this.rpcUrl}\n`,
+        `-- relayer Address: ${this.wallet.address}\n`,
+        `-- relayer Balance: ${formatEther(balance)}\n`,
+        `-- relayer Torn balance: ${formatEther(tornBalance)}\n`,
+      );
+
+
       this.isInit = true;
-      console.log(this);
     } catch (e) {
       console.error(`${this.constructor.name} Error:`, e.message);
     }
@@ -122,6 +142,12 @@ export class ConfigService {
   async getBalance() {
     const balance = await this.wallet.getBalance();
     const isEnougth = balance.gt(minimumBalance);
+    return { balance, isEnougth };
+  }
+
+  async getTornBalance() {
+    const balance = await this._tokenContract.balanceOf(this.wallet.address);
+    const isEnougth = balance.gt(minimumTornBalance);
     return { balance, isEnougth };
   }
 

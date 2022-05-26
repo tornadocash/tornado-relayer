@@ -6,7 +6,7 @@ require('dotenv').config();
 export const netId = <availableIds>Number(process.env.NET_ID || 1);
 export const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 export const rpcUrl = process.env.RPC_URL;
-export const oracleRpcUrl = process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/';
+export const mainnetRpcUrl = process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/';
 export const offchainOracleAddress = '0x07D91f5fb9Bf7798734C3f606dB065549F6893bb';
 export const multiCallAddress = '0xda3c19c6fe954576707fa24695efb830d9cca1ca';
 export const aggregatorAddress = process.env.AGGREGATOR;
@@ -25,6 +25,7 @@ export const gasLimits = {
   [RelayerJobType.MINING_WITHDRAW]: 400000,
 };
 export const minimumBalance = '1000000000000000000';
+export const minimumTornBalance = '50000000000000000000';
 export const baseFeeReserve = Number(process.env.BASE_FEE_RESERVE_PERCENTAGE);
 export const tornToken = {
   tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
