@@ -1,8 +1,10 @@
 const Web3 = require('web3')
 const { GasPriceOracle } = require('gas-price-oracle')
+const { serialize } = require('@ethersproject/transactions')
 const { toBN, toWei, fromWei, toHex } = require('web3-utils')
 const { redis } = require('./modules/redis')
 const proxyLightABI = require('../abis/proxyLightABI.json')
+const ovmGasPriceOracleABI = require('../abis/ovmGasPriceOracleABI.json')
 const { queue } = require('./queue')
 const { getInstance, fromDecimals, logRelayerError, clearRelayerErrors } = require('./utils')
 const { jobType, status } = require('./constants')
@@ -22,10 +24,12 @@ let currentTx
 let currentJob
 let txManager
 let gasPriceOracle
+let tornadoProxyInstance
 
 function start() {
   try {
     web3 = new Web3(httpRpcUrl)
+    tornadoProxyInstance = new web3.eth.Contract(proxyLightABI, proxyLight)
     clearRelayerErrors(redis)
     const { CONFIRMATIONS, MAX_GAS_PRICE } = process.env
     const gasPriceOracleConfig = {
@@ -72,13 +76,44 @@ function getGasLimit() {
   return gasLimits[action]
 }
 
-async function checkTornadoFee({ args, contract }) {
-  const { amount, decimals } = getInstance(contract)
-  const fee = toBN(args[4])
+async function getL1Fee({ data, gasPrice }) {
+  const { address } = web3.eth.accounts.privateKeyToAccount(privateKey)
+  const nonce = await web3.eth.getTransactionCount(address)
+
+  const ovmGasPriceOracleContract = '0x420000000000000000000000000000000000000F'
+  const oracleInstance = new web3.eth.Contract(ovmGasPriceOracleABI, ovmGasPriceOracleContract)
+
+  const calldata = tornadoProxyInstance.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
+
+  const tx = serialize({
+    nonce,
+    type: 0,
+    data: calldata,
+    chainId: netId,
+    value: data.args[5],
+    to: tornadoProxyInstance._address,
+    gasLimit: getGasLimit(),
+    gasPrice: toHex(gasPrice),
+  })
+
+  const l1Fee = await oracleInstance.methods.getL1Fee(tx).call()
+
+  return l1Fee
+}
+
+async function checkTornadoFee({ data }) {
+  const fee = toBN(data.args[4])
+  const { amount, decimals } = getInstance(data.contract)
 
   const { fast } = await getGasPrices()
+  const gasPrice = toWei(fast.toString(), 'gwei')
 
-  const expense = toBN(toWei(fast.toString(), 'gwei')).mul(toBN(getGasLimit()))
+  let expense = toBN(gasPrice).mul(toBN(getGasLimit()))
+  if (netId === 10) {
+    const l1Fee = await getL1Fee({ data, gasPrice })
+    expense = expense.add(toBN(l1Fee))
+  }
+
   const feePercent = toBN(fromDecimals(amount, decimals))
     .mul(toBN(parseInt(tornadoServiceFee * 1e10)))
     .div(toBN(1e10 * 100))
@@ -96,15 +131,13 @@ async function checkTornadoFee({ args, contract }) {
 }
 
 async function getTxObject({ data }) {
-  const contract = new web3.eth.Contract(proxyLightABI, proxyLight)
-
-  const calldata = contract.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
+  const calldata = tornadoProxyInstance.methods.withdraw(data.contract, data.proof, ...data.args).encodeABI()
 
   const { fast } = await getGasPrices()
 
   return {
     value: data.args[5],
-    to: contract._address,
+    to: tornadoProxyInstance._address,
     data: calldata,
     gasLimit: getGasLimit(),
     gasPrice: toHex(toWei(fast.toString(), 'gwei')),
@@ -128,7 +161,7 @@ async function processJob(job) {
 }
 
 async function submitTx(job) {
-  await checkTornadoFee(job.data)
+  await checkTornadoFee(job)
   currentTx = await txManager.createTx(await getTxObject(job))
 
   try {
