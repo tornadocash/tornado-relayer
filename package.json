@@ -4,17 +4,12 @@
   "description": "Relayer for Tornado.cash privacy solution. https://tornado.cash",
   "scripts": {
     "dev:app": "nodemon --watch './src/**/*.ts' --exec ts-node src/app/index.ts",
-    "server": "node src/app/server.ts",
-    "worker": "node src/worker",
-    "treeWatcher": "node src/treeWatcher",
-    "priceWatcher": "node src/priceWatcher",
-    "healthWatcher": "node src/healthWatcher",
+    "dev:worker": "nodemon --watch './src/**/*.ts' --exec ts-node src/worker.ts",
     "eslint": "eslint --ext .js --ignore-path .gitignore .",
     "prettier:check": "npx prettier --check . --config .prettierrc",
     "prettier:fix": "npx prettier --write . --config .prettierrc",
     "lint": "yarn eslint && yarn prettier:check",
-    "test": "mocha",
-    "start": "yarn server & yarn priceWatcher & yarn treeWatcher & yarn worker & yarn healthWatcher"
+    "test": "mocha"
   },
   "author": "tornado.cash",
   "license": "MIT",
@@ -28,7 +23,7 @@
     "ethers": "^5.6.4",
     "fastify": "^3.28.0",
     "gas-price-oracle": "^0.4.6",
-    "ioredis": "^4.14.1",
+    "ioredis": "^5.0.6",
     "json-schema-to-ts": "^2.2.0",
     "node-fetch": "^2.6.7",
     "reflect-metadata": "^0.1.13",
