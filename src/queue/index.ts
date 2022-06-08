@@ -1,16 +1,18 @@
 import { Processor, Queue, QueueScheduler, Worker } from 'bullmq';
 import { JobStatus, RelayerJobType, Token } from '../types';
 import { WithdrawalData } from '../services/tx.service';
-import { BigNumber } from 'ethers';
 import { priceProcessor } from './price.processor';
 import { autoInjectable } from 'tsyringe';
 import { RedisStore } from '../modules/redis';
 import { ConfigService } from '../services/config.service';
 import { relayerProcessor } from './relayer.processor';
+import { healthProcessor } from './health.processor';
 
 type PriceJobData = Token[]
 type PriceJobReturn = number
-type HealthJobReturn = { balance: BigNumber, isEnought: boolean }
+
+type HealthJobReturn = void
+type HealthJobData = null
 
 export type RelayerJobData =
   WithdrawalData
@@ -109,4 +111,51 @@ export class RelayerQueueHelper {
 
 }
 
+@autoInjectable()
+export class HealthQueueHelper {
+
+  private _queue: Queue<HealthJobData, HealthJobReturn, 'checkHealth'>;
+  private _worker: Worker<HealthJobData, HealthJobReturn, 'checkHealth'>;
+  private _scheduler: QueueScheduler;
+
+  constructor(private store?: RedisStore, private config?: ConfigService) {
+  }
+
+  get scheduler(): QueueScheduler {
+    if (!this._scheduler) {
+      this._scheduler = new QueueScheduler('health', { connection: this.store.client });
+    }
+    return this._scheduler;
+  }
+
+  get worker() {
+    if (!this._worker) {
+      this._worker = new Worker<HealthJobData, HealthJobReturn, 'checkHealth'>('health', healthProcessor, {
+        connection: this.store.client,
+        concurrency: 1,
+      });
+    }
+    return this._worker;
+  }
+
+  get queue() {
+    if (!this._queue) {
+      this._queue = new Queue<HealthJobData, HealthJobReturn, 'checkHealth'>('health', {
+        connection: this.store.client,
+        defaultJobOptions: { stackTraceLimit: 100 },
+      });
+    }
+    return this._queue;
+  }
+
+  async addRepeatable() {
+    await this.queue.add('checkHealth', null, {
+      repeat: {
+        every: 30000,
+        immediately: true,
+      },
+    });
+  }
+
+}
 

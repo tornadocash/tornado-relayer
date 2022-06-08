@@ -1,13 +1,16 @@
 import { v4 } from 'uuid';
 import { JobStatus, RelayerJobType } from '../types';
-import { PriceQueueHelper, RelayerQueueHelper } from '../queue';
+import { HealthQueueHelper, PriceQueueHelper, RelayerQueueHelper } from '../queue';
 import { WithdrawalData } from './tx.service';
 import { container, injectable } from 'tsyringe';
 import { ConfigService } from './config.service';
 
 @injectable()
 export class JobService {
-  constructor(private price?: PriceQueueHelper, private relayer?: RelayerQueueHelper, public config?: ConfigService) {
+  constructor(private price?: PriceQueueHelper,
+    private relayer?: RelayerQueueHelper,
+    private health?: HealthQueueHelper,
+    public config?: ConfigService) {
   }
 
   async postJob(type: RelayerJobType, data: WithdrawalData) {
@@ -35,13 +38,20 @@ export class JobService {
   }
 
   private async _clearSchedulerJobs() {
-    const jobs = await this.price.queue.getJobs();
-    await Promise.all(jobs.map(job => job.remove()));
+    try {
+
+
+      const jobs = await Promise.all([this.price.queue.getJobs(), this.health.queue.getJobs()]);
+      await Promise.all(jobs.flat().map(job => job?.remove()));
+    } catch (e) {
+      console.log(e);
+    }
   }
 
   async setupRepeatableJobs() {
     await this._clearSchedulerJobs();
     await this.price.addRepeatable(this.config.tokens);
+    await this.health.addRepeatable();
     // await this.schedulerQ.add('checkBalance', null, {
     //   repeat: {
     //     every: 30000,

@@ -25,7 +25,7 @@ export const gasLimits = {
   [RelayerJobType.MINING_WITHDRAW]: 400000,
 };
 export const minimumBalance = '1000000000000000000';
-export const minimumTornBalance = '50000000000000000000';
+export const minimumTornBalance = '30000000000000000000';
 export const baseFeeReserve = Number(process.env.BASE_FEE_RESERVE_PERCENTAGE);
 export const tornToken = {
   tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',

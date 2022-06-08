@@ -2,50 +2,23 @@ version: '2'
 
 services:
   server:
-    image: tornadocash/relayer:mining
+    image: tornadocash/relayer
     restart: always
     command: server
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
       nginx_proxy_read_timeout: 600
-    depends_on: [redis]
-
-  treeWatcher:
-    image: tornadocash/relayer:mining
-    restart: always
-    command: treeWatcher
-    env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [redis]
-
-  priceWatcher:
-    image: tornadocash/relayer:mining
-    restart: always
-    command: priceWatcher
-    env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [redis]
-
-  healthWatcher:
-    image: tornadocash/relayer:mining
-    restart: always
-    command: healthWatcher
-    env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [redis]
+    depends_on: [ redis ]
 
   worker1:
-    image: tornadocash/relayer:mining
+    image: tornadocash/relayer
     restart: always
     command: worker
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
-    depends_on: [redis]
+    depends_on: [ redis ]
 
   #  worker2:
   #    image: tornadocash/relayer:mining
@@ -92,28 +65,21 @@ services:
   #      TELEGRAM_NOTIFIER_BOT_TOKEN: ...
   #      TELEGRAM_NOTIFIER_CHAT_ID: ...
 
-  #  # this container will send Telegram notifications if specified address doesn't have enough funds
-  #  monitor_mainnet:
-  #    image: peppersec/monitor_eth
-  #    restart: always
-  #    environment:
-  #      TELEGRAM_NOTIFIER_BOT_TOKEN: ...
-  #      TELEGRAM_NOTIFIER_CHAT_ID: ...
-  #      ADDRESS: '0x0000000000000000000000000000000000000000'
-  #      THRESHOLD: 0.5 # ETH
-  #      RPC_URL: https://mainnet.infura.io
-  #      BLOCK_EXPLORER: etherscan.io
+
 
   redis:
     image: redis
     restart: always
-    command: [redis-server, --appendonly, 'yes']
+    command: [ redis-server, '/usr/local/etc/redis/redis.conf', --appendonly, 'yes', ]
+    ports:
+      - '6379:6379'
     volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
       - redis:/data
 
   nginx:
     image: nginx:alpine
-    container_name: nginx
+    #    container_name: nginx
     restart: always
     ports:
       - 80:80

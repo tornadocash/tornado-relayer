@@ -6,6 +6,13 @@ const getNewInstance: () => Redis = () => new IORedis(redisUrl, { maxRetriesPerR
 
 @singleton()
 export class RedisStore {
+  get publisher(): Redis {
+    if (!this._publisher) {
+      this._publisher = getNewInstance();
+    }
+    return this._publisher;
+  }
+
   get client() {
     if (!this._client) {
       this._client = getNewInstance();
@@ -20,8 +27,9 @@ export class RedisStore {
     return this._subscriber;
   }
 
-  _subscriber: Redis;
-  _client: Redis;
+  private _subscriber: Redis;
+  private _publisher: Redis;
+  private _client: Redis;
 
 }
 

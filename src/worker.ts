@@ -1,4 +1,5 @@
-import { schedulerWorker, relayerWorker } from './queue/worker';
+import { priceWorker, relayerWorker, healthWorker } from './queue/worker';
 
-schedulerWorker();
+priceWorker();
 relayerWorker();
+healthWorker();

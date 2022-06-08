@@ -27,24 +27,28 @@ export class PriceService {
   }
 
   async fetchPrices(tokens: Token[]) {
-    const names = tokens.reduce((p, c) => {
-      p[c.address] = c.symbol.toLowerCase();
-      return p;
-    }, {});
-    const callData = this.prepareCallData(tokens);
-    const { results, success } = await this.multiCall.multicall(callData);
-    const prices: Record<string, string> = {};
-    for (let i = 0; i < results.length; i++) {
-      if (!success[i]) {
-        continue;
+    try {
+      const names = tokens.reduce((p, c) => {
+        p[c.address] = c.symbol.toLowerCase();
+        return p;
+      }, {});
+      const callData = this.prepareCallData(tokens);
+      const { results, success } = await this.multiCall.multicall(callData);
+      const prices: Record<string, string> = {};
+      for (let i = 0; i < results.length; i++) {
+        if (!success[i]) {
+          continue;
+        }
+        const decodedRate = defaultAbiCoder.decode(['uint256'], results[i]).toString();
+        const numerator = BigNumber.from(10).pow(tokens[i].decimals);
+        const denominator = BigNumber.from(10).pow(18); // eth decimals
+        const price = BigNumber.from(decodedRate).mul(numerator).div(denominator);
+        prices[names[tokens[i].address]] = price.toString();
       }
-      const decodedRate = defaultAbiCoder.decode(['uint256'], results[i]).toString();
-      const numerator = BigNumber.from(10).pow(tokens[i].decimals);
-      const denominator = BigNumber.from(10).pow(18); // eth decimals
-      const price = BigNumber.from(decodedRate).mul(numerator).div(denominator);
-      prices[names[tokens[i].address]] = price.toString();
+      return prices;
+    } catch (e) {
+      console.log(e);
     }
-    return prices;
   }
 
   async getPrice(currency: string) {

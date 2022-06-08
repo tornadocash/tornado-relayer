@@ -3,7 +3,7 @@ import createServer from './server';
 import { utils } from 'ethers';
 import { port, rewardAccount } from '../config';
 import { version } from '../../package.json';
-import { configService, getJobService } from '../services';
+import { configService, getJobService, getNotifierService } from '../services';
 
 
 if (!utils.isAddress(rewardAccount)) {
@@ -14,6 +14,8 @@ server.listen(port, '0.0.0.0', async (err, address) => {
   if (err) throw err;
   await configService.init();
   await getJobService().setupRepeatableJobs();
+  await getNotifierService().subscribe();
+
   console.log(`Relayer ${version} started on port ${address}`);
 });
 

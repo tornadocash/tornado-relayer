@@ -4,5 +4,7 @@ import { PriceProcessor } from './index';
 export const priceProcessor: PriceProcessor = async (job) => {
   const priceService = getPriceService();
   const result = await priceService.fetchPrices(job.data);
-  return await priceService.savePrices(result);
+  if (result) return await priceService.savePrices(result);
+  return null;
 };
+

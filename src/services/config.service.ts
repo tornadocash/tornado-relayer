@@ -20,11 +20,10 @@ import {
 import { resolve } from '../modules';
 import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../../contracts';
 import { availableIds, netIds, NetInstances } from '../../../torn-token';
-import { formatEther, getAddress } from 'ethers/lib/utils';
-import { providers, Wallet } from 'ethers';
+import { getAddress } from 'ethers/lib/utils';
+import { BigNumber, providers, Wallet } from 'ethers';
 import { container, singleton } from 'tsyringe';
 import { GasPrice } from 'gas-price-oracle/lib/types';
-import { configService } from './index';
 
 type relayerQueueName = `relayer_${availableIds}`
 
@@ -48,6 +47,7 @@ export class ConfigService {
   fallbackGasPrices: GasPrice;
   private _tokenAddress: string;
   private _tokenContract: ERC20Abi;
+  balances: { MAIN: { warn: string; critical: string; }; TORN: { warn: string; critical: string; }; };
 
 
   constructor() {
@@ -57,6 +57,10 @@ export class ConfigService {
     this.instances = instances[this.netIdKey];
     this.provider = getProvider(false);
     this.wallet = new Wallet(this.privateKey, this.provider);
+    this.balances = {
+      MAIN: { warn: BigNumber.from(minimumBalance).mul(150).div(100).toString(), critical: minimumBalance },
+      TORN: { warn: BigNumber.from(minimumTornBalance).mul(2).toString(), critical: minimumTornBalance },
+    };
     this._fillInstanceMap();
   }
 
@@ -64,21 +68,19 @@ export class ConfigService {
     return this._proxyContract;
   }
 
+  get tokenContract(): ERC20Abi {
+    return this._tokenContract;
+  }
+
   private _fillInstanceMap() {
     if (!this.instances) throw new Error('config mismatch, check your environment variables');
     // TODO
     for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(this.instances)) {
-      Object.entries(instanceAddress).forEach(([amount, address]) => {
-          if (address) {
-            this.addressMap.set(getAddress(address), {
-              currency,
-              amount,
-              symbol,
-              decimals,
-            });
-          }
-        },
-      );
+      for (const [amount, address] of Object.entries(instanceAddress)) {
+        if (address) this.addressMap.set(getAddress(address), {
+          currency, amount, symbol, decimals,
+        });
+      }
     }
   }
 
@@ -104,6 +106,7 @@ export class ConfigService {
         this.fallbackGasPrices = gasPrices;
       } else {
         this._proxyAddress = tornadoGoerliProxy;
+        this.nativeCurrency = 'eth';
         if (this.netId === 1) {
           this._proxyAddress = await resolve(torn.tornadoRouter.address);
         }
@@ -117,18 +120,12 @@ export class ConfigService {
           decimals: el.decimals,
           symbol: el.symbol,
         })).filter(Boolean);
-      const { balance } = await configService.getBalance();
-      const { balance: tornBalance } = await configService.getTornBalance();
       console.log(
         'Configuration completed\n',
         `-- netId: ${this.netId}\n`,
         `-- rpcUrl: ${this.rpcUrl}\n`,
         `-- relayer Address: ${this.wallet.address}\n`,
-        `-- relayer Balance: ${formatEther(balance)}\n`,
-        `-- relayer Torn balance: ${formatEther(tornBalance)}\n`,
       );
-
-
       this.isInit = true;
     } catch (e) {
       console.error(`${this.constructor.name} Error:`, e.message);
@@ -137,18 +134,6 @@ export class ConfigService {
 
   getInstance(address: string) {
     return this.addressMap.get(getAddress(address));
-  }
-
-  async getBalance() {
-    const balance = await this.wallet.getBalance();
-    const isEnougth = balance.gt(minimumBalance);
-    return { balance, isEnougth };
-  }
-
-  async getTornBalance() {
-    const balance = await this._tokenContract.balanceOf(this.wallet.address);
-    const isEnougth = balance.gt(minimumTornBalance);
-    return { balance, isEnougth };
   }
 
 }
