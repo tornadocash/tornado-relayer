@@ -6,11 +6,12 @@ import {
   TornadoProxyABI__factory,
 } from '../../contracts';
 import { providers } from 'ethers';
-import { multiCallAddress, netId, offchainOracleAddress, mainnetRpcUrl, rpcUrl } from '../config';
+import { mainnetRpcUrl, multiCallAddress, netId, offchainOracleAddress, rpcUrl } from '../config';
 
 export function getProvider(isStatic = true, customRpcUrl?: string, chainId = netId) {
-  if (isStatic) return new providers.StaticJsonRpcProvider(customRpcUrl || rpcUrl, chainId);
-  else return new providers.JsonRpcProvider(customRpcUrl || rpcUrl, chainId);
+  const url = customRpcUrl || rpcUrl;
+  if (isStatic) return new providers.StaticJsonRpcProvider(url, chainId);
+  else return new providers.JsonRpcProvider(url, chainId);
 
 }
 
@@ -33,6 +34,3 @@ export const getMultiCallContract = () => {
 export const getTornTokenContract = (tokenAddress: string) => {
   return ERC20Abi__factory.connect(tokenAddress, getProvider(true, mainnetRpcUrl));
 };
-// export const getAggregatorContract = () => {
-//   return AggregatorAbi__factory.connect(aggregatorAddress, getProvider());
-// };

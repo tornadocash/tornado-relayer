@@ -34,25 +34,27 @@ export class NotifierService {
 
   async processAlert(message: string) {
     const alert = JSON.parse(message);
-    const [a, b] = alert.type.split('_');
-    if (alert.level === 'OK') {
-      this.store.client.srem('alerts:sent', ...['WARN', 'CRITICAL'].map(l => `${a}_${b}_${l}`));
-    } else {
-      await this.send(alert.message, alert.level);
-      this.store.client.sadd('alerts:sent', alert.type);
+    const [a, b, c] = alert.type.split('_');
+    const isSent = await this.store.client.sismember('alerts:sent', `${a}_${b}_${c}`);
+    if (!isSent) {
+      if (alert.level === 'OK') {
+        this.store.client.srem('alerts:sent', ...['WARN', 'CRITICAL'].map(c => `${a}_${b}_${c}`));
+      } else {
+        await this.send(alert.message, alert.level);
+        this.store.client.sadd('alerts:sent', alert.type);
+      }
     }
   }
 
   async subscribe() {
     const sub = await this.store.subscriber;
-    sub.subscribe('__keyspace@0__:alerts', 'rpush');
+    sub.subscribe('__keyspace@0__:alerts:list', 'rpush');
     sub.on('message', async (channel, event) => {
       if (event === 'rpush') {
-        const messages = await this.store.client.brpop('alerts', 10);
-        while (messages.length) {
-          const [, message] = messages.splice(0, 2);
-          await this.processAlert(message);
-        }
+        const messages = await this.store.client.rpop('alerts:list', 10);
+        messages?.forEach(message => {
+          this.processAlert(message);
+        });
       }
     });
   }

@@ -24,6 +24,7 @@ import { getAddress } from 'ethers/lib/utils';
 import { BigNumber, providers, Wallet } from 'ethers';
 import { container, singleton } from 'tsyringe';
 import { GasPrice } from 'gas-price-oracle/lib/types';
+import { RedisStore } from '../modules/redis';
 
 type relayerQueueName = `relayer_${availableIds}`
 
@@ -50,7 +51,7 @@ export class ConfigService {
   balances: { MAIN: { warn: string; critical: string; }; TORN: { warn: string; critical: string; }; };
 
 
-  constructor() {
+  constructor(private store: RedisStore) {
     this.netIdKey = `netId${this.netId}`;
     this.queueName = `relayer_${this.netId}`;
     this.isLightMode = ![1, 5].includes(netId);
@@ -130,6 +131,11 @@ export class ConfigService {
     } catch (e) {
       console.error(`${this.constructor.name} Error:`, e.message);
     }
+  }
+
+  async clearRedisState() {
+    const queueKeys = (await this.store.client.keys('bull:*')).filter(s => s.indexOf('relayer') === -1);
+    await this.store.client.del(queueKeys);
   }
 
   getInstance(address: string) {

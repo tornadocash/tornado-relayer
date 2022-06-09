@@ -13,6 +13,7 @@ const server = createServer();
 server.listen(port, '0.0.0.0', async (err, address) => {
   if (err) throw err;
   await configService.init();
+  await configService.clearRedisState();
   await getJobService().setupRepeatableJobs();
   await getNotifierService().subscribe();
 

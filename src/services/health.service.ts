@@ -29,7 +29,7 @@ export class HealthService {
   private async _checkBalance(value, currency: 'MAIN' | 'TORN') {
     let level = 'OK';
     const type = 'BALANCE';
-    const key = 'alerts';
+    const key = 'alerts:list';
     const time = new Date().getTime();
     if (value.lt(this.config.balances[currency].critical)) {
       level = 'CRITICAL';

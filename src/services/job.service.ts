@@ -49,15 +49,8 @@ export class JobService {
   }
 
   async setupRepeatableJobs() {
-    await this._clearSchedulerJobs();
     await this.price.addRepeatable(this.config.tokens);
     await this.health.addRepeatable();
-    // await this.schedulerQ.add('checkBalance', null, {
-    //   repeat: {
-    //     every: 30000,
-    //     immediately: true,
-    //   },
-    // });
   }
 }
 
