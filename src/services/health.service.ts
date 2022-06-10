@@ -3,27 +3,73 @@ import { ConfigService } from './config.service';
 import { RedisStore } from '../modules/redis';
 import { formatEther } from 'ethers/lib/utils';
 
+class RelayerError extends Error {
+  constructor(message: string, code: string) {
+    super(message);
+    this.code = code;
+  }
+
+  code: string;
+}
+
 @autoInjectable()
 export class HealthService {
+
   constructor(private config: ConfigService, private store: RedisStore) {
   }
 
   async clearErrors() {
-    await this.store.client.del('errors');
+    await this.store.client.del('errors:log', 'errors:code');
   }
 
-  async getErrors(): Promise<{ message: string, score: number }[]> {
-    const set = await this.store.client.zrevrange('errors', 0, -1, 'WITHSCORES');
-    const errors = [];
-    while (set.length) {
-      const [message, score] = set.splice(0, 2);
-      errors.push({ message, score });
+  private async _getErrors(): Promise<{ errorsLog: { message: string, score: number }[], errorsCode: Record<string, number> }> {
+    const logSet = await this.store.client.zrevrange('errors:log', 0, -1, 'WITHSCORES');
+    const codeSet = await this.store.client.zrevrange('errors:code', 0, -1, 'WITHSCORES');
+
+    return { errorsLog: HealthService._parseSet(logSet), errorsCode: HealthService._parseSet(codeSet, 'object') };
+  }
+
+  private async _getStatus() {
+    return this.store.client.hgetall('health:status');
+  }
+
+  private static _parseSet(log, to = 'array', keys = ['message', 'score']) {
+    let out;
+    if (to === 'array') {
+      out = [];
+      while (log.length) {
+        const [a, b] = log.splice(0, 2);
+        out.push({ [keys[0]]: a, [keys[1]]: b });
+      }
+    } else {
+      out = {};
+      while (log.length) {
+        const [a, b] = log.splice(0, 2);
+        out[a] = Number(b);
+      }
     }
-    return errors;
+
+    return out;
+  }
+
+  async setStatus(status: { status: boolean; error: string; }) {
+    await this.store.client.hset('health:status', status);
+  }
+
+  async getStatus() {
+    const heathStatus = await this._getStatus();
+    const { errorsLog, errorsCode } = await this._getErrors();
+
+    return {
+      ...heathStatus,
+      errorsLog,
+      errorsCode,
+    };
   }
 
   async saveError(e) {
-    await this.store.client.zadd('errors', 'INCR', 1, e.message);
+    await this.store.client.zadd('errors:code', 'INCR', 1, e?.code || 'RUNTIME_ERROR');
+    await this.store.client.zadd('errors:log', 'INCR', 1, e.message);
   }
 
   private async _checkBalance(value, currency: 'MAIN' | 'TORN') {
@@ -37,26 +83,31 @@ export class HealthService {
       level = 'WARN';
     }
 
-    const isSent = await this.store.client.sismember(`${key}:sent`, `${type}_${currency}_${level}`);
-    if (!isSent) {
-      const alert = {
-        type: `${type}_${currency}_${level}`,
-        message: `Insufficient balance ${formatEther(value)} ${currency === 'MAIN' ? this.config.nativeCurrency : 'torn'}`,
-        level,
-        time,
-      };
-      await this.store.client.rpush(key, JSON.stringify(alert));
-    }
+    const alert = {
+      type: `${type}_${currency}_${level}`,
+      message: `Insufficient balance ${formatEther(value)} ${currency === 'MAIN' ? this.config.nativeCurrency : 'torn'}`,
+      level,
+      time,
+    };
+    await this.store.client.rpush(key, JSON.stringify(alert));
 
+    return alert;
   }
 
   async check() {
+    await this.config.checkNetwork();
     const mainBalance = await this.config.wallet.getBalance();
     const tornBalance = await this.config.tokenContract.balanceOf(this.config.wallet.address);
-    // const mainBalance = BigNumber.from(`${2e18}`).add(1);
-    // const tornBalance = BigNumber.from(`${50e18}`);
-    await this._checkBalance(mainBalance, 'MAIN');
-    await this._checkBalance(tornBalance, 'TORN');
+    // const mainBalance = BigNumber.from(`${1e18}`).add(1);
+    // const tornBalance = BigNumber.from(`${45e18}`);
+    const mainStatus = await this._checkBalance(mainBalance, 'MAIN');
+    const tornStatus = await this._checkBalance(tornBalance, 'TORN');
+    if (mainStatus.level === 'CRITICAL') {
+      throw new RelayerError(mainStatus.message, 'INSUFFICIENT_MAIN_BALANCE');
+    }
+    if (tornStatus.level === 'CRITICAL') {
+      throw new RelayerError(tornStatus.message, 'INSUFFICIENT_TORN_BALANCE');
+    }
   }
 
 }

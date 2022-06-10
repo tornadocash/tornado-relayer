@@ -5,6 +5,8 @@ import { configService, getHealthService } from '../services';
 
 export const priceWorker = async () => {
   await configService.init();
+  const healthService = getHealthService();
+
   const price = new PriceQueueHelper();
   price.scheduler.on('stalled', (jobId, prev) => console.log({ jobId, prev }));
   console.log('price worker', price.queue.name);
@@ -12,7 +14,7 @@ export const priceWorker = async () => {
   price.worker.on('completed', async (job, result) => {
     console.log(`Job ${job.id} completed with result: ${result}`);
   });
-  price.worker.on('failed', (job, error) => console.log(error));
+  price.worker.on('failed', (job, error) => healthService.saveError(error));
 };
 
 export const relayerWorker = async () => {
@@ -25,7 +27,7 @@ export const relayerWorker = async () => {
   });
   relayer.worker.on('failed', (job, error) => {
     healthService.saveError(error);
-    console.log(error);
+    // console.log(error);
   });
 };
 
@@ -37,5 +39,8 @@ export const healthWorker = async () => {
   health.worker.on('completed', (job, result) => {
     console.log(`Job ${job.id} completed with result: `, result);
   });
-  health.worker.on('failed', (job, error) => console.log(error));
+  health.worker.on('failed', (job, error) => {
+
+    // console.log(error);
+  });
 };

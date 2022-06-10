@@ -23,8 +23,7 @@ export function mainHandler(server: FastifyInstance, options, next) {
     async (req, res) => {
       const ethPrices = await priceService.getPrices();
       const currentQueue = await jobService.getQueueCount();
-      const errorsLog = await healthService.getErrors();
-      console.log(currentQueue);
+      const health = await healthService.getStatus();
       res.send({
         rewardAccount,
         instances: configService.instances,
@@ -33,11 +32,7 @@ export function mainHandler(server: FastifyInstance, options, next) {
         tornadoServiceFee,
         miningServiceFee: 0,
         version: '4.5.0',
-        health: {
-          status: 'true',
-          error: '',
-          errorsLog
-        },
+        health,
         currentQueue,
       });
     });

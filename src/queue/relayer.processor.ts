@@ -14,8 +14,7 @@ export const relayerProcessor: RelayerProcessor = async (job) => {
     const txData = await txService.prepareTxData(withdrawalData);
     return await txService.sendTx(txData);
   } catch (e) {
-    console.log(e);
     await job.update({ ...job.data, status: JobStatus.FAILED });
-    throw new Error(e.message);
+    throw e;
   }
 };

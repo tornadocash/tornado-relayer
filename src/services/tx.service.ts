@@ -11,6 +11,7 @@ import { Job } from 'bullmq';
 import { RelayerJobData } from '../queue';
 import { ConfigService } from './config.service';
 import { container, injectable } from 'tsyringe';
+import { parseJSON } from '../modules/utils';
 
 export type WithdrawalData = {
   contract: string,
@@ -23,6 +24,15 @@ export type WithdrawalData = {
     BigNumberish,
     BigNumberish
   ]
+}
+
+class ExecutionError extends Error {
+  constructor(message: string, code?: string) {
+    super(message);
+    this.code = code;
+  }
+
+  code: string;
 }
 
 @injectable()
@@ -39,9 +49,9 @@ export class TxService {
 
   constructor(private config: ConfigService, private priceService: PriceService) {
     const { privateKey, rpcUrl, netId } = this.config;
-    this.txManager = new TxManager({ privateKey, rpcUrl, config: { THROW_ON_REVERT: true } });
     this.tornadoProxy = this.config.proxyContract;
     this.provider = this.tornadoProxy.provider;
+    this.txManager = new TxManager({ privateKey, rpcUrl, config: { THROW_ON_REVERT: true }, provider: this.provider });
     this.oracle = new GasPriceOracle({
       defaultRpc: rpcUrl,
       chainId: netId,
@@ -77,7 +87,11 @@ export class TxService {
       } else throw new Error('Submitted transaction failed');
       return receipt;
     } catch (e) {
-      throw new Error(e.message);
+      const regex = /body=("\{.*}}")/;
+      if (regex.test(e.message)) {
+        const { error } = parseJSON(regex.exec(e.message)[1]);
+        throw  new ExecutionError(error.message, 'REVERTED');
+      } else throw e.message;
     }
   }
 

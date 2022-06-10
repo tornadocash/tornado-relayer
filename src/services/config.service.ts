@@ -1,5 +1,6 @@
 import {
   instances,
+  mainnetRpcUrl,
   minimumBalance,
   minimumTornBalance,
   netId,
@@ -39,6 +40,7 @@ export class ConfigService {
   isLightMode: boolean;
   instances: NetInstances;
   provider: providers.JsonRpcProvider;
+  mainnentProvider: providers.JsonRpcProvider;
   wallet: Wallet;
   public readonly netId: availableIds = netId;
   public readonly privateKey = privateKey;
@@ -50,13 +52,13 @@ export class ConfigService {
   private _tokenContract: ERC20Abi;
   balances: { MAIN: { warn: string; critical: string; }; TORN: { warn: string; critical: string; }; };
 
-
   constructor(private store: RedisStore) {
     this.netIdKey = `netId${this.netId}`;
     this.queueName = `relayer_${this.netId}`;
     this.isLightMode = ![1, 5].includes(netId);
     this.instances = instances[this.netIdKey];
     this.provider = getProvider(false);
+    this.mainnentProvider = getProvider(false, mainnetRpcUrl, 1);
     this.wallet = new Wallet(this.privateKey, this.provider);
     this.balances = {
       MAIN: { warn: BigNumber.from(minimumBalance).mul(150).div(100).toString(), critical: minimumBalance },
@@ -85,18 +87,18 @@ export class ConfigService {
     }
   }
 
-  private async _checkNetwork() {
-    try {
-      await this.provider.getNetwork();
-    } catch (e) {
-      throw new Error(`Could not detect network, check your rpc url: ${this.rpcUrl}. ` + e.message);
+  async checkNetwork() {
+    await this.provider.getNetwork();
+    if (this.isLightMode) {
+      await this.mainnentProvider.getNetwork();
     }
   }
+
 
   async init() {
     try {
       if (this.isInit) return;
-      await this._checkNetwork();
+      await this.checkNetwork();
       this._tokenAddress = await resolve(torn.torn.address);
       this._tokenContract = await getTornTokenContract(this._tokenAddress);
       if (this.isLightMode) {
@@ -130,12 +132,15 @@ export class ConfigService {
       this.isInit = true;
     } catch (e) {
       console.error(`${this.constructor.name} Error:`, e.message);
+      process.exit(1);
     }
   }
 
   async clearRedisState() {
     const queueKeys = (await this.store.client.keys('bull:*')).filter(s => s.indexOf('relayer') === -1);
-    await this.store.client.del(queueKeys);
+    const errorKeys = await this.store.client.keys('errors:*');
+    // const alertKeys = await this.store.client.keys('alerts:*');
+    await this.store.client.del([...queueKeys, ...errorKeys]);
   }
 
   getInstance(address: string) {

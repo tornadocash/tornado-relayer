@@ -28,6 +28,7 @@ export class PriceService {
 
   async fetchPrices(tokens: Token[]) {
     try {
+      if (!tokens?.length) return;
       const names = tokens.reduce((p, c) => {
         p[c.address] = c.symbol.toLowerCase();
         return p;
