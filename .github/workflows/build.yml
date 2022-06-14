@@ -2,8 +2,8 @@ name: build
 
 on:
   push:
-    branches: ['*']
-    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+    branches: [ '*' ]
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
   pull_request:
 
 jobs:
@@ -14,7 +14,7 @@ jobs:
         uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
-          node-version: 12
+          node-version: 16
       - run: yarn install
       - run: yarn test
       - run: yarn lint
@@ -51,7 +51,7 @@ jobs:
           dockerfile: Dockerfile
           repository: tornadocash/relayer
           tag_with_ref: true
-          tags: mining,candidate
+          tags: candidate
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 

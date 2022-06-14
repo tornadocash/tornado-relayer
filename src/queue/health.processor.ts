@@ -6,6 +6,7 @@ export const healthProcessor: Processor = async () => {
 
   try {
     await healthService.check();
+    await healthService.clearErrorCodes();
     await healthService.setStatus({ status: true, error: '' });
   } catch (e) {
     await healthService.saveError(e);

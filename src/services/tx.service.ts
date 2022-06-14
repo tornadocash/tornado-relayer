@@ -84,14 +84,14 @@ export class TxService {
         });
       if (receipt.status === 1) {
         await this.updateJobData({ status: JobStatus.CONFIRMED });
-      } else throw new Error('Submitted transaction failed');
+      } else throw new ExecutionError('Submitted transaction failed', 'REVERTED');
       return receipt;
     } catch (e) {
       const regex = /body=("\{.*}}")/;
       if (regex.test(e.message)) {
         const { error } = parseJSON(regex.exec(e.message)[1]);
-        throw  new ExecutionError(error.message, 'REVERTED');
-      } else throw e.message;
+        throw new ExecutionError(error.message, 'REVERTED');
+      } else throw new ExecutionError(e.message, 'SEND_ERROR');
     }
   }
 

@@ -2,6 +2,7 @@ import { autoInjectable, container } from 'tsyringe';
 import { ConfigService } from './config.service';
 import { RedisStore } from '../modules/redis';
 import { formatEther } from 'ethers/lib/utils';
+import { Levels } from './notifier.service';
 
 class RelayerError extends Error {
   constructor(message: string, code: string) {
@@ -18,8 +19,8 @@ export class HealthService {
   constructor(private config: ConfigService, private store: RedisStore) {
   }
 
-  async clearErrors() {
-    await this.store.client.del('errors:log', 'errors:code');
+  async clearErrorCodes() {
+    await this.store.client.del('errors:code');
   }
 
   private async _getErrors(): Promise<{ errorsLog: { message: string, score: number }[], errorsCode: Record<string, number> }> {
@@ -57,8 +58,11 @@ export class HealthService {
   }
 
   async getStatus() {
-    const heathStatus = await this._getStatus();
     const { errorsLog, errorsCode } = await this._getErrors();
+    if (errorsCode['NETWORK_ERROR'] > 5) {
+      await this.setStatus({ status: false, error: 'Network error' });
+    }
+    const heathStatus = await this._getStatus();
 
     return {
       ...heathStatus,
@@ -67,15 +71,28 @@ export class HealthService {
     };
   }
 
-  async saveError(e) {
+  async saveError(e, jobId?: string) {
     await this.store.client.zadd('errors:code', 'INCR', 1, e?.code || 'RUNTIME_ERROR');
     await this.store.client.zadd('errors:log', 'INCR', 1, e.message);
+
+    if (e?.code === 'REVERTED') {
+      const jobUrl = `https://${this.config.host}/v1/jobs/${jobId}`;
+      await this.pushAlert({
+        message: `${e.message} \n ${jobUrl}`,
+        type: 'REVERTED',
+        level: 'WARN',
+        time: new Date().getTime(),
+      });
+    }
+  }
+
+  async pushAlert(alert: Alert) {
+    await this.store.client.rpush('alerts:list', JSON.stringify(alert));
   }
 
   private async _checkBalance(value, currency: 'MAIN' | 'TORN') {
-    let level = 'OK';
+    let level: Levels = 'OK';
     const type = 'BALANCE';
-    const key = 'alerts:list';
     const time = new Date().getTime();
     if (value.lt(this.config.balances[currency].critical)) {
       level = 'CRITICAL';
@@ -89,7 +106,7 @@ export class HealthService {
       level,
       time,
     };
-    await this.store.client.rpush(key, JSON.stringify(alert));
+    await this.pushAlert(alert);
 
     return alert;
   }
@@ -99,7 +116,7 @@ export class HealthService {
     const mainBalance = await this.config.wallet.getBalance();
     const tornBalance = await this.config.tokenContract.balanceOf(this.config.wallet.address);
     // const mainBalance = BigNumber.from(`${1e18}`).add(1);
-    // const tornBalance = BigNumber.from(`${45e18}`);
+    // const tornBalance = BigNumber.from(`${60e18}`);
     const mainStatus = await this._checkBalance(mainBalance, 'MAIN');
     const tornStatus = await this._checkBalance(tornBalance, 'TORN');
     if (mainStatus.level === 'CRITICAL') {
@@ -117,5 +134,10 @@ type HealthData = {
   error: string,
   errorsLog: { message: string, score: number }[]
 }
-
+type Alert = {
+  type: string,
+  message: string,
+  level: Levels,
+  time?: number,
+}
 export default () => container.resolve(HealthService);

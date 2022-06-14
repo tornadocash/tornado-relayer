@@ -9,7 +9,7 @@ export enum AlertLevel {
   'WARN' = '⚠️',
   'CRITICAL' = '‼️',
   'ERROR' = '💩',
-  'RECOVERED' = '✅'
+  'OK' = '✅'
 }
 
 export enum AlertType {

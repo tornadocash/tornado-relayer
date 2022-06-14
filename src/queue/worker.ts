@@ -26,8 +26,8 @@ export const relayerWorker = async () => {
     console.log(`Job ${job.id} completed with result: `, result);
   });
   relayer.worker.on('failed', (job, error) => {
-    healthService.saveError(error);
-    // console.log(error);
+    healthService.saveError(error, job.id);
+    console.log(error);
   });
 };
 

@@ -1,4 +1,5 @@
 import {
+  host,
   instances,
   mainnetRpcUrl,
   minimumBalance,
@@ -51,11 +52,13 @@ export class ConfigService {
   private _tokenAddress: string;
   private _tokenContract: ERC20Abi;
   balances: { MAIN: { warn: string; critical: string; }; TORN: { warn: string; critical: string; }; };
+  host: string;
 
   constructor(private store: RedisStore) {
     this.netIdKey = `netId${this.netId}`;
     this.queueName = `relayer_${this.netId}`;
     this.isLightMode = ![1, 5].includes(netId);
+    this.host = host;
     this.instances = instances[this.netIdKey];
     this.provider = getProvider(false);
     this.mainnentProvider = getProvider(false, mainnetRpcUrl, 1);
@@ -140,7 +143,8 @@ export class ConfigService {
     const queueKeys = (await this.store.client.keys('bull:*')).filter(s => s.indexOf('relayer') === -1);
     const errorKeys = await this.store.client.keys('errors:*');
     // const alertKeys = await this.store.client.keys('alerts:*');
-    await this.store.client.del([...queueKeys, ...errorKeys]);
+    const keys = [...queueKeys, ...errorKeys];
+    if (keys.length) await this.store.client.del([...queueKeys, ...errorKeys]);
   }
 
   getInstance(address: string) {

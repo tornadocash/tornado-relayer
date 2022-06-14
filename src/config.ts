@@ -14,6 +14,7 @@ export const privateKey = process.env.PRIVATE_KEY;
 export const instances = tornConfig.instances;
 export const torn = tornConfig;
 export const port = process.env.APP_PORT || 8000;
+export const host = process.env.VIRTUAL_HOST || `localhost:${port}`;
 export const tornadoServiceFee = Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE);
 export const rewardAccount = process.env.REWARD_ACCOUNT;
 export const governanceAddress = '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce';
