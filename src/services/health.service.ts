@@ -76,7 +76,7 @@ export class HealthService {
     await this.store.client.zadd('errors:log', 'INCR', 1, e.message);
 
     if (e?.code === 'REVERTED') {
-      const jobUrl = `https://${this.config.host}/v1/jobs/${jobId}`;
+      const jobUrl = `${this.config.host}/v1/jobs/${jobId}`;
       await this.pushAlert({
         message: `${e.message} \n ${jobUrl}`,
         type: 'REVERTED',
