@@ -19,16 +19,30 @@ export enum AlertType {
 
 }
 
+class MockTelegram {
+  async sendMessage(chatId, text: string, extra?: any) {
+    console.log(text);
+  }
+
+  async getMe() {
+    return {
+      id: 1,
+      first_name: 'test',
+      is_bot: true,
+    };
+  }
+}
+
 @autoInjectable()
 export class NotifierService {
-  private telegram: Telegram;
+  private telegram: Telegram | MockTelegram;
   private readonly token: string;
   private readonly chatId: string;
 
   constructor(private store: RedisStore) {
-    this.token = process.env.TELEGRAM_NOTIFIER_BOT_TOKEN || '';
-    this.chatId = process.env.TELEGRAM_NOTIFIER_CHAT_ID || '';
-    this.telegram = new Telegram(this.token);
+    this.token = process.env.TELEGRAM_NOTIFIER_BOT_TOKEN;
+    this.chatId = process.env.TELEGRAM_NOTIFIER_CHAT_ID;
+    this.telegram = this.token ? new Telegram(this.token) : new MockTelegram();
 
   }
 
@@ -58,7 +72,6 @@ export class NotifierService {
 
   send(message: string, level: Levels) {
     const text = `${AlertLevel[level]} ${message}`;
-    console.log('sending message: ', text);
     return this.telegram.sendMessage(
       this.chatId,
       text,
