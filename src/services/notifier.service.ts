@@ -47,16 +47,13 @@ export class NotifierService {
   }
 
   async subscribe() {
-    const sub = await this.store.subscriber;
-    sub.subscribe('__keyspace@0__:alerts:list', 'rpush');
-    sub.on('message', async (channel, event) => {
-      if (event === 'rpush') {
-        const messages = await this.store.client.rpop('alerts:list', 10);
-        messages?.forEach(message => {
-          this.processAlert(message);
-        });
-      }
-    });
+    this.store.subscriber.subscribe('user-notify');
+    this.store.subscriber.on('message', async (channel, message) => {
+        await this.processAlert(<string>message);
+      },
+    );
+
+
   }
 
   send(message: string, level: Levels) {

@@ -59,7 +59,7 @@ export class HealthService {
 
   async getStatus() {
     const { errorsLog, errorsCode } = await this._getErrors();
-    if (errorsCode['NETWORK_ERROR'] > 5) {
+    if (errorsCode['NETWORK_ERROR'] > 6) {
       await this.setStatus({ status: false, error: 'Network error' });
     }
     const heathStatus = await this._getStatus();
@@ -87,7 +87,7 @@ export class HealthService {
   }
 
   async pushAlert(alert: Alert) {
-    await this.store.client.rpush('alerts:list', JSON.stringify(alert));
+    await this.store.publisher.publish('user-notify', JSON.stringify(alert));
   }
 
   private async _checkBalance(value, currency: 'MAIN' | 'TORN') {
@@ -126,7 +126,6 @@ export class HealthService {
       throw new RelayerError(tornStatus.message, 'INSUFFICIENT_TORN_BALANCE');
     }
   }
-
 }
 
 type HealthData = {
