@@ -14,8 +14,7 @@ export enum JobStatus {
   FAILED = 'FAILED',
 }
 
-
-export type Token = { address: string, decimals: number, symbol?: string }
+export type Token = { address: string; decimals: number; symbol?: string };
 
 export enum ChainIds {
   'kardia' = 0,

@@ -13,82 +13,50 @@ import type {
   PopulatedTransaction,
   Signer,
   utils,
-} from "ethers";
-import type {
-  FunctionFragment,
-  Result,
-  EventFragment,
-} from "@ethersproject/abi";
-import type { Listener, Provider } from "@ethersproject/providers";
-import type {
-  TypedEventFilter,
-  TypedEvent,
-  TypedListener,
-  OnEvent,
-} from "./common";
+} from 'ethers';
+import type { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
+import type { Listener, Provider } from '@ethersproject/providers';
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
 
 export interface ProxyLightABIInterface extends utils.Interface {
-  contractName: "ProxyLightABI";
+  contractName: 'ProxyLightABI';
 
   functions: {
-    "backupNotes(bytes[])": FunctionFragment;
-    "deposit(address,bytes32,bytes)": FunctionFragment;
-    "withdraw(address,bytes,bytes32,bytes32,address,address,uint256,uint256)": FunctionFragment;
+    'backupNotes(bytes[])': FunctionFragment;
+    'deposit(address,bytes32,bytes)': FunctionFragment;
+    'withdraw(address,bytes,bytes32,bytes32,address,address,uint256,uint256)': FunctionFragment;
   };
 
-  getFunction(
-    nameOrSignatureOrTopic: "backupNotes" | "deposit" | "withdraw"
-  ): FunctionFragment;
+  getFunction(nameOrSignatureOrTopic: 'backupNotes' | 'deposit' | 'withdraw'): FunctionFragment;
 
+  encodeFunctionData(functionFragment: 'backupNotes', values: [BytesLike[]]): string;
+  encodeFunctionData(functionFragment: 'deposit', values: [string, BytesLike, BytesLike]): string;
   encodeFunctionData(
-    functionFragment: "backupNotes",
-    values: [BytesLike[]]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "deposit",
-    values: [string, BytesLike, BytesLike]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "withdraw",
-    values: [
-      string,
-      BytesLike,
-      BytesLike,
-      BytesLike,
-      string,
-      string,
-      BigNumberish,
-      BigNumberish
-    ]
+    functionFragment: 'withdraw',
+    values: [string, BytesLike, BytesLike, BytesLike, string, string, BigNumberish, BigNumberish],
   ): string;
 
-  decodeFunctionResult(
-    functionFragment: "backupNotes",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(functionFragment: "deposit", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'backupNotes', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'deposit', data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: 'withdraw', data: BytesLike): Result;
 
   events: {
-    "EncryptedNote(address,bytes)": EventFragment;
+    'EncryptedNote(address,bytes)': EventFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "EncryptedNote"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: 'EncryptedNote'): EventFragment;
 }
 
 export interface EncryptedNoteEventObject {
   sender: string;
   encryptedNote: string;
 }
-export type EncryptedNoteEvent = TypedEvent<
-  [string, string],
-  EncryptedNoteEventObject
->;
+export type EncryptedNoteEvent = TypedEvent<[string, string], EncryptedNoteEventObject>;
 
 export type EncryptedNoteEventFilter = TypedEventFilter<EncryptedNoteEvent>;
 
 export interface ProxyLightABI extends BaseContract {
-  contractName: "ProxyLightABI";
+  contractName: 'ProxyLightABI';
 
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
@@ -99,16 +67,12 @@ export interface ProxyLightABI extends BaseContract {
   queryFilter<TEvent extends TypedEvent>(
     event: TypedEventFilter<TEvent>,
     fromBlockOrBlockhash?: string | number | undefined,
-    toBlock?: string | number | undefined
+    toBlock?: string | number | undefined,
   ): Promise<Array<TEvent>>;
 
-  listeners<TEvent extends TypedEvent>(
-    eventFilter?: TypedEventFilter<TEvent>
-  ): Array<TypedListener<TEvent>>;
+  listeners<TEvent extends TypedEvent>(eventFilter?: TypedEventFilter<TEvent>): Array<TypedListener<TEvent>>;
   listeners(eventName?: string): Array<Listener>;
-  removeAllListeners<TEvent extends TypedEvent>(
-    eventFilter: TypedEventFilter<TEvent>
-  ): this;
+  removeAllListeners<TEvent extends TypedEvent>(eventFilter: TypedEventFilter<TEvent>): this;
   removeAllListeners(eventName?: string): this;
   off: OnEvent<this>;
   on: OnEvent<this>;
@@ -118,14 +82,14 @@ export interface ProxyLightABI extends BaseContract {
   functions: {
     backupNotes(
       _encryptedNotes: BytesLike[],
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     deposit(
       _tornado: string,
       _commitment: BytesLike,
       _encryptedNote: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
 
     withdraw(
@@ -137,20 +101,20 @@ export interface ProxyLightABI extends BaseContract {
       _relayer: string,
       _fee: BigNumberish,
       _refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<ContractTransaction>;
   };
 
   backupNotes(
     _encryptedNotes: BytesLike[],
-    overrides?: Overrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   deposit(
     _tornado: string,
     _commitment: BytesLike,
     _encryptedNote: BytesLike,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   withdraw(
@@ -162,21 +126,13 @@ export interface ProxyLightABI extends BaseContract {
     _relayer: string,
     _fee: BigNumberish,
     _refund: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: PayableOverrides & { from?: string | Promise<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    backupNotes(
-      _encryptedNotes: BytesLike[],
-      overrides?: CallOverrides
-    ): Promise<void>;
+    backupNotes(_encryptedNotes: BytesLike[], overrides?: CallOverrides): Promise<void>;
 
-    deposit(
-      _tornado: string,
-      _commitment: BytesLike,
-      _encryptedNote: BytesLike,
-      overrides?: CallOverrides
-    ): Promise<void>;
+    deposit(_tornado: string, _commitment: BytesLike, _encryptedNote: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     withdraw(
       _tornado: string,
@@ -187,32 +143,23 @@ export interface ProxyLightABI extends BaseContract {
       _relayer: string,
       _fee: BigNumberish,
       _refund: BigNumberish,
-      overrides?: CallOverrides
+      overrides?: CallOverrides,
     ): Promise<void>;
   };
 
   filters: {
-    "EncryptedNote(address,bytes)"(
-      sender?: string | null,
-      encryptedNote?: null
-    ): EncryptedNoteEventFilter;
-    EncryptedNote(
-      sender?: string | null,
-      encryptedNote?: null
-    ): EncryptedNoteEventFilter;
+    'EncryptedNote(address,bytes)'(sender?: string | null, encryptedNote?: null): EncryptedNoteEventFilter;
+    EncryptedNote(sender?: string | null, encryptedNote?: null): EncryptedNoteEventFilter;
   };
 
   estimateGas: {
-    backupNotes(
-      _encryptedNotes: BytesLike[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    backupNotes(_encryptedNotes: BytesLike[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
 
     deposit(
       _tornado: string,
       _commitment: BytesLike,
       _encryptedNote: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
 
     withdraw(
@@ -224,21 +171,21 @@ export interface ProxyLightABI extends BaseContract {
       _relayer: string,
       _fee: BigNumberish,
       _refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     backupNotes(
       _encryptedNotes: BytesLike[],
-      overrides?: Overrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     deposit(
       _tornado: string,
       _commitment: BytesLike,
       _encryptedNote: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
 
     withdraw(
@@ -250,7 +197,7 @@ export interface ProxyLightABI extends BaseContract {
       _relayer: string,
       _fee: BigNumberish,
       _refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: PayableOverrides & { from?: string | Promise<string> },
     ): Promise<PopulatedTransaction>;
   };
 }

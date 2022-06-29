@@ -6,7 +6,6 @@ import helmet from '@fastify/helmet';
 import validator from './plugins/validator';
 import { mainHandler, relayerHandler } from './routes';
 
-
 function createServer() {
   const server = fastify({
     logger: true,
@@ -20,7 +19,6 @@ function createServer() {
   server.register(mainHandler);
   server.register(mainHandler, { prefix: '/v1' });
   server.register(relayerHandler, { prefix: '/v1' });
-
 
   server.setErrorHandler((error, req, res) => {
     req.log.error(error.toString());

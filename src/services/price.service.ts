@@ -1,6 +1,6 @@
 import { getMultiCallContract, getOffchainOracleContract } from '../modules/contracts';
-import { MulticallAbi, OffchainOracleAbi } from '../../contracts';
-import { MultiCall } from '../../contracts/MulticallAbi';
+import { MulticallAbi, OffchainOracleAbi } from '../contracts';
+import { MultiCall } from '../contracts/MulticallAbi';
 import { BigNumber } from 'ethers';
 import { defaultAbiCoder } from 'ethers/lib/utils';
 import { Token } from '../types';
@@ -20,9 +20,7 @@ export class PriceService {
   prepareCallData(tokens: Token[]): MultiCall.CallStruct[] {
     return tokens.map((token) => ({
       to: this.oracle.address,
-      data: this.oracle.interface.encodeFunctionData('getRateToEth',
-        [token.address, true],
-      ),
+      data: this.oracle.interface.encodeFunctionData('getRateToEth', [token.address, true]),
     }));
   }
 

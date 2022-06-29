@@ -1,9 +1,9 @@
 import { TransactionData, TxManager } from 'tx-manager';
 import { GasPriceOracle } from 'gas-price-oracle';
-import { Provider } from '@ethersproject/providers';
+import { AlchemyProvider, Provider } from '@ethersproject/providers';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
-import { ProxyLightABI, TornadoProxyABI } from '../../contracts';
+import { ProxyLightABI, TornadoProxyABI } from '../contracts';
 import { gasLimits, tornadoServiceFee } from '../config';
 import { JobStatus, RelayerJobType } from '../types';
 import { PriceService } from './price.service';
@@ -14,17 +14,10 @@ import { container, injectable } from 'tsyringe';
 import { parseJSON } from '../modules/utils';
 
 export type WithdrawalData = {
-  contract: string,
-  proof: BytesLike,
-  args: [
-    BytesLike,
-    BytesLike,
-    string,
-    string,
-    BigNumberish,
-    BigNumberish
-  ]
-}
+  contract: string;
+  proof: BytesLike;
+  args: [BytesLike, BytesLike, string, string, BigNumberish, BigNumberish];
+};
 
 class ExecutionError extends Error {
   constructor(message: string, code?: string) {
@@ -51,11 +44,17 @@ export class TxService {
     const { privateKey, rpcUrl, netId } = this.config;
     this.tornadoProxy = this.config.proxyContract;
     this.provider = this.tornadoProxy.provider;
-    this.txManager = new TxManager({ privateKey, rpcUrl, config: { THROW_ON_REVERT: true }, provider: this.provider });
+    const prov = new AlchemyProvider(netId);
+    this.txManager = new TxManager({
+      privateKey,
+      rpcUrl,
+      config: { THROW_ON_REVERT: true },
+      provider: prov,
+    });
     this.oracle = new GasPriceOracle({
       defaultRpc: rpcUrl,
       chainId: netId,
-      defaultFallbackGasPrices: this.config?.fallbackGasPrices,
+      fallbackGasPrices: this.config?.fallbackGasPrices,
     });
   }
 
@@ -69,16 +68,17 @@ export class TxService {
     try {
       const currentTx = this.txManager.createTx(tx);
 
-      const receipt = await currentTx.send()
-        .on('transactionHash', async txHash => {
+      const receipt = await currentTx
+        .send()
+        .on('transactionHash', async (txHash) => {
           console.log('Transaction sent, txHash: ', txHash);
           await this.updateJobData({ txHash, status: JobStatus.SENT });
         })
-        .on('mined', async receipt => {
+        .on('mined', async (receipt) => {
           console.log('Transaction mined in block', receipt.blockNumber);
           await this.updateJobData({ status: JobStatus.MINED });
         })
-        .on('confirmations', async confirmations => {
+        .on('confirmations', async (confirmations) => {
           console.log('Transaction confirmations: ', confirmations);
           await this.updateJobData({ confirmations });
         });
@@ -113,7 +113,7 @@ export class TxService {
     const [fee, refund] = [args[4], args[5]].map(BigNumber.from);
     const gasPrice = await this.getGasPrice();
     // TODO check refund value
-    const operationCost = gasPrice.mul((gasLimits[RelayerJobType.TORNADO_WITHDRAW]));
+    const operationCost = gasPrice.mul(gasLimits[RelayerJobType.TORNADO_WITHDRAW]);
 
     const serviceFee = parseUnits(amount, decimals)
       .mul(`${tornadoServiceFee * 1e10}`)
@@ -124,30 +124,23 @@ export class TxService {
     if (!this.config.isLightMode && currency !== 'eth') {
       const ethPrice = await this.priceService.getPrice(currency);
       const numerator = BigNumber.from(10).pow(decimals);
-      desiredFee = operationCost
-        .add(refund)
-        .mul(numerator)
-        .div(ethPrice)
-        .add(serviceFee);
+      desiredFee = operationCost.add(refund).mul(numerator).div(ethPrice).add(serviceFee);
     }
-    console.log(
-      {
-        sentFee: formatEther(fee),
-        desiredFee: formatEther(desiredFee),
-        serviceFee: formatEther(serviceFee),
-      },
-    );
+    console.log({
+      sentFee: formatEther(fee),
+      desiredFee: formatEther(desiredFee),
+      serviceFee: formatEther(serviceFee),
+    });
     if (fee.lt(desiredFee)) {
       throw new Error('Provided fee is not enough. Probably it is a Gas Price spike, try to resubmit.');
     }
   }
 
   async getGasPrice(): Promise<BigNumber> {
-    // TODO eip https://eips.ethereum.org/EIPS/eip-1559
-    const { baseFeePerGas = 0 } = await this.provider.getBlock('latest');
-    if (baseFeePerGas) return await this.provider.getGasPrice();
-    const { fast = 0 } = await this.oracle.gasPrices();
-    return parseUnits(String(fast), 'gwei');
+    const gasPrices = await this.oracle.gasPrices({});
+    let gasPrice = gasPrices['fast'];
+    if ('maxFeePerGas' in gasPrices) gasPrice = gasPrices['maxFeePerGas'];
+    return parseUnits(String(gasPrice), 'gwei');
   }
 }
 

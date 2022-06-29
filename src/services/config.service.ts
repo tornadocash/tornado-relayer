@@ -13,22 +13,17 @@ import {
   tornToken,
 } from '../config';
 import { Token } from '../types';
-import {
-  getProvider,
-  getTornadoProxyContract,
-  getTornadoProxyLightContract,
-  getTornTokenContract,
-} from '../modules/contracts';
+import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract, getTornTokenContract } from '../modules/contracts';
 import { resolve } from '../modules';
-import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../../contracts';
-import { availableIds, netIds, NetInstances } from '../../../torn-token';
+import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../contracts';
+import { availableIds, netIds, NetInstances } from 'torn-token';
 import { getAddress } from 'ethers/lib/utils';
 import { BigNumber, providers, Wallet } from 'ethers';
 import { container, singleton } from 'tsyringe';
-import { GasPrice } from 'gas-price-oracle/lib/types';
+import { FallbackGasPrices } from 'gas-price-oracle';
 import { RedisStore } from '../modules/redis';
 
-type relayerQueueName = `relayer_${availableIds}`
+type relayerQueueName = `relayer_${availableIds}`;
 
 @singleton()
 export class ConfigService {
@@ -48,11 +43,15 @@ export class ConfigService {
   public readonly rpcUrl = rpcUrl;
   isInit: boolean;
   nativeCurrency: string;
-  fallbackGasPrices: GasPrice;
+  fallbackGasPrices: FallbackGasPrices;
   private _tokenAddress: string;
   private _tokenContract: ERC20Abi;
-  balances: { MAIN: { warn: string; critical: string; }; TORN: { warn: string; critical: string; }; };
+  balances: {
+    MAIN: { warn: string; critical: string };
+    TORN: { warn: string; critical: string };
+  };
   host: string;
+  version: string;
 
   constructor(private store: RedisStore) {
     this.netIdKey = `netId${this.netId}`;
@@ -64,8 +63,14 @@ export class ConfigService {
     this.mainnentProvider = getProvider(false, mainnetRpcUrl, 1);
     this.wallet = new Wallet(this.privateKey, this.provider);
     this.balances = {
-      MAIN: { warn: BigNumber.from(minimumBalance).mul(150).div(100).toString(), critical: minimumBalance },
-      TORN: { warn: BigNumber.from(minimumTornBalance).mul(2).toString(), critical: minimumTornBalance },
+      MAIN: {
+        warn: BigNumber.from(minimumBalance).mul(150).div(100).toString(),
+        critical: minimumBalance,
+      },
+      TORN: {
+        warn: BigNumber.from(minimumTornBalance).mul(2).toString(),
+        critical: minimumTornBalance,
+      },
     };
     this._fillInstanceMap();
   }
@@ -83,9 +88,13 @@ export class ConfigService {
     // TODO
     for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(this.instances)) {
       for (const [amount, address] of Object.entries(instanceAddress)) {
-        if (address) this.addressMap.set(getAddress(address), {
-          currency, amount, symbol, decimals,
-        });
+        if (address)
+          this.addressMap.set(getAddress(address), {
+            currency,
+            amount,
+            symbol,
+            decimals,
+          });
       }
     }
   }
@@ -96,7 +105,6 @@ export class ConfigService {
       await this.mainnentProvider.getNetwork();
     }
   }
-
 
   async init() {
     try {
@@ -121,11 +129,15 @@ export class ConfigService {
       // TODO get instances from registry
 
       this.tokens = [tornToken, ...Object.values(torn.instances['netId1'])]
-        .map<Token>(el => (el.tokenAddress && {
-          address: getAddress(el.tokenAddress),
-          decimals: el.decimals,
-          symbol: el.symbol,
-        })).filter(Boolean);
+        .map<Token>(
+          (el) =>
+            el.tokenAddress && {
+              address: getAddress(el.tokenAddress),
+              decimals: el.decimals,
+              symbol: el.symbol,
+            },
+        )
+        .filter(Boolean);
       console.log(
         'Configuration completed\n',
         `-- netId: ${this.netId}\n`,
@@ -140,7 +152,7 @@ export class ConfigService {
   }
 
   async clearRedisState() {
-    const queueKeys = (await this.store.client.keys('bull:*')).filter(s => s.indexOf('relayer') === -1);
+    const queueKeys = (await this.store.client.keys('bull:*')).filter((s) => s.indexOf('relayer') === -1);
     const errorKeys = await this.store.client.keys('errors:*');
     // const alertKeys = await this.store.client.keys('alerts:*');
     const keys = [...queueKeys, ...errorKeys];
@@ -150,14 +162,13 @@ export class ConfigService {
   getInstance(address: string) {
     return this.addressMap.get(getAddress(address));
   }
-
 }
 
 type InstanceProps = {
-  currency: string,
-  amount: string,
-  symbol: string,
-  decimals: number,
-}
+  currency: string;
+  amount: string;
+  symbol: string;
+  decimals: number;
+};
 
 export default container.resolve(ConfigService);

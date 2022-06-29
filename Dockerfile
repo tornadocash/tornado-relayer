@@ -6,25 +6,23 @@ WORKDIR /usr/app
 
 COPY yarn.lock .
 COPY package.json .
-
-RUN yarn install && yarn cache clean
-
-COPY . .
+RUN apk update && apk add --no-cache g++ make python3 git openssh && rm -rf /var/cache/apk/*
+RUN yarn install && yarn cache clean -f
+COPY . ./
 
 RUN yarn build
 
-FROM node:16-alpine as production
+FROM node:16-alpine as prod
 ENV NODE_ENV=production
 
 WORKDIR /app
+
+RUN apk update && apk add --no-cache g++ make python3 git openssh && rm -rf /var/cache/apk/*
 
 COPY --from=dev /usr/app/build /app
 COPY --from=dev /usr/app/package.json /app/
 COPY --from=dev /usr/app/yarn.lock /app/
 
-RUN chown -R node: .
+RUN yarn install && yarn cache clean -f
 
-USER node
-RUN yarn install --non-interactive --frozen-lockfile && yarn cache clean
-
-CMD ["node", "index.js"]
+ENTRYPOINT ["yarn"]

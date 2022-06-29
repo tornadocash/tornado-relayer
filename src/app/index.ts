@@ -1,10 +1,8 @@
 import 'reflect-metadata';
 import createServer from './server';
 import { utils } from 'ethers';
-import { port, rewardAccount } from '../config';
-import { version } from '../../package.json';
+import { port, relayerVersion, rewardAccount } from '../config';
 import { configService, getJobService, getNotifierService } from '../services';
-
 
 if (!utils.isAddress(rewardAccount)) {
   throw new Error('No REWARD_ACCOUNT specified');
@@ -17,12 +15,10 @@ server.listen(port, '0.0.0.0', async (err, address) => {
   await getJobService().setupRepeatableJobs();
   await getNotifierService().subscribe();
 
-  console.log(`Relayer ${version} started on port ${address}`);
+  console.log(`Relayer ${relayerVersion} started on port ${address}`);
 });
 
-process
-  .on('uncaughtException', (e) => {
-    console.log('uncaughtException', e);
-    process.exit(1);
-  });
-
+process.on('uncaughtException', (e) => {
+  console.log('uncaughtException', e);
+  process.exit(1);
+});

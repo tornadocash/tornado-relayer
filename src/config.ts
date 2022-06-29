@@ -2,7 +2,8 @@ import { RelayerJobType } from './types';
 import tornConfig, { availableIds } from 'torn-token';
 
 require('dotenv').config();
-
+const isProduction = process.env.NODE_ENV === 'production';
+export const relayerVersion = require(`${isProduction ? '.' : '..'}/package.json`).version;
 export const netId = <availableIds>Number(process.env.NET_ID || 1);
 export const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 export const rpcUrl = process.env.RPC_URL;
@@ -14,7 +15,7 @@ export const privateKey = process.env.PRIVATE_KEY;
 export const instances = tornConfig.instances;
 export const torn = tornConfig;
 export const port = process.env.APP_PORT || 8000;
-export const host = process.env.NODE_ENV === 'production' ? 'https://' + process.env.VIRTUAL_HOST : `http://localhost:${port}`;
+export const host = isProduction ? 'https://' + process.env.VIRTUAL_HOST : `http://localhost:${port}`;
 export const tornadoServiceFee = Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE);
 export const rewardAccount = process.env.REWARD_ACCOUNT;
 export const governanceAddress = '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce';

@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import { configService, getHealthService } from './services';
 
 (async () => {
-
   try {
     await configService.init();
     const healthService = getHealthService();
@@ -10,6 +9,4 @@ import { configService, getHealthService } from './services';
   } catch (e) {
     console.error('Top level catch', e);
   }
-
 })();
-

@@ -2,7 +2,6 @@ import 'reflect-metadata';
 import { HealthQueueHelper, PriceQueueHelper, RelayerQueueHelper } from './';
 import { configService, getHealthService } from '../services';
 
-
 export const priceWorker = async () => {
   await configService.init();
   const healthService = getHealthService();
@@ -40,7 +39,6 @@ export const healthWorker = async () => {
     console.log(`Job ${job.id} completed with result: `, result);
   });
   health.worker.on('failed', (job, error) => {
-
-    // console.log(error);
+    console.log(error);
   });
 };

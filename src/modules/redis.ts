@@ -30,7 +30,6 @@ export class RedisStore {
   private _subscriber: Redis;
   private _publisher: Redis;
   private _client: Redis;
-
 }
 
 export default () => container.resolve(RedisStore);

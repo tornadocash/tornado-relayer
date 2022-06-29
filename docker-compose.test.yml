@@ -1,45 +1,38 @@
-version: '2'
+version: '3'
 
-# ssh-agent && ssh-add -K ~/.ssh/id_rsa
-# DOCKER_BUILDKIT=1 docker build --ssh default -t tornadocash/relayer .
 services:
   server:
-    image: tornadocash/relayer
+    image: tornadocash/relayer:v5.0.0
     restart: always
-    command: server
+    command: 'server'
     env_file: .env
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 8000:8000
-    environment:
-      REDIS_URL: redis://redis/0
-      nginx_proxy_read_timeout: 600
-    depends_on: [ redis ]
+    depends_on: [redis]
 
-  worker1:
-    image: tornadocash/relayer
+  txWorker:
+    image: tornadocash/relayer:v5.0.0
     restart: always
-    command: worker
+    command: 'txWorker'
     env_file: .env
-    environment:
-      REDIS_URL: redis://redis/0
-    depends_on: [ redis ]
+    depends_on: [redis]
 
-  #  worker2:
-  #    image: tornadocash/relayer
-  #    restart: always
-  #    command: worker
-  #    env_file: .env
-  #    environment:
-  #      PRIVATE_KEY: qwe
-  #      REDIS_URL: redis://redis/0
+  healthWorker:
+    image: tornadocash/relayer:v5.0.0
+    restart: always
+    command: 'healthWorker'
+    env_file: .env
+    depends_on: [redis]
 
   redis:
     image: redis
     restart: always
-    command: [ redis-server, --appendonly, 'yes' ]
+    environment:
+      - REDIS_APPENDONLY=yes
+      - REDIS_APPENDFSYNC=always
     volumes:
       - redis:/data
 

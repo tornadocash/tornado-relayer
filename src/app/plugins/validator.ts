@@ -4,7 +4,7 @@ import { rewardAccount } from '../../config';
 import { getAddress, isAddress } from 'ethers/lib/utils';
 import { configService } from '../../services';
 
-export default fp(async server => {
+export default fp(async (server) => {
   const ajv = new Ajv();
 
   ajv.addKeyword('isAddress', {
