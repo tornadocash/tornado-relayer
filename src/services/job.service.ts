@@ -7,11 +7,12 @@ import { ConfigService } from './config.service';
 
 @injectable()
 export class JobService {
-  constructor(private price?: PriceQueueHelper,
+  constructor(
+    private price?: PriceQueueHelper,
     private relayer?: RelayerQueueHelper,
     private health?: HealthQueueHelper,
-    public config?: ConfigService) {
-  }
+    public config?: ConfigService,
+  ) {}
 
   async postJob(type: RelayerJobType, data: WithdrawalData) {
     const id = v4();
@@ -39,10 +40,8 @@ export class JobService {
 
   private async _clearSchedulerJobs() {
     try {
-
-
       const jobs = await Promise.all([this.price.queue.getJobs(), this.health.queue.getJobs()]);
-      await Promise.all(jobs.flat().map(job => job?.remove()));
+      await Promise.all(jobs.flat().map((job) => job?.remove()));
     } catch (e) {
       console.log(e);
     }

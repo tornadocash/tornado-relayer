@@ -1,4 +1,5 @@
 import { Processor, Queue, QueueScheduler, Worker } from 'bullmq';
+import { TransactionReceipt } from '@ethersproject/abstract-provider';
 import { JobStatus, RelayerJobType, Token } from '../types';
 import { WithdrawalData } from '../services/tx.service';
 import { priceProcessor } from './price.processor';
@@ -8,19 +9,23 @@ import { ConfigService } from '../services/config.service';
 import { relayerProcessor } from './relayer.processor';
 import { healthProcessor } from './health.processor';
 
-type PriceJobData = Token[]
-type PriceJobReturn = number
+type PriceJobData = Token[];
+type PriceJobReturn = number;
 
-type HealthJobReturn = void
-type HealthJobData = null
+type HealthJobReturn = void;
+type HealthJobData = null;
 
-export type RelayerJobData =
-  WithdrawalData
-  & { id: string, status: JobStatus, type: RelayerJobType, txHash?: string, confirmations?: number }
-export type RelayerJobReturn = any
+export type RelayerJobData = WithdrawalData & {
+  id: string;
+  status: JobStatus;
+  type: RelayerJobType;
+  txHash?: string;
+  confirmations?: number;
+};
+export type RelayerJobReturn = TransactionReceipt;
 
-export type RelayerProcessor = Processor<RelayerJobData, RelayerJobReturn, RelayerJobType>
-export type PriceProcessor = Processor<PriceJobData, PriceJobReturn, 'updatePrice'>
+export type RelayerProcessor = Processor<RelayerJobData, RelayerJobReturn, RelayerJobType>;
+export type PriceProcessor = Processor<PriceJobData, PriceJobReturn, 'updatePrice'>;
 
 @autoInjectable()
 export class PriceQueueHelper {
@@ -28,8 +33,7 @@ export class PriceQueueHelper {
   _worker: Worker<PriceJobData, PriceJobReturn, 'updatePrice'>;
   _scheduler: QueueScheduler;
 
-  constructor(private store?: RedisStore) {
-  }
+  constructor(private store?: RedisStore) {}
 
   get queue() {
     if (!this._queue) {
@@ -56,7 +60,9 @@ export class PriceQueueHelper {
 
   get scheduler() {
     if (!this._scheduler) {
-      this._scheduler = new QueueScheduler('price', { connection: this.store.client });
+      this._scheduler = new QueueScheduler('price', {
+        connection: this.store.client,
+      });
     }
     return this._scheduler;
   }
@@ -71,15 +77,13 @@ export class PriceQueueHelper {
   }
 }
 
-
 @autoInjectable()
 export class RelayerQueueHelper {
   private _queue: Queue<RelayerJobData, RelayerJobReturn, RelayerJobType>;
   private _worker: Worker<RelayerJobData, RelayerJobReturn, RelayerJobType>;
   private _scheduler: QueueScheduler;
 
-  constructor(private store?: RedisStore, private config?: ConfigService) {
-  }
+  constructor(private store?: RedisStore, private config?: ConfigService) {}
 
   get queue() {
     if (!this._queue) {
@@ -103,27 +107,27 @@ export class RelayerQueueHelper {
 
   get scheduler() {
     if (!this._scheduler) {
-      this._scheduler = new QueueScheduler(this.config.queueName, { connection: this.store.client });
+      this._scheduler = new QueueScheduler(this.config.queueName, {
+        connection: this.store.client,
+      });
     }
     return this._scheduler;
   }
-
-
 }
 
 @autoInjectable()
 export class HealthQueueHelper {
-
   private _queue: Queue<HealthJobData, HealthJobReturn, 'checkHealth'>;
   private _worker: Worker<HealthJobData, HealthJobReturn, 'checkHealth'>;
   private _scheduler: QueueScheduler;
 
-  constructor(private store?: RedisStore, private config?: ConfigService) {
-  }
+  constructor(private store?: RedisStore, private config?: ConfigService) {}
 
   get scheduler(): QueueScheduler {
     if (!this._scheduler) {
-      this._scheduler = new QueueScheduler('health', { connection: this.store.client });
+      this._scheduler = new QueueScheduler('health', {
+        connection: this.store.client,
+      });
     }
     return this._scheduler;
   }
@@ -156,6 +160,4 @@ export class HealthQueueHelper {
       },
     });
   }
-
 }
-

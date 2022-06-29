@@ -13,4 +13,3 @@ export const healthProcessor: Processor = async () => {
     await healthService.setStatus({ status: false, error: e.message });
   }
 };
-

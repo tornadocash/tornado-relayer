@@ -1,10 +1,26 @@
 [
   {
     "inputs": [
-      { "internalType": "contract MultiWrapper", "name": "_multiWrapper", "type": "address" },
-      { "internalType": "contract IOracle[]", "name": "existingOracles", "type": "address[]" },
-      { "internalType": "enum OffchainOracle.OracleType[]", "name": "oracleTypes", "type": "uint8[]" },
-      { "internalType": "contract IERC20[]", "name": "existingConnectors", "type": "address[]" },
+      {
+        "internalType": "contract MultiWrapper",
+        "name": "_multiWrapper",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IOracle[]",
+        "name": "existingOracles",
+        "type": "address[]"
+      },
+      {
+        "internalType": "enum OffchainOracle.OracleType[]",
+        "name": "oracleTypes",
+        "type": "uint8[]"
+      },
+      {
+        "internalType": "contract IERC20[]",
+        "name": "existingConnectors",
+        "type": "address[]"
+      },
       { "internalType": "contract IERC20", "name": "wBase", "type": "address" }
     ],
     "stateMutability": "nonpayable",
@@ -13,7 +29,12 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": false, "internalType": "contract IERC20", "name": "connector", "type": "address" }
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "connector",
+        "type": "address"
+      }
     ],
     "name": "ConnectorAdded",
     "type": "event"
@@ -21,7 +42,12 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": false, "internalType": "contract IERC20", "name": "connector", "type": "address" }
+      {
+        "indexed": false,
+        "internalType": "contract IERC20",
+        "name": "connector",
+        "type": "address"
+      }
     ],
     "name": "ConnectorRemoved",
     "type": "event"
@@ -29,7 +55,12 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": false, "internalType": "contract MultiWrapper", "name": "multiWrapper", "type": "address" }
+      {
+        "indexed": false,
+        "internalType": "contract MultiWrapper",
+        "name": "multiWrapper",
+        "type": "address"
+      }
     ],
     "name": "MultiWrapperUpdated",
     "type": "event"
@@ -37,7 +68,12 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": false, "internalType": "contract IOracle", "name": "oracle", "type": "address" },
+      {
+        "indexed": false,
+        "internalType": "contract IOracle",
+        "name": "oracle",
+        "type": "address"
+      },
       {
         "indexed": false,
         "internalType": "enum OffchainOracle.OracleType",
@@ -51,7 +87,12 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": false, "internalType": "contract IOracle", "name": "oracle", "type": "address" },
+      {
+        "indexed": false,
+        "internalType": "contract IOracle",
+        "name": "oracle",
+        "type": "address"
+      },
       {
         "indexed": false,
         "internalType": "enum OffchainOracle.OracleType",
@@ -65,14 +106,30 @@
   {
     "anonymous": false,
     "inputs": [
-      { "indexed": true, "internalType": "address", "name": "previousOwner", "type": "address" },
-      { "indexed": true, "internalType": "address", "name": "newOwner", "type": "address" }
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
     ],
     "name": "OwnershipTransferred",
     "type": "event"
   },
   {
-    "inputs": [{ "internalType": "contract IERC20", "name": "connector", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "connector",
+        "type": "address"
+      }
+    ],
     "name": "addConnector",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -80,8 +137,16 @@
   },
   {
     "inputs": [
-      { "internalType": "contract IOracle", "name": "oracle", "type": "address" },
-      { "internalType": "enum OffchainOracle.OracleType", "name": "oracleKind", "type": "uint8" }
+      {
+        "internalType": "contract IOracle",
+        "name": "oracle",
+        "type": "address"
+      },
+      {
+        "internalType": "enum OffchainOracle.OracleType",
+        "name": "oracleKind",
+        "type": "uint8"
+      }
     ],
     "name": "addOracle",
     "outputs": [],
@@ -91,14 +156,28 @@
   {
     "inputs": [],
     "name": "connectors",
-    "outputs": [{ "internalType": "contract IERC20[]", "name": "allConnectors", "type": "address[]" }],
+    "outputs": [
+      {
+        "internalType": "contract IERC20[]",
+        "name": "allConnectors",
+        "type": "address[]"
+      }
+    ],
     "stateMutability": "view",
     "type": "function"
   },
   {
     "inputs": [
-      { "internalType": "contract IERC20", "name": "srcToken", "type": "address" },
-      { "internalType": "contract IERC20", "name": "dstToken", "type": "address" },
+      {
+        "internalType": "contract IERC20",
+        "name": "srcToken",
+        "type": "address"
+      },
+      {
+        "internalType": "contract IERC20",
+        "name": "dstToken",
+        "type": "address"
+      },
       { "internalType": "bool", "name": "useWrappers", "type": "bool" }
     ],
     "name": "getRate",
@@ -108,7 +187,11 @@
   },
   {
     "inputs": [
-      { "internalType": "contract IERC20", "name": "srcToken", "type": "address" },
+      {
+        "internalType": "contract IERC20",
+        "name": "srcToken",
+        "type": "address"
+      },
       { "internalType": "bool", "name": "useSrcWrappers", "type": "bool" }
     ],
     "name": "getRateToEth",
@@ -127,8 +210,16 @@
     "inputs": [],
     "name": "oracles",
     "outputs": [
-      { "internalType": "contract IOracle[]", "name": "allOracles", "type": "address[]" },
-      { "internalType": "enum OffchainOracle.OracleType[]", "name": "oracleTypes", "type": "uint8[]" }
+      {
+        "internalType": "contract IOracle[]",
+        "name": "allOracles",
+        "type": "address[]"
+      },
+      {
+        "internalType": "enum OffchainOracle.OracleType[]",
+        "name": "oracleTypes",
+        "type": "uint8[]"
+      }
     ],
     "stateMutability": "view",
     "type": "function"
@@ -141,7 +232,13 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "contract IERC20", "name": "connector", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "contract IERC20",
+        "name": "connector",
+        "type": "address"
+      }
+    ],
     "name": "removeConnector",
     "outputs": [],
     "stateMutability": "nonpayable",
@@ -149,8 +246,16 @@
   },
   {
     "inputs": [
-      { "internalType": "contract IOracle", "name": "oracle", "type": "address" },
-      { "internalType": "enum OffchainOracle.OracleType", "name": "oracleKind", "type": "uint8" }
+      {
+        "internalType": "contract IOracle",
+        "name": "oracle",
+        "type": "address"
+      },
+      {
+        "internalType": "enum OffchainOracle.OracleType",
+        "name": "oracleKind",
+        "type": "uint8"
+      }
     ],
     "name": "removeOracle",
     "outputs": [],
@@ -165,7 +270,13 @@
     "type": "function"
   },
   {
-    "inputs": [{ "internalType": "contract MultiWrapper", "name": "_multiWrapper", "type": "address" }],
+    "inputs": [
+      {
+        "internalType": "contract MultiWrapper",
+        "name": "_multiWrapper",
+        "type": "address"
+      }
+    ],
     "name": "setMultiWrapper",
     "outputs": [],
     "stateMutability": "nonpayable",

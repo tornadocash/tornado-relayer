@@ -2,21 +2,20 @@ import { Telegram } from 'telegraf';
 import { autoInjectable, container } from 'tsyringe';
 import { RedisStore } from '../modules/redis';
 
-export type Levels = keyof typeof AlertLevel
+export type Levels = keyof typeof AlertLevel;
 
 export enum AlertLevel {
   'INFO' = 'ℹ️️',
   'WARN' = '⚠️',
   'CRITICAL' = '‼️',
   'ERROR' = '💩',
-  'OK' = '✅'
+  'OK' = '✅',
 }
 
 export enum AlertType {
   'INSUFFICIENT_BALANCE',
   'INSUFFICIENT_TORN_BALANCE',
-  'RPC'
-
+  'RPC',
 }
 
 class MockTelegram {
@@ -43,7 +42,6 @@ export class NotifierService {
     this.token = process.env.TELEGRAM_NOTIFIER_BOT_TOKEN;
     this.chatId = process.env.TELEGRAM_NOTIFIER_CHAT_ID;
     this.telegram = this.token ? new Telegram(this.token) : new MockTelegram();
-
   }
 
   async processAlert(message: string) {
@@ -52,7 +50,7 @@ export class NotifierService {
     const isSent = await this.store.client.sismember('alerts:sent', `${a}_${b}_${c}`);
     if (!isSent) {
       if (alert.level === 'OK') {
-        this.store.client.srem('alerts:sent', ...['WARN', 'CRITICAL'].map(c => `${a}_${b}_${c}`));
+        this.store.client.srem('alerts:sent', ...['WARN', 'CRITICAL'].map((c) => `${a}_${b}_${c}`));
       } else {
         await this.send(alert.message, alert.level);
         this.store.client.sadd('alerts:sent', alert.type);
@@ -63,27 +61,17 @@ export class NotifierService {
   async subscribe() {
     this.store.subscriber.subscribe('user-notify');
     this.store.subscriber.on('message', async (channel, message) => {
-        await this.processAlert(<string>message);
-      },
-    );
-
-
+      await this.processAlert(<string>message);
+    });
   }
 
   send(message: string, level: Levels) {
     const text = `${AlertLevel[level]} ${message}`;
-    return this.telegram.sendMessage(
-      this.chatId,
-      text,
-      { parse_mode: 'HTML' },
-    );
+    return this.telegram.sendMessage(this.chatId, text, { parse_mode: 'HTML' });
   }
 
   sendError(e: any) {
-    return this.telegram.sendMessage(
-      this.chatId,
-      `Error: ${e}`,
-    );
+    return this.telegram.sendMessage(this.chatId, `Error: ${e}`);
   }
 
   check() {

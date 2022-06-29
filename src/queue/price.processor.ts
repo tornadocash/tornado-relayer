@@ -7,4 +7,3 @@ export const priceProcessor: PriceProcessor = async (job) => {
   if (result) return await priceService.savePrices(result);
   return null;
 };
-

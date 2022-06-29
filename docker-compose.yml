@@ -9,7 +9,7 @@ services:
     environment:
       REDIS_URL: redis://redis/0
       nginx_proxy_read_timeout: 600
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   worker1:
     image: tornadocash/relayer
@@ -18,7 +18,7 @@ services:
     env_file: .env
     environment:
       REDIS_URL: redis://redis/0
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   #  worker2:
   #    image: tornadocash/relayer:mining
@@ -65,12 +65,10 @@ services:
   #      TELEGRAM_NOTIFIER_BOT_TOKEN: ...
   #      TELEGRAM_NOTIFIER_CHAT_ID: ...
 
-
-
   redis:
     image: redis
     restart: always
-    command: [ redis-server, '/usr/local/etc/redis/redis.conf', --appendonly, 'yes', ]
+    command: [redis-server, '/usr/local/etc/redis/redis.conf', --appendonly, 'yes']
     ports:
       - '6379:6379'
     volumes:

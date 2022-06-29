@@ -15,19 +15,23 @@ class RelayerError extends Error {
 
 @autoInjectable()
 export class HealthService {
-
-  constructor(private config: ConfigService, private store: RedisStore) {
-  }
+  constructor(private config: ConfigService, private store: RedisStore) {}
 
   async clearErrorCodes() {
     await this.store.client.del('errors:code');
   }
 
-  private async _getErrors(): Promise<{ errorsLog: { message: string, score: number }[], errorsCode: Record<string, number> }> {
+  private async _getErrors(): Promise<{
+    errorsLog: { message: string; score: number }[];
+    errorsCode: Record<string, number>;
+  }> {
     const logSet = await this.store.client.zrevrange('errors:log', 0, -1, 'WITHSCORES');
     const codeSet = await this.store.client.zrevrange('errors:code', 0, -1, 'WITHSCORES');
 
-    return { errorsLog: HealthService._parseSet(logSet), errorsCode: HealthService._parseSet(codeSet, 'object') };
+    return {
+      errorsLog: HealthService._parseSet(logSet),
+      errorsCode: HealthService._parseSet(codeSet, 'object'),
+    };
   }
 
   private async _getStatus() {
@@ -53,7 +57,7 @@ export class HealthService {
     return out;
   }
 
-  async setStatus(status: { status: boolean; error: string; }) {
+  async setStatus(status: { status: boolean; error: string }) {
     await this.store.client.hset('health:status', status);
   }
 
@@ -115,8 +119,6 @@ export class HealthService {
     await this.config.checkNetwork();
     const mainBalance = await this.config.wallet.getBalance();
     const tornBalance = await this.config.tokenContract.balanceOf(this.config.wallet.address);
-    // const mainBalance = BigNumber.from(`${1e18}`).add(1);
-    // const tornBalance = BigNumber.from(`${60e18}`);
     const mainStatus = await this._checkBalance(mainBalance, 'MAIN');
     const tornStatus = await this._checkBalance(tornBalance, 'TORN');
     if (mainStatus.level === 'CRITICAL') {
@@ -128,15 +130,10 @@ export class HealthService {
   }
 }
 
-type HealthData = {
-  status: boolean,
-  error: string,
-  errorsLog: { message: string, score: number }[]
-}
 type Alert = {
-  type: string,
-  message: string,
-  level: Levels,
-  time?: number,
-}
+  type: string;
+  message: string;
+  level: Levels;
+  time?: number;
+};
 export default () => container.resolve(HealthService);
