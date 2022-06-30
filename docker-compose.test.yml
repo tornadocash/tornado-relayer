@@ -11,21 +11,21 @@ services:
       dockerfile: Dockerfile
     ports:
       - 8000:8000
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   txWorker:
     image: tornadocash/relayer:v5.0.0
     restart: unless-stopped
     command: 'node txWorker.js'
     env_file: .env
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   healthWorker:
     image: tornadocash/relayer:v5.0.0
     restart: unless-stopped
     command: 'node healthWorker.js'
     env_file: .env
-    depends_on: [ redis ]
+    depends_on: [redis]
 
   redis:
     image: redis

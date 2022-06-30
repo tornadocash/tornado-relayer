@@ -91,7 +91,8 @@ export class HealthService {
   }
 
   async pushAlert(alert: Alert) {
-    await this.store.publisher.publish('user-notify', JSON.stringify(alert));
+    const channel = `${this.config.netId}/user-notify`;
+    await this.store.publisher.publish(channel, JSON.stringify(alert));
   }
 
   private async _checkBalance(value, currency: 'MAIN' | 'TORN') {

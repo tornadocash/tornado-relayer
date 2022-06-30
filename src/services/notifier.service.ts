@@ -2,6 +2,7 @@ import { Telegram } from 'telegraf';
 import { autoInjectable, container } from 'tsyringe';
 import { RedisStore } from '../modules/redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
+import { netId } from '../config';
 
 export type Levels = keyof typeof AlertLevel;
 
@@ -60,7 +61,8 @@ export class NotifierService {
   }
 
   async subscribe() {
-    this.store.subscriber.subscribe('user-notify');
+    const channel = `${netId}/user-notify`;
+    this.store.subscriber.subscribe(channel);
     this.store.subscriber.on('message', async (channel, message) => {
       await this.processAlert(<string>message);
     });
