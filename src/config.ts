@@ -6,7 +6,7 @@ const isProduction = process.env.NODE_ENV === 'production';
 export const relayerVersion = require(`${isProduction ? '.' : '..'}/package.json`).version;
 export const netId = <availableIds>Number(process.env.NET_ID || 1);
 export const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
-export const rpcUrl = process.env.RPC_URL;
+export const rpcUrl = process.env.HTTP_RPC_URL;
 export const mainnetRpcUrl = process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/';
 export const offchainOracleAddress = '0x07D91f5fb9Bf7798734C3f606dB065549F6893bb';
 export const multiCallAddress = '0xda3c19c6fe954576707fa24695efb830d9cca1ca';

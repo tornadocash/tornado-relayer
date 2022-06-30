@@ -100,6 +100,7 @@ export class ConfigService {
   }
 
   async checkNetwork() {
+    console.log('Checking network...');
     await this.provider.getNetwork();
     if (this.isLightMode) {
       await this.mainnentProvider.getNetwork();
@@ -110,6 +111,7 @@ export class ConfigService {
     try {
       if (this.isInit) return;
       await this.checkNetwork();
+      console.log('Initializing...');
       this._tokenAddress = await resolve(torn.torn.address);
       this._tokenContract = await getTornTokenContract(this._tokenAddress);
       if (this.isLightMode) {

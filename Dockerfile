@@ -25,4 +25,3 @@ COPY --from=dev /usr/app/yarn.lock /app/
 
 RUN yarn install && yarn cache clean -f
 
-ENTRYPOINT ["yarn"]

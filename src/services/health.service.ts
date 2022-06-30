@@ -127,6 +127,7 @@ export class HealthService {
     if (tornStatus.level === 'CRITICAL') {
       throw new RelayerError(tornStatus.message, 'INSUFFICIENT_TORN_BALANCE');
     }
+    return { mainStatus, tornStatus };
   }
 }
 

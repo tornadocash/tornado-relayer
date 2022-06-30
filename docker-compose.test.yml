@@ -1,35 +1,37 @@
-version: '3'
+version: '3.7'
 
 services:
   server:
     image: tornadocash/relayer:v5.0.0
     restart: always
-    command: 'server'
+    command: 'node app/index.js'
     env_file: .env
     build:
       context: .
       dockerfile: Dockerfile
     ports:
       - 8000:8000
-    depends_on: [redis]
+    depends_on: [ redis ]
 
   txWorker:
     image: tornadocash/relayer:v5.0.0
-    restart: always
-    command: 'txWorker'
+    restart: unless-stopped
+    command: 'node txWorker.js'
     env_file: .env
-    depends_on: [redis]
+    depends_on: [ redis ]
 
   healthWorker:
     image: tornadocash/relayer:v5.0.0
-    restart: always
-    command: 'healthWorker'
+    restart: unless-stopped
+    command: 'node healthWorker.js'
     env_file: .env
-    depends_on: [redis]
+    depends_on: [ redis ]
 
   redis:
     image: redis
-    restart: always
+    restart: unless-stopped
+    ports:
+      - 6379:6379
     environment:
       - REDIS_APPENDONLY=yes
       - REDIS_APPENDFSYNC=always
@@ -38,3 +40,8 @@ services:
 
 volumes:
   redis:
+
+#networks:
+#  default:
+#    external: true
+#    name: frontend_default
