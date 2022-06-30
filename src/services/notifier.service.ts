@@ -1,6 +1,7 @@
 import { Telegram } from 'telegraf';
 import { autoInjectable, container } from 'tsyringe';
 import { RedisStore } from '../modules/redis';
+import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 
 export type Levels = keyof typeof AlertLevel;
 
@@ -19,8 +20,8 @@ export enum AlertType {
 }
 
 class MockTelegram {
-  async sendMessage(chatId, text: string, extra?: any) {
-    console.log(text);
+  async sendMessage(chatId, text: string, extra?: ExtraReplyMessage) {
+    console.log(text, extra);
   }
 
   async getMe() {
@@ -70,7 +71,7 @@ export class NotifierService {
     return this.telegram.sendMessage(this.chatId, text, { parse_mode: 'HTML' });
   }
 
-  sendError(e: any) {
+  sendError(e: Error) {
     return this.telegram.sendMessage(this.chatId, `Error: ${e}`);
   }
 

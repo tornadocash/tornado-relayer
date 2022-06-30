@@ -103,10 +103,10 @@ export class HealthService {
     } else if (value.lt(this.config.balances[currency].warn)) {
       level = 'WARN';
     }
-
+    const msg = { WARN: 'Please refill your balance', CRITICAL: 'Insufficient balance' };
     const alert = {
       type: `${type}_${currency}_${level}`,
-      message: `Insufficient balance ${formatEther(value)} ${currency === 'MAIN' ? this.config.nativeCurrency : 'torn'}`,
+      message: `${msg[level]} ${formatEther(value)} ${currency === 'MAIN' ? this.config.nativeCurrency : 'torn'}`,
       level,
       time,
     };

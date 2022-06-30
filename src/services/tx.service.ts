@@ -1,6 +1,6 @@
 import { TransactionData, TxManager } from 'tx-manager';
 import { GasPriceOracle } from 'gas-price-oracle';
-import { AlchemyProvider, Provider } from '@ethersproject/providers';
+import { Provider } from '@ethersproject/providers';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
 import { ProxyLightABI, TornadoProxyABI } from '../contracts';
@@ -44,12 +44,11 @@ export class TxService {
     const { privateKey, rpcUrl, netId } = this.config;
     this.tornadoProxy = this.config.proxyContract;
     this.provider = this.tornadoProxy.provider;
-    const prov = new AlchemyProvider(netId);
     this.txManager = new TxManager({
       privateKey,
       rpcUrl,
       config: { THROW_ON_REVERT: true },
-      provider: prov,
+      provider: this.provider,
     });
     this.oracle = new GasPriceOracle({
       defaultRpc: rpcUrl,
@@ -137,7 +136,7 @@ export class TxService {
   }
 
   async getGasPrice(): Promise<BigNumber> {
-    const gasPrices = await this.oracle.gasPrices({});
+    const gasPrices = await this.oracle.gasPrices();
     let gasPrice = gasPrices['fast'];
     if ('maxFeePerGas' in gasPrices) gasPrice = gasPrices['maxFeePerGas'];
     return parseUnits(String(gasPrice), 'gwei');

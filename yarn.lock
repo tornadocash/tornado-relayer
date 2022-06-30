@@ -2826,9 +2826,9 @@ functional-red-black-tree@^1.0.1:
   resolved "https://registry.yarnpkg.com/functional-red-black-tree/-/functional-red-black-tree-1.0.1.tgz#1b0ab3bd553b2a0d6399d29c0e3ea0b252078327"
   integrity sha512-dsKNQNdj6xA3T+QlADDA7mOSlX0qiMINjn0cgr+eGHGsbSHzTabcIogz2+p/iqP1Xs6EP/sS2SbqH+brGTbq0g==
 
-"gas-price-oracle@git+https://github.com/peppersec/gas-price-oracle.git#da3de92dea7c75afc2c8ba141f23c4eea597a614":
+"gas-price-oracle@git+https://github.com/peppersec/gas-price-oracle.git#de97ca2d154480aebbe9130778a69727f3a0f00b":
   version "0.5.0"
-  resolved "git+https://github.com/peppersec/gas-price-oracle.git#da3de92dea7c75afc2c8ba141f23c4eea597a614"
+  resolved "git+https://github.com/peppersec/gas-price-oracle.git#de97ca2d154480aebbe9130778a69727f3a0f00b"
   dependencies:
     axios "^0.21.2"
     bignumber.js "^9.0.0"
@@ -4975,13 +4975,13 @@ tweetnacl@^1.0.0:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
-"tx-manager@git+https://github.com/tornadocash/tx-manager.git#b4235ec8f7d4937a088ae862ca82f3866cd2aaee":
+"tx-manager@git+https://github.com/tornadocash/tx-manager.git#3a168c3c54a7d1ad77316476418927c21da22bb7":
   version "0.4.8"
-  resolved "git+https://github.com/tornadocash/tx-manager.git#b4235ec8f7d4937a088ae862ca82f3866cd2aaee"
+  resolved "git+https://github.com/tornadocash/tx-manager.git#3a168c3c54a7d1ad77316476418927c21da22bb7"
   dependencies:
     async-mutex "^0.2.4"
     ethers "^5.4.6"
-    gas-price-oracle "git+https://github.com/peppersec/gas-price-oracle.git#da3de92dea7c75afc2c8ba141f23c4eea597a614"
+    gas-price-oracle "git+https://github.com/peppersec/gas-price-oracle.git#de97ca2d154480aebbe9130778a69727f3a0f00b"
     web3-core-promievent "^1.3.0"
 
 type-check@^0.4.0, type-check@~0.4.0:

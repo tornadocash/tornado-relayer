@@ -6,7 +6,6 @@ export const relayerProcessor: RelayerProcessor = async (job) => {
   try {
     await job.update({ ...job.data, status: JobStatus.ACCEPTED });
     console.log(`Start processing a new ${job.data.type} job ${job.id}`);
-
     const txService = getTxService();
     txService.currentJob = job;
     const withdrawalData = job.data;
