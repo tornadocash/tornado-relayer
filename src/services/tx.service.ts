@@ -4,7 +4,7 @@ import { Provider } from '@ethersproject/providers';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
 import { ProxyLightABI, TornadoProxyABI } from '../contracts';
-import { gasLimits, tornadoServiceFee } from '../config';
+import { CONFIRMATIONS, gasLimits, tornadoServiceFee } from '../config';
 import { JobStatus, RelayerJobType } from '../types';
 import { PriceService } from './price.service';
 import { Job } from 'bullmq';
@@ -47,7 +47,7 @@ export class TxService {
     this.txManager = new TxManager({
       privateKey,
       rpcUrl,
-      config: { THROW_ON_REVERT: true },
+      config: { THROW_ON_REVERT: true, CONFIRMATIONS },
       provider: this.provider,
     });
     this.oracle = new GasPriceOracle({

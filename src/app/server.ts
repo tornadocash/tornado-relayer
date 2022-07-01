@@ -9,6 +9,7 @@ import { mainHandler, relayerHandler } from './routes';
 function createServer() {
   const server = fastify({
     logger: true,
+    trustProxy: true,
     pluginTimeout: 5000,
     bodyLimit: 1048576, // 1 mb
   });

@@ -1,7 +1,7 @@
 import { FastifyInstance } from 'fastify';
 import { jobsSchema, statusSchema, withdrawBodySchema, withdrawSchema } from './schema';
 import { FromSchema } from 'json-schema-to-ts';
-import { rewardAccount, tornadoServiceFee } from '../config';
+import { relayerVersion, rewardAccount, tornadoServiceFee } from '../config';
 import { configService, getHealthService, getJobService, getPriceService } from '../services';
 import { RelayerJobType } from '../types';
 
@@ -23,6 +23,7 @@ export function mainHandler(server: FastifyInstance, options, next) {
     const ethPrices = await priceService.getPrices();
     const currentQueue = await jobService.getQueueCount();
     const health = await healthService.getStatus();
+    const version = relayerVersion;
     res.send({
       rewardAccount,
       instances: configService.instances,
@@ -30,7 +31,7 @@ export function mainHandler(server: FastifyInstance, options, next) {
       ethPrices,
       tornadoServiceFee,
       miningServiceFee: 0,
-      version: '4.5.0',
+      version,
       health,
       currentQueue,
     });
