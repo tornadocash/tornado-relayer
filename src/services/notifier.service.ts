@@ -3,6 +3,7 @@ import { autoInjectable, container } from 'tsyringe';
 import { RedisStore } from '../modules/redis';
 import { ExtraReplyMessage } from 'telegraf/typings/telegram-types';
 import { netId } from '../config';
+import { ConfigService } from './config.service';
 
 export type Levels = keyof typeof AlertLevel;
 
@@ -39,11 +40,13 @@ export class NotifierService {
   private telegram: Telegram | MockTelegram;
   private readonly token: string;
   private readonly chatId: string;
+  prefix: string;
 
-  constructor(private store: RedisStore) {
+  constructor(private store: RedisStore, private config: ConfigService) {
     this.token = process.env.TELEGRAM_NOTIFIER_BOT_TOKEN;
     this.chatId = process.env.TELEGRAM_NOTIFIER_CHAT_ID;
     this.telegram = this.token ? new Telegram(this.token) : new MockTelegram();
+    this.prefix = this.config.host;
   }
 
   async processAlert(message: string) {
@@ -69,7 +72,7 @@ export class NotifierService {
   }
 
   send(message: string, level: Levels) {
-    const text = `${AlertLevel[level]} ${message}`;
+    const text = `${AlertLevel[level]} ${this.prefix}: ${message}`;
     return this.telegram.sendMessage(this.chatId, text, { parse_mode: 'HTML' });
   }
 
