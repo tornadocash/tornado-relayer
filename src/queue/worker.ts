@@ -4,6 +4,7 @@ import { configService, getHealthService } from '../services';
 
 export const priceWorker = async () => {
   await configService.init();
+  if (configService.isLightMode) return;
   const healthService = getHealthService();
 
   const price = new PriceQueueHelper();

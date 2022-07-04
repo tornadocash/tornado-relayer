@@ -6,7 +6,7 @@ import {
   TornadoProxyABI__factory,
 } from '../contracts';
 import { providers } from 'ethers';
-import { mainnetRpcUrl, multiCallAddress, netId, offchainOracleAddress, rpcUrl } from '../config';
+import { mainnetRpcUrl, multiCallAddress, netId, offchainOracleAddress, oracleRpcUrl, rpcUrl } from '../config';
 
 export function getProvider(isStatic = true, customRpcUrl?: string, chainId = netId) {
   const url = customRpcUrl || rpcUrl;
@@ -22,7 +22,7 @@ export const getTornadoProxyLightContract = (proxyAddress: string) => {
 };
 
 export const getOffchainOracleContract = () => {
-  return OffchainOracleAbi__factory.connect(offchainOracleAddress, getProvider(true, mainnetRpcUrl));
+  return OffchainOracleAbi__factory.connect(offchainOracleAddress, getProvider(true, oracleRpcUrl));
 };
 
 export const getMultiCallContract = () => {

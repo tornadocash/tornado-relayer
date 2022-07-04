@@ -18,9 +18,8 @@ jobs:
       - run: yarn install --network-concurrency=2
       #      - run: yarn test
       - run: yarn lint
-      - name: Telegram Failure Notification
-        uses: appleboy/telegram-action@master
-#        TODO if: failure()
+#      - name: Telegram Failure Notification
+#        uses: appleboy/telegram-action@master
 #        if: failure()
 #        with:
 #          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}

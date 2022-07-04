@@ -48,7 +48,9 @@ export class JobService {
   }
 
   async setupRepeatableJobs() {
-    await this.price.addRepeatable(this.config.tokens);
+    if (!this.config.isLightMode) {
+      await this.price.addRepeatable(this.config.tokens);
+    }
     await this.health.addRepeatable();
   }
 }
