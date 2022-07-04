@@ -1,9 +1,11 @@
 import { RelayerJobType } from './types';
 import tornConfig, { availableIds } from 'torn-token';
+import { config } from 'dotenv';
+import { version } from '../package.json';
 
-require('dotenv').config();
+config();
 const isProduction = process.env.NODE_ENV === 'production';
-export const relayerVersion = require(`${isProduction ? '.' : '..'}/package.json`).version;
+export const relayerVersion = version;
 export const netId = <availableIds>Number(process.env.NET_ID || 1);
 export const redisUrl = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
 export const rpcUrl = process.env.HTTP_RPC_URL;

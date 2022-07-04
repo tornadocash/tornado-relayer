@@ -36,7 +36,10 @@ export class HealthService {
 
   private async _getStatus() {
     const status = await this.store.client.hgetall('health:status');
-    return status || { health: 'false', error: 'Service is not running' };
+    if (Object.keys(status).length === 0) {
+      return { health: 'false', error: 'Service is not running' };
+    }
+    return status;
   }
 
   private static _parseSet(log, to = 'array', keys = ['message', 'score']) {
@@ -64,7 +67,7 @@ export class HealthService {
 
   async getStatus() {
     const { errorsLog, errorsCode } = await this._getErrors();
-    if (errorsCode['NETWORK_ERROR'] > 6) {
+    if (errorsCode['NETWORK_ERROR'] > 10) {
       await this.setStatus({ status: false, error: 'Network error' });
     }
     const heathStatus = await this._getStatus();

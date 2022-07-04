@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
-      - run: yarn install --skip-integrity-check
+      - run: yarn install --network-concurrency=2
       #      - run: yarn test
       - run: yarn lint
       - name: Telegram Failure Notification

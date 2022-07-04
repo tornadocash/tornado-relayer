@@ -3,9 +3,9 @@
   "version": "5.0.0",
   "description": "Relayer for Tornado.cash privacy solution. https://tornado.cash",
   "scripts": {
-    "server": "node app/index.js",
-    "txWorker": "node txWorker.js",
-    "healthWorker": "node healthWorker.js",
+    "server": "node src/app/index.js",
+    "txWorker": "node src/txWorker.js",
+    "healthWorker": "node src/healthWorker.js",
     "dev:server": "nodemon --watch './src/**/*.ts' --exec ts-node src/app/index.ts",
     "dev:healthWorker": "nodemon --watch './src/**/*.ts' --exec ts-node src/healthWorker.ts",
     "dev:txWorker": "nodemon --watch './src/**/*.ts' --exec ts-node src/txWorker.ts",
