@@ -8,7 +8,7 @@ if (!utils.isAddress(rewardAccount)) {
   throw new Error('No REWARD_ACCOUNT specified');
 }
 const server = createServer();
-server.listen(port, '0.0.0.0', async (err, address) => {
+server.listen({ port, host: '0.0.0.0' }, async (err, address) => {
   if (err) throw err;
   await configService.init();
   await configService.clearRedisState();

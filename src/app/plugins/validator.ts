@@ -3,11 +3,13 @@ import fp from 'fastify-plugin';
 import { rewardAccount } from '../../config';
 import { getAddress, isAddress } from 'ethers/lib/utils';
 import { configService } from '../../services';
+import addFormats from 'ajv-formats';
 
 export default fp(async (server) => {
   const ajv = new Ajv();
-
-  ajv.addKeyword('isAddress', {
+  addFormats(ajv);
+  ajv.addKeyword({
+    keyword: 'isAddress',
     validate: (schema, data) => {
       try {
         return isAddress(data);
@@ -18,7 +20,8 @@ export default fp(async (server) => {
     errors: true,
   });
 
-  ajv.addKeyword('isKnownContract', {
+  ajv.addKeyword({
+    keyword: 'isKnownContract',
     validate: (schema, data) => {
       try {
         return !!configService.getInstance(data);
@@ -29,7 +32,8 @@ export default fp(async (server) => {
     errors: true,
   });
 
-  ajv.addKeyword('isFeeRecipient', {
+  ajv.addKeyword({
+    keyword: 'isFeeRecipient',
     validate: (schema, data) => {
       try {
         return getAddress(rewardAccount) === getAddress(data);

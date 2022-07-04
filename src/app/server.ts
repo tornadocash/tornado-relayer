@@ -23,7 +23,7 @@ function createServer() {
 
   server.setErrorHandler((error, req, res) => {
     req.log.error(error.toString());
-    res.code(500).send({ error });
+    res.code(500).send({ error: error.toString() });
   });
   return server;
 }

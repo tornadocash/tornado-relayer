@@ -17,7 +17,7 @@ export const aggregatorAddress = process.env.AGGREGATOR;
 export const privateKey = process.env.PRIVATE_KEY;
 export const instances = tornConfig.instances;
 export const torn = tornConfig;
-export const port = process.env.APP_PORT || 8000;
+export const port = Number(process.env.APP_PORT) || 8000;
 export const host = isProduction ? 'https://' + process.env.VIRTUAL_HOST : `http://localhost:${port}`;
 export const tornadoServiceFee = Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE);
 export const rewardAccount = process.env.REWARD_ACCOUNT;
@@ -29,8 +29,11 @@ export const gasLimits = {
   [RelayerJobType.MINING_REWARD]: 455000,
   [RelayerJobType.MINING_WITHDRAW]: 400000,
 };
-export const minimumBalance = '1000000000000000000';
-export const minimumTornBalance = '30000000000000000000';
+// export const minimumBalance = '1000000000000000000';
+// export const minimumTornBalance = '30000000000000000000';
+// TODO: remove this
+export const minimumBalance = '10000000000000000';
+export const minimumTornBalance = '0';
 export const baseFeeReserve = Number(process.env.BASE_FEE_RESERVE_PERCENTAGE);
 export const tornToken = {
   tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
