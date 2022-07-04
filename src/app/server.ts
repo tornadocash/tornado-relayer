@@ -23,7 +23,11 @@ function createServer() {
 
   server.setErrorHandler((error, req, res) => {
     req.log.error(error.toString());
-    res.code(500).send({ error: error.toString() });
+    let statusCode = 500;
+    if ('validation' in error) {
+      statusCode = 400;
+    }
+    res.code(statusCode).send({ error: error.toString() });
   });
   return server;
 }
