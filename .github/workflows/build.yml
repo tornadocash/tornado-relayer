@@ -20,12 +20,13 @@ jobs:
       - run: yarn lint
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
-        if: failure()
-        with:
-          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
-          format: markdown
-          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+#        TODO if: failure()
+#        if: failure()
+#        with:
+#          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
+#          format: markdown
+#          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+#          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
 #  TODO: Edit this step
 #  publish:
 #    runs-on: ubuntu-latest

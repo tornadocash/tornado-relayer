@@ -40,13 +40,13 @@ export class NotifierService {
   private telegram: Telegram | MockTelegram;
   private readonly token: string;
   private readonly chatId: string;
-  prefix: string;
+  host: string;
 
   constructor(private store: RedisStore, private config: ConfigService) {
     this.token = process.env.TELEGRAM_NOTIFIER_BOT_TOKEN;
     this.chatId = process.env.TELEGRAM_NOTIFIER_CHAT_ID;
     this.telegram = this.token ? new Telegram(this.token) : new MockTelegram();
-    this.prefix = this.config.host;
+    this.host = this.config.host;
   }
 
   async processAlert(message: string) {
@@ -72,7 +72,7 @@ export class NotifierService {
   }
 
   send(message: string, level: Levels) {
-    const text = `${AlertLevel[level]} ${this.prefix}: ${message}`;
+    const text = `${AlertLevel[level]} ${this.host}: ${message}`;
     return this.telegram.sendMessage(this.chatId, text, { parse_mode: 'HTML' });
   }
 
