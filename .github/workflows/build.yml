@@ -2,8 +2,8 @@ name: build
 
 on:
   push:
-    branches: ['*']
-    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+    branches: [ '*' ]
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
   pull_request:
 
 jobs:
@@ -15,7 +15,7 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
-      - run: yarn install
+      - run: yarn install --skip-integrity-check
       #      - run: yarn test
       - run: yarn lint
       - name: Telegram Failure Notification
