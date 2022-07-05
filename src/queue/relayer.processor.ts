@@ -1,6 +1,19 @@
 import { RelayerProcessor } from './index';
 import { getTxService } from '../services';
 import { JobStatus } from '../types';
+import { UnrecoverableError } from 'bullmq';
+import { ExecutionError } from '../services/tx.service';
+
+class RevertError extends UnrecoverableError {
+  code: string;
+
+  constructor(message: string, code: string) {
+    super(message);
+    this.name = this.constructor.name;
+    this.code = code;
+    Object.setPrototypeOf(this, new.target.prototype);
+  }
+}
 
 export const relayerProcessor: RelayerProcessor = async (job) => {
   try {
@@ -13,7 +26,10 @@ export const relayerProcessor: RelayerProcessor = async (job) => {
     const txData = await txService.prepareTxData(withdrawalData);
     return await txService.sendTx(txData);
   } catch (e) {
-    await job.update({ ...job.data, status: JobStatus.FAILED });
+    if (e instanceof ExecutionError && e.code === 'REVERTED') {
+      await job.update({ ...job.data, status: JobStatus.FAILED });
+      throw new RevertError(e.message, e.code);
+    }
     throw e;
   }
 };

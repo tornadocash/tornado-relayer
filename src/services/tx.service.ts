@@ -19,7 +19,7 @@ export type WithdrawalData = {
   args: [BytesLike, BytesLike, string, string, BigNumberish, BigNumberish];
 };
 
-class ExecutionError extends Error {
+export class ExecutionError extends Error {
   constructor(message: string, code?: string) {
     super(message);
     this.code = code;
@@ -83,7 +83,9 @@ export class TxService {
         });
       if (receipt.status === 1) {
         await this.updateJobData({ status: JobStatus.CONFIRMED });
-      } else throw new ExecutionError('Submitted transaction failed', 'REVERTED');
+      } else {
+        throw new ExecutionError('Submitted transaction failed', 'REVERTED');
+      }
       return receipt;
     } catch (e) {
       const regex = /body=("\{.*}}")/;
@@ -138,7 +140,9 @@ export class TxService {
   async getGasPrice(): Promise<BigNumber> {
     const gasPrices = await this.oracle.gasPrices();
     let gasPrice = gasPrices['fast'];
-    if ('maxFeePerGas' in gasPrices) gasPrice = gasPrices['maxFeePerGas'];
+    if ('maxFeePerGas' in gasPrices) {
+      gasPrice = gasPrices['maxFeePerGas'];
+    }
     return parseUnits(String(gasPrice), 'gwei');
   }
 }

@@ -32,6 +32,7 @@ export class PriceQueueHelper {
   _queue: Queue<PriceJobData, PriceJobReturn, 'updatePrice'>;
   _worker: Worker<PriceJobData, PriceJobReturn, 'updatePrice'>;
   _scheduler: QueueScheduler;
+  interval = 30000;
 
   constructor(private store?: RedisStore) {}
 
@@ -70,7 +71,7 @@ export class PriceQueueHelper {
   async addRepeatable(tokens: PriceJobData) {
     await this.queue.add('updatePrice', tokens, {
       repeat: {
-        every: 30000,
+        every: this.interval,
         immediately: true,
       },
     });
@@ -89,7 +90,11 @@ export class RelayerQueueHelper {
     if (!this._queue) {
       this._queue = new Queue<RelayerJobData, RelayerJobReturn, RelayerJobType>(this.config.queueName, {
         connection: this.store.client,
-        defaultJobOptions: { stackTraceLimit: 100 },
+        defaultJobOptions: {
+          stackTraceLimit: 100,
+          attempts: 3,
+          backoff: 1000,
+        },
       });
     }
     return this._queue;
@@ -120,8 +125,9 @@ export class HealthQueueHelper {
   private _queue: Queue<HealthJobData, HealthJobReturn, 'checkHealth'>;
   private _worker: Worker<HealthJobData, HealthJobReturn, 'checkHealth'>;
   private _scheduler: QueueScheduler;
+  interval = 30000;
 
-  constructor(private store?: RedisStore, private config?: ConfigService) {}
+  constructor(private store?: RedisStore) {}
 
   get scheduler(): QueueScheduler {
     if (!this._scheduler) {
@@ -155,7 +161,7 @@ export class HealthQueueHelper {
   async addRepeatable() {
     await this.queue.add('checkHealth', null, {
       repeat: {
-        every: 30000,
+        every: this.interval,
         immediately: true,
       },
     });

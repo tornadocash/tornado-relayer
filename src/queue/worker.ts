@@ -27,8 +27,9 @@ export const relayerWorker = async () => {
   });
   relayer.worker.on('failed', (job, error) => {
     healthService.saveError(error, job.id);
-    console.log(error);
+    console.log(`Failed job ${job.id}: `, error);
   });
+  relayer.scheduler.on('stalled', (jobId, prev) => console.log({ jobId, prev }));
 };
 
 export const healthWorker = async () => {
@@ -42,6 +43,6 @@ export const healthWorker = async () => {
     console.log(`Job ${job.name} completed with result: `, result);
   });
   health.worker.on('failed', (job, error) => {
-    console.log(error);
+    console.log(`Failed job ${job.id}: `, error);
   });
 };
