@@ -26,15 +26,14 @@
     "dotenv": "^8.2.0",
     "ethers": "^5.6.4",
     "fastify": "^4.2.0",
-    "gas-price-oracle": "git+https://github.com/peppersec/gas-price-oracle.git#de97ca2d154480aebbe9130778a69727f3a0f00b",
+    "gas-price-oracle": "git+https://github.com/peppersec/gas-price-oracle.git#ead2fc80aae67caf20ce6d867018853e601a406d",
     "ioredis": "^5.0.6",
     "json-schema-to-ts": "^2.2.0",
-    "node-fetch": "^3.2.6",
     "reflect-metadata": "^0.1.13",
     "telegraf": "^4.8.2",
     "torn-token": "^1.0.8",
     "tsyringe": "^4.7.0",
-    "tx-manager": "git+https://github.com/tornadocash/tx-manager.git#e223c22791b5887012f24c4b15917001fc649dfe",
+    "tx-manager": "git+https://github.com/tornadocash/tx-manager.git#c67fdbc1b68332f19282c165f917c6e14b0382fd",
     "uuid": "^8.3.0"
   },
   "devDependencies": {
