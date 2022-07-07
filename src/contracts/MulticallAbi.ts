@@ -4,10 +4,13 @@
 import type { BaseContract, BigNumber, BytesLike, CallOverrides, PopulatedTransaction, Signer, utils } from 'ethers';
 import type { FunctionFragment, Result } from '@ethersproject/abi';
 import type { Listener, Provider } from '@ethersproject/providers';
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from './common';
 
 export declare namespace MultiCall {
-  export type CallStruct = { to: string; data: BytesLike };
+  export type CallStruct = {
+    to: PromiseOrValue<string>;
+    data: PromiseOrValue<BytesLike>;
+  };
 
   export type CallStructOutput = [string, string] & {
     to: string;
@@ -16,8 +19,6 @@ export declare namespace MultiCall {
 }
 
 export interface MulticallAbiInterface extends utils.Interface {
-  contractName: 'MulticallAbi';
-
   functions: {
     'multicall((address,bytes)[])': FunctionFragment;
   };
@@ -32,8 +33,6 @@ export interface MulticallAbiInterface extends utils.Interface {
 }
 
 export interface MulticallAbi extends BaseContract {
-  contractName: 'MulticallAbi';
-
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;

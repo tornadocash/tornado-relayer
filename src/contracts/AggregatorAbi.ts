@@ -15,11 +15,9 @@ import type {
 } from 'ethers';
 import type { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
 import type { Listener, Provider } from '@ethersproject/providers';
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from './common';
 
 export interface AggregatorAbiInterface extends utils.Interface {
-  contractName: 'AggregatorAbi';
-
   functions: {
     'addConnector(address)': FunctionFragment;
     'addOracle(address,uint8)': FunctionFragment;
@@ -53,19 +51,22 @@ export interface AggregatorAbiInterface extends utils.Interface {
       | 'transferOwnership',
   ): FunctionFragment;
 
-  encodeFunctionData(functionFragment: 'addConnector', values: [string]): string;
-  encodeFunctionData(functionFragment: 'addOracle', values: [string, BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'addConnector', values: [PromiseOrValue<string>]): string;
+  encodeFunctionData(functionFragment: 'addOracle', values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
   encodeFunctionData(functionFragment: 'connectors', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'getRate', values: [string, string, boolean]): string;
-  encodeFunctionData(functionFragment: 'getRateToEth', values: [string, boolean]): string;
+  encodeFunctionData(
+    functionFragment: 'getRate',
+    values: [PromiseOrValue<string>, PromiseOrValue<string>, PromiseOrValue<boolean>],
+  ): string;
+  encodeFunctionData(functionFragment: 'getRateToEth', values: [PromiseOrValue<string>, PromiseOrValue<boolean>]): string;
   encodeFunctionData(functionFragment: 'multiWrapper', values?: undefined): string;
   encodeFunctionData(functionFragment: 'oracles', values?: undefined): string;
   encodeFunctionData(functionFragment: 'owner', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'removeConnector', values: [string]): string;
-  encodeFunctionData(functionFragment: 'removeOracle', values: [string, BigNumberish]): string;
+  encodeFunctionData(functionFragment: 'removeConnector', values: [PromiseOrValue<string>]): string;
+  encodeFunctionData(functionFragment: 'removeOracle', values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
   encodeFunctionData(functionFragment: 'renounceOwnership', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'setMultiWrapper', values: [string]): string;
-  encodeFunctionData(functionFragment: 'transferOwnership', values: [string]): string;
+  encodeFunctionData(functionFragment: 'setMultiWrapper', values: [PromiseOrValue<string>]): string;
+  encodeFunctionData(functionFragment: 'transferOwnership', values: [PromiseOrValue<string>]): string;
 
   decodeFunctionResult(functionFragment: 'addConnector', data: BytesLike): Result;
   decodeFunctionResult(functionFragment: 'addOracle', data: BytesLike): Result;
@@ -144,8 +145,6 @@ export type OwnershipTransferredEvent = TypedEvent<[string, string], OwnershipTr
 export type OwnershipTransferredEventFilter = TypedEventFilter<OwnershipTransferredEvent>;
 
 export interface AggregatorAbi extends BaseContract {
-  contractName: 'AggregatorAbi';
-
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -168,26 +167,29 @@ export interface AggregatorAbi extends BaseContract {
   removeListener: OnEvent<this>;
 
   functions: {
-    addConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    addConnector(
+      connector: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<ContractTransaction>;
 
     addOracle(
-      oracle: string,
-      oracleKind: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     connectors(overrides?: CallOverrides): Promise<[string[]] & { allConnectors: string[] }>;
 
     getRate(
-      srcToken: string,
-      dstToken: string,
-      useWrappers: boolean,
+      srcToken: PromiseOrValue<string>,
+      dstToken: PromiseOrValue<string>,
+      useWrappers: PromiseOrValue<boolean>,
       overrides?: CallOverrides,
     ): Promise<[BigNumber] & { weightedRate: BigNumber }>;
 
     getRateToEth(
-      srcToken: string,
-      useSrcWrappers: boolean,
+      srcToken: PromiseOrValue<string>,
+      useSrcWrappers: PromiseOrValue<boolean>,
       overrides?: CallOverrides,
     ): Promise<[BigNumber] & { weightedRate: BigNumber }>;
 
@@ -197,40 +199,55 @@ export interface AggregatorAbi extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    removeConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
-
-    removeOracle(
-      oracle: string,
-      oracleKind: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+    removeConnector(
+      connector: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
-    renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+    removeOracle(
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<ContractTransaction>;
+
+    renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<ContractTransaction>;
 
     setMultiWrapper(
-      _multiWrapper: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      _multiWrapper: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
   };
 
-  addConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+  addConnector(
+    connector: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
+  ): Promise<ContractTransaction>;
 
   addOracle(
-    oracle: string,
-    oracleKind: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    oracle: PromiseOrValue<string>,
+    oracleKind: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   connectors(overrides?: CallOverrides): Promise<string[]>;
 
-  getRate(srcToken: string, dstToken: string, useWrappers: boolean, overrides?: CallOverrides): Promise<BigNumber>;
+  getRate(
+    srcToken: PromiseOrValue<string>,
+    dstToken: PromiseOrValue<string>,
+    useWrappers: PromiseOrValue<boolean>,
+    overrides?: CallOverrides,
+  ): Promise<BigNumber>;
 
-  getRateToEth(srcToken: string, useSrcWrappers: boolean, overrides?: CallOverrides): Promise<BigNumber>;
+  getRateToEth(
+    srcToken: PromiseOrValue<string>,
+    useSrcWrappers: PromiseOrValue<boolean>,
+    overrides?: CallOverrides,
+  ): Promise<BigNumber>;
 
   multiWrapper(overrides?: CallOverrides): Promise<string>;
 
@@ -238,33 +255,48 @@ export interface AggregatorAbi extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  removeConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+  removeConnector(
+    connector: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
+  ): Promise<ContractTransaction>;
 
   removeOracle(
-    oracle: string,
-    oracleKind: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    oracle: PromiseOrValue<string>,
+    oracleKind: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
-  renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+  renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<ContractTransaction>;
 
   setMultiWrapper(
-    _multiWrapper: string,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    _multiWrapper: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
-  transferOwnership(newOwner: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<ContractTransaction>;
+  transferOwnership(
+    newOwner: PromiseOrValue<string>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
+  ): Promise<ContractTransaction>;
 
   callStatic: {
-    addConnector(connector: string, overrides?: CallOverrides): Promise<void>;
+    addConnector(connector: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
 
-    addOracle(oracle: string, oracleKind: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    addOracle(oracle: PromiseOrValue<string>, oracleKind: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
 
     connectors(overrides?: CallOverrides): Promise<string[]>;
 
-    getRate(srcToken: string, dstToken: string, useWrappers: boolean, overrides?: CallOverrides): Promise<BigNumber>;
+    getRate(
+      srcToken: PromiseOrValue<string>,
+      dstToken: PromiseOrValue<string>,
+      useWrappers: PromiseOrValue<boolean>,
+      overrides?: CallOverrides,
+    ): Promise<BigNumber>;
 
-    getRateToEth(srcToken: string, useSrcWrappers: boolean, overrides?: CallOverrides): Promise<BigNumber>;
+    getRateToEth(
+      srcToken: PromiseOrValue<string>,
+      useSrcWrappers: PromiseOrValue<boolean>,
+      overrides?: CallOverrides,
+    ): Promise<BigNumber>;
 
     multiWrapper(overrides?: CallOverrides): Promise<string>;
 
@@ -272,15 +304,19 @@ export interface AggregatorAbi extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    removeConnector(connector: string, overrides?: CallOverrides): Promise<void>;
+    removeConnector(connector: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
 
-    removeOracle(oracle: string, oracleKind: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    removeOracle(
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides,
+    ): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
-    setMultiWrapper(_multiWrapper: string, overrides?: CallOverrides): Promise<void>;
+    setMultiWrapper(_multiWrapper: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
 
-    transferOwnership(newOwner: string, overrides?: CallOverrides): Promise<void>;
+    transferOwnership(newOwner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<void>;
   };
 
   filters: {
@@ -300,26 +336,41 @@ export interface AggregatorAbi extends BaseContract {
     OracleRemoved(oracle?: null, oracleType?: null): OracleRemovedEventFilter;
 
     'OwnershipTransferred(address,address)'(
-      previousOwner?: string | null,
-      newOwner?: string | null,
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null,
     ): OwnershipTransferredEventFilter;
-    OwnershipTransferred(previousOwner?: string | null, newOwner?: string | null): OwnershipTransferredEventFilter;
+    OwnershipTransferred(
+      previousOwner?: PromiseOrValue<string> | null,
+      newOwner?: PromiseOrValue<string> | null,
+    ): OwnershipTransferredEventFilter;
   };
 
   estimateGas: {
-    addConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+    addConnector(
+      connector: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<BigNumber>;
 
     addOracle(
-      oracle: string,
-      oracleKind: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
     connectors(overrides?: CallOverrides): Promise<BigNumber>;
 
-    getRate(srcToken: string, dstToken: string, useWrappers: boolean, overrides?: CallOverrides): Promise<BigNumber>;
+    getRate(
+      srcToken: PromiseOrValue<string>,
+      dstToken: PromiseOrValue<string>,
+      useWrappers: PromiseOrValue<boolean>,
+      overrides?: CallOverrides,
+    ): Promise<BigNumber>;
 
-    getRateToEth(srcToken: string, useSrcWrappers: boolean, overrides?: CallOverrides): Promise<BigNumber>;
+    getRateToEth(
+      srcToken: PromiseOrValue<string>,
+      useSrcWrappers: PromiseOrValue<boolean>,
+      overrides?: CallOverrides,
+    ): Promise<BigNumber>;
 
     multiWrapper(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -327,35 +378,56 @@ export interface AggregatorAbi extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    removeConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
-
-    removeOracle(
-      oracle: string,
-      oracleKind: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+    removeConnector(
+      connector: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
-    renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+    removeOracle(
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<BigNumber>;
 
-    setMultiWrapper(_multiWrapper: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+    renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<BigNumber>;
 
-    transferOwnership(newOwner: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+    setMultiWrapper(
+      _multiWrapper: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<BigNumber>;
+
+    transferOwnership(
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    addConnector(connector: string, overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+    addConnector(
+      connector: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<PopulatedTransaction>;
 
     addOracle(
-      oracle: string,
-      oracleKind: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     connectors(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    getRate(srcToken: string, dstToken: string, useWrappers: boolean, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getRate(
+      srcToken: PromiseOrValue<string>,
+      dstToken: PromiseOrValue<string>,
+      useWrappers: PromiseOrValue<boolean>,
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
 
-    getRateToEth(srcToken: string, useSrcWrappers: boolean, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    getRateToEth(
+      srcToken: PromiseOrValue<string>,
+      useSrcWrappers: PromiseOrValue<boolean>,
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
 
     multiWrapper(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -364,26 +436,26 @@ export interface AggregatorAbi extends BaseContract {
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     removeConnector(
-      connector: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      connector: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     removeOracle(
-      oracle: string,
-      oracleKind: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      oracle: PromiseOrValue<string>,
+      oracleKind: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
-    renounceOwnership(overrides?: Overrides & { from?: string | Promise<string> }): Promise<PopulatedTransaction>;
+    renounceOwnership(overrides?: Overrides & { from?: PromiseOrValue<string> }): Promise<PopulatedTransaction>;
 
     setMultiWrapper(
-      _multiWrapper: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      _multiWrapper: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      newOwner: PromiseOrValue<string>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
   };
 }

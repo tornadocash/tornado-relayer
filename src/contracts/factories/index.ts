@@ -5,6 +5,7 @@ export { AggregatorAbi__factory } from './AggregatorAbi__factory';
 export { ERC20Abi__factory } from './ERC20Abi__factory';
 export { MulticallAbi__factory } from './MulticallAbi__factory';
 export { OffchainOracleAbi__factory } from './OffchainOracleAbi__factory';
+export { OvmGasPriceOracleABI__factory } from './OvmGasPriceOracleABI__factory';
 export { ProxyLightABI__factory } from './ProxyLightABI__factory';
 export { TornadoABI__factory } from './TornadoABI__factory';
 export { TornadoProxyABI__factory } from './TornadoProxyABI__factory';

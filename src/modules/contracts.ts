@@ -2,11 +2,20 @@ import {
   ERC20Abi__factory,
   MulticallAbi__factory,
   OffchainOracleAbi__factory,
+  OvmGasPriceOracleABI__factory,
   ProxyLightABI__factory,
   TornadoProxyABI__factory,
 } from '../contracts';
 import { providers } from 'ethers';
-import { mainnetRpcUrl, multiCallAddress, netId, offchainOracleAddress, oracleRpcUrl, rpcUrl } from '../config';
+import {
+  mainnetRpcUrl,
+  multiCallAddress,
+  netId,
+  offchainOracleAddress,
+  oracleRpcUrl,
+  ovmGasPriceOracleContract,
+  rpcUrl,
+} from '../config';
 
 export function getProvider(isStatic = true, customRpcUrl?: string, chainId = netId) {
   const url = customRpcUrl || rpcUrl;
@@ -31,4 +40,7 @@ export const getMultiCallContract = () => {
 
 export const getTornTokenContract = (tokenAddress: string) => {
   return ERC20Abi__factory.connect(tokenAddress, getProvider(true, mainnetRpcUrl));
+};
+export const getOvmGasPriceOracle = () => {
+  return OvmGasPriceOracleABI__factory.connect(ovmGasPriceOracleContract, getProvider());
 };

@@ -15,11 +15,9 @@ import type {
 } from 'ethers';
 import type { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
 import type { Listener, Provider } from '@ethersproject/providers';
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from './common';
 
 export interface ERC20AbiInterface extends utils.Interface {
-  contractName: 'ERC20Abi';
-
   functions: {
     'totalSupply()': FunctionFragment;
     '_totalSupply()': FunctionFragment;
@@ -47,15 +45,26 @@ export interface ERC20AbiInterface extends utils.Interface {
 
   encodeFunctionData(functionFragment: 'totalSupply', values?: undefined): string;
   encodeFunctionData(functionFragment: '_totalSupply', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'balanceOf', values: [string]): string;
-  encodeFunctionData(functionFragment: 'transfer', values: [string, BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'allowance', values: [string, string]): string;
-  encodeFunctionData(functionFragment: 'transferFrom', values: [string, string, BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'approve', values: [string, BigNumberish]): string;
-  encodeFunctionData(functionFragment: 'nonces', values: [string]): string;
+  encodeFunctionData(functionFragment: 'balanceOf', values: [PromiseOrValue<string>]): string;
+  encodeFunctionData(functionFragment: 'transfer', values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
+  encodeFunctionData(functionFragment: 'allowance', values: [PromiseOrValue<string>, PromiseOrValue<string>]): string;
+  encodeFunctionData(
+    functionFragment: 'transferFrom',
+    values: [PromiseOrValue<string>, PromiseOrValue<string>, PromiseOrValue<BigNumberish>],
+  ): string;
+  encodeFunctionData(functionFragment: 'approve', values: [PromiseOrValue<string>, PromiseOrValue<BigNumberish>]): string;
+  encodeFunctionData(functionFragment: 'nonces', values: [PromiseOrValue<string>]): string;
   encodeFunctionData(
     functionFragment: 'permit',
-    values: [string, string, BigNumberish, BigNumberish, BigNumberish, BytesLike, BytesLike],
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+    ],
   ): string;
 
   decodeFunctionResult(functionFragment: 'totalSupply', data: BytesLike): Result;
@@ -96,8 +105,6 @@ export type TransferEvent = TypedEvent<[string, string, BigNumber], TransferEven
 export type TransferEventFilter = TypedEventFilter<TransferEvent>;
 
 export interface ERC20Abi extends BaseContract {
-  contractName: 'ERC20Abi';
-
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -124,40 +131,40 @@ export interface ERC20Abi extends BaseContract {
 
     _totalSupply(overrides?: CallOverrides): Promise<[BigNumber]>;
 
-    balanceOf(who: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    balanceOf(who: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transfer(
-      to: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
-    allowance(owner: string, spender: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    allowance(owner: PromiseOrValue<string>, spender: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     transferFrom(
-      from: string,
-      to: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     approve(
-      spender: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      spender: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
-    nonces(owner: string, overrides?: CallOverrides): Promise<[BigNumber]>;
+    nonces(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[BigNumber]>;
 
     permit(
-      owner: string,
-      spender: string,
-      amount: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      owner: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
+      v: PromiseOrValue<BigNumberish>,
+      r: PromiseOrValue<BytesLike>,
+      s: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
   };
 
@@ -165,40 +172,40 @@ export interface ERC20Abi extends BaseContract {
 
   _totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
-  balanceOf(who: string, overrides?: CallOverrides): Promise<BigNumber>;
+  balanceOf(who: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
   transfer(
-    to: string,
-    value: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    to: PromiseOrValue<string>,
+    value: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
-  allowance(owner: string, spender: string, overrides?: CallOverrides): Promise<BigNumber>;
+  allowance(owner: PromiseOrValue<string>, spender: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
   transferFrom(
-    from: string,
-    to: string,
-    value: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    from: PromiseOrValue<string>,
+    to: PromiseOrValue<string>,
+    value: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   approve(
-    spender: string,
-    value: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    spender: PromiseOrValue<string>,
+    value: PromiseOrValue<BigNumberish>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
-  nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+  nonces(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
   permit(
-    owner: string,
-    spender: string,
-    amount: BigNumberish,
-    deadline: BigNumberish,
-    v: BigNumberish,
-    r: BytesLike,
-    s: BytesLike,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    owner: PromiseOrValue<string>,
+    spender: PromiseOrValue<string>,
+    amount: PromiseOrValue<BigNumberish>,
+    deadline: PromiseOrValue<BigNumberish>,
+    v: PromiseOrValue<BigNumberish>,
+    r: PromiseOrValue<BytesLike>,
+    s: PromiseOrValue<BytesLike>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
@@ -206,36 +213,49 @@ export interface ERC20Abi extends BaseContract {
 
     _totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
-    balanceOf(who: string, overrides?: CallOverrides): Promise<BigNumber>;
+    balanceOf(who: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
-    transfer(to: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    transfer(to: PromiseOrValue<string>, value: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
 
-    allowance(owner: string, spender: string, overrides?: CallOverrides): Promise<BigNumber>;
+    allowance(owner: PromiseOrValue<string>, spender: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
-    transferFrom(from: string, to: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    transferFrom(
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: CallOverrides,
+    ): Promise<void>;
 
-    approve(spender: string, value: BigNumberish, overrides?: CallOverrides): Promise<void>;
+    approve(spender: PromiseOrValue<string>, value: PromiseOrValue<BigNumberish>, overrides?: CallOverrides): Promise<void>;
 
-    nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+    nonces(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
     permit(
-      owner: string,
-      spender: string,
-      amount: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
+      owner: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
+      v: PromiseOrValue<BigNumberish>,
+      r: PromiseOrValue<BytesLike>,
+      s: PromiseOrValue<BytesLike>,
       overrides?: CallOverrides,
     ): Promise<void>;
   };
 
   filters: {
-    'Approval(address,address,uint256)'(owner?: string | null, spender?: string | null, value?: null): ApprovalEventFilter;
-    Approval(owner?: string | null, spender?: string | null, value?: null): ApprovalEventFilter;
+    'Approval(address,address,uint256)'(
+      owner?: PromiseOrValue<string> | null,
+      spender?: PromiseOrValue<string> | null,
+      value?: null,
+    ): ApprovalEventFilter;
+    Approval(owner?: PromiseOrValue<string> | null, spender?: PromiseOrValue<string> | null, value?: null): ApprovalEventFilter;
 
-    'Transfer(address,address,uint256)'(from?: string | null, to?: string | null, value?: null): TransferEventFilter;
-    Transfer(from?: string | null, to?: string | null, value?: null): TransferEventFilter;
+    'Transfer(address,address,uint256)'(
+      from?: PromiseOrValue<string> | null,
+      to?: PromiseOrValue<string> | null,
+      value?: null,
+    ): TransferEventFilter;
+    Transfer(from?: PromiseOrValue<string> | null, to?: PromiseOrValue<string> | null, value?: null): TransferEventFilter;
   };
 
   estimateGas: {
@@ -243,36 +263,40 @@ export interface ERC20Abi extends BaseContract {
 
     _totalSupply(overrides?: CallOverrides): Promise<BigNumber>;
 
-    balanceOf(who: string, overrides?: CallOverrides): Promise<BigNumber>;
+    balanceOf(who: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
-    transfer(to: string, value: BigNumberish, overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+    transfer(
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<BigNumber>;
 
-    allowance(owner: string, spender: string, overrides?: CallOverrides): Promise<BigNumber>;
+    allowance(owner: PromiseOrValue<string>, spender: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
     transferFrom(
-      from: string,
-      to: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
     approve(
-      spender: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      spender: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
-    nonces(owner: string, overrides?: CallOverrides): Promise<BigNumber>;
+    nonces(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
     permit(
-      owner: string,
-      spender: string,
-      amount: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      owner: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
+      v: PromiseOrValue<BigNumberish>,
+      r: PromiseOrValue<BytesLike>,
+      s: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
   };
 
@@ -281,40 +305,44 @@ export interface ERC20Abi extends BaseContract {
 
     _totalSupply(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    balanceOf(who: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    balanceOf(who: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     transfer(
-      to: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
-    allowance(owner: string, spender: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    allowance(
+      owner: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
+      overrides?: CallOverrides,
+    ): Promise<PopulatedTransaction>;
 
     transferFrom(
-      from: string,
-      to: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      from: PromiseOrValue<string>,
+      to: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     approve(
-      spender: string,
-      value: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      spender: PromiseOrValue<string>,
+      value: PromiseOrValue<BigNumberish>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
-    nonces(owner: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    nonces(owner: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     permit(
-      owner: string,
-      spender: string,
-      amount: BigNumberish,
-      deadline: BigNumberish,
-      v: BigNumberish,
-      r: BytesLike,
-      s: BytesLike,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      owner: PromiseOrValue<string>,
+      spender: PromiseOrValue<string>,
+      amount: PromiseOrValue<BigNumberish>,
+      deadline: PromiseOrValue<BigNumberish>,
+      v: PromiseOrValue<BigNumberish>,
+      r: PromiseOrValue<BytesLike>,
+      s: PromiseOrValue<BytesLike>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
   };
 }

@@ -16,11 +16,9 @@ import type {
 } from 'ethers';
 import type { FunctionFragment, Result } from '@ethersproject/abi';
 import type { Listener, Provider } from '@ethersproject/providers';
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from './common';
 
 export interface TornadoProxyABIInterface extends utils.Interface {
-  contractName: 'TornadoProxyABI';
-
   functions: {
     'governance()': FunctionFragment;
     'instances(address)': FunctionFragment;
@@ -36,14 +34,23 @@ export interface TornadoProxyABIInterface extends utils.Interface {
   ): FunctionFragment;
 
   encodeFunctionData(functionFragment: 'governance', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'instances', values: [string]): string;
-  encodeFunctionData(functionFragment: 'resolve', values: [BytesLike]): string;
+  encodeFunctionData(functionFragment: 'instances', values: [PromiseOrValue<string>]): string;
+  encodeFunctionData(functionFragment: 'resolve', values: [PromiseOrValue<BytesLike>]): string;
   encodeFunctionData(functionFragment: 'tornadoTrees', values?: undefined): string;
-  encodeFunctionData(functionFragment: 'deposit', values: [string, BytesLike]): string;
-  encodeFunctionData(functionFragment: 'updateInstances', values: [string, boolean]): string;
+  encodeFunctionData(functionFragment: 'deposit', values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>]): string;
+  encodeFunctionData(functionFragment: 'updateInstances', values: [PromiseOrValue<string>, PromiseOrValue<boolean>]): string;
   encodeFunctionData(
     functionFragment: 'withdraw',
-    values: [string, BytesLike, BytesLike, BytesLike, string, string, BigNumberish, BigNumberish],
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+    ],
   ): string;
 
   decodeFunctionResult(functionFragment: 'governance', data: BytesLike): Result;
@@ -58,8 +65,6 @@ export interface TornadoProxyABIInterface extends utils.Interface {
 }
 
 export interface TornadoProxyABI extends BaseContract {
-  contractName: 'TornadoProxyABI';
-
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -84,91 +89,91 @@ export interface TornadoProxyABI extends BaseContract {
   functions: {
     governance(overrides?: CallOverrides): Promise<[string]>;
 
-    instances(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
+    instances(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<[boolean]>;
 
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<[string]>;
+    resolve(node: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<[string]>;
 
     tornadoTrees(overrides?: CallOverrides): Promise<[string]>;
 
     deposit(
-      tornado: string,
-      commitment: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      tornado: PromiseOrValue<string>,
+      commitment: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     updateInstances(
-      instance: string,
-      update: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      instance: PromiseOrValue<string>,
+      update: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     withdraw(
-      tornado: string,
-      proof: BytesLike,
-      root: BytesLike,
-      nullifierHash: BytesLike,
-      recipient: string,
-      relayer: string,
-      fee: BigNumberish,
-      refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      tornado: PromiseOrValue<string>,
+      proof: PromiseOrValue<BytesLike>,
+      root: PromiseOrValue<BytesLike>,
+      nullifierHash: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      relayer: PromiseOrValue<string>,
+      fee: PromiseOrValue<BigNumberish>,
+      refund: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
   };
 
   governance(overrides?: CallOverrides): Promise<string>;
 
-  instances(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+  instances(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
 
-  resolve(node: BytesLike, overrides?: CallOverrides): Promise<string>;
+  resolve(node: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
 
   tornadoTrees(overrides?: CallOverrides): Promise<string>;
 
   deposit(
-    tornado: string,
-    commitment: BytesLike,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
+    tornado: PromiseOrValue<string>,
+    commitment: PromiseOrValue<BytesLike>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   updateInstances(
-    instance: string,
-    update: boolean,
-    overrides?: Overrides & { from?: string | Promise<string> },
+    instance: PromiseOrValue<string>,
+    update: PromiseOrValue<boolean>,
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   withdraw(
-    tornado: string,
-    proof: BytesLike,
-    root: BytesLike,
-    nullifierHash: BytesLike,
-    recipient: string,
-    relayer: string,
-    fee: BigNumberish,
-    refund: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
+    tornado: PromiseOrValue<string>,
+    proof: PromiseOrValue<BytesLike>,
+    root: PromiseOrValue<BytesLike>,
+    nullifierHash: PromiseOrValue<BytesLike>,
+    recipient: PromiseOrValue<string>,
+    relayer: PromiseOrValue<string>,
+    fee: PromiseOrValue<BigNumberish>,
+    refund: PromiseOrValue<BigNumberish>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
     governance(overrides?: CallOverrides): Promise<string>;
 
-    instances(arg0: string, overrides?: CallOverrides): Promise<boolean>;
+    instances(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<boolean>;
 
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<string>;
+    resolve(node: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<string>;
 
     tornadoTrees(overrides?: CallOverrides): Promise<string>;
 
-    deposit(tornado: string, commitment: BytesLike, overrides?: CallOverrides): Promise<void>;
+    deposit(tornado: PromiseOrValue<string>, commitment: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<void>;
 
-    updateInstances(instance: string, update: boolean, overrides?: CallOverrides): Promise<void>;
+    updateInstances(instance: PromiseOrValue<string>, update: PromiseOrValue<boolean>, overrides?: CallOverrides): Promise<void>;
 
     withdraw(
-      tornado: string,
-      proof: BytesLike,
-      root: BytesLike,
-      nullifierHash: BytesLike,
-      recipient: string,
-      relayer: string,
-      fee: BigNumberish,
-      refund: BigNumberish,
+      tornado: PromiseOrValue<string>,
+      proof: PromiseOrValue<BytesLike>,
+      root: PromiseOrValue<BytesLike>,
+      nullifierHash: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      relayer: PromiseOrValue<string>,
+      fee: PromiseOrValue<BigNumberish>,
+      refund: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides,
     ): Promise<void>;
   };
@@ -178,68 +183,68 @@ export interface TornadoProxyABI extends BaseContract {
   estimateGas: {
     governance(overrides?: CallOverrides): Promise<BigNumber>;
 
-    instances(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+    instances(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<BigNumber>;
 
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<BigNumber>;
+    resolve(node: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<BigNumber>;
 
     tornadoTrees(overrides?: CallOverrides): Promise<BigNumber>;
 
     deposit(
-      tornado: string,
-      commitment: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      tornado: PromiseOrValue<string>,
+      commitment: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
     updateInstances(
-      instance: string,
-      update: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      instance: PromiseOrValue<string>,
+      update: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
     withdraw(
-      tornado: string,
-      proof: BytesLike,
-      root: BytesLike,
-      nullifierHash: BytesLike,
-      recipient: string,
-      relayer: string,
-      fee: BigNumberish,
-      refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      tornado: PromiseOrValue<string>,
+      proof: PromiseOrValue<BytesLike>,
+      root: PromiseOrValue<BytesLike>,
+      nullifierHash: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      relayer: PromiseOrValue<string>,
+      fee: PromiseOrValue<BigNumberish>,
+      refund: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     governance(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    instances(arg0: string, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    instances(arg0: PromiseOrValue<string>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    resolve(node: BytesLike, overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    resolve(node: PromiseOrValue<BytesLike>, overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     tornadoTrees(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     deposit(
-      tornado: string,
-      commitment: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      tornado: PromiseOrValue<string>,
+      commitment: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     updateInstances(
-      instance: string,
-      update: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> },
+      instance: PromiseOrValue<string>,
+      update: PromiseOrValue<boolean>,
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     withdraw(
-      tornado: string,
-      proof: BytesLike,
-      root: BytesLike,
-      nullifierHash: BytesLike,
-      recipient: string,
-      relayer: string,
-      fee: BigNumberish,
-      refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      tornado: PromiseOrValue<string>,
+      proof: PromiseOrValue<BytesLike>,
+      root: PromiseOrValue<BytesLike>,
+      nullifierHash: PromiseOrValue<BytesLike>,
+      recipient: PromiseOrValue<string>,
+      relayer: PromiseOrValue<string>,
+      fee: PromiseOrValue<BigNumberish>,
+      refund: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
   };
 }

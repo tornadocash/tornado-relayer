@@ -16,11 +16,9 @@ import type {
 } from 'ethers';
 import type { FunctionFragment, Result, EventFragment } from '@ethersproject/abi';
 import type { Listener, Provider } from '@ethersproject/providers';
-import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent } from './common';
+import type { TypedEventFilter, TypedEvent, TypedListener, OnEvent, PromiseOrValue } from './common';
 
 export interface ProxyLightABIInterface extends utils.Interface {
-  contractName: 'ProxyLightABI';
-
   functions: {
     'backupNotes(bytes[])': FunctionFragment;
     'deposit(address,bytes32,bytes)': FunctionFragment;
@@ -29,11 +27,23 @@ export interface ProxyLightABIInterface extends utils.Interface {
 
   getFunction(nameOrSignatureOrTopic: 'backupNotes' | 'deposit' | 'withdraw'): FunctionFragment;
 
-  encodeFunctionData(functionFragment: 'backupNotes', values: [BytesLike[]]): string;
-  encodeFunctionData(functionFragment: 'deposit', values: [string, BytesLike, BytesLike]): string;
+  encodeFunctionData(functionFragment: 'backupNotes', values: [PromiseOrValue<BytesLike>[]]): string;
+  encodeFunctionData(
+    functionFragment: 'deposit',
+    values: [PromiseOrValue<string>, PromiseOrValue<BytesLike>, PromiseOrValue<BytesLike>],
+  ): string;
   encodeFunctionData(
     functionFragment: 'withdraw',
-    values: [string, BytesLike, BytesLike, BytesLike, string, string, BigNumberish, BigNumberish],
+    values: [
+      PromiseOrValue<string>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<BytesLike>,
+      PromiseOrValue<string>,
+      PromiseOrValue<string>,
+      PromiseOrValue<BigNumberish>,
+      PromiseOrValue<BigNumberish>,
+    ],
   ): string;
 
   decodeFunctionResult(functionFragment: 'backupNotes', data: BytesLike): Result;
@@ -56,8 +66,6 @@ export type EncryptedNoteEvent = TypedEvent<[string, string], EncryptedNoteEvent
 export type EncryptedNoteEventFilter = TypedEventFilter<EncryptedNoteEvent>;
 
 export interface ProxyLightABI extends BaseContract {
-  contractName: 'ProxyLightABI';
-
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -81,123 +89,131 @@ export interface ProxyLightABI extends BaseContract {
 
   functions: {
     backupNotes(
-      _encryptedNotes: BytesLike[],
-      overrides?: Overrides & { from?: string | Promise<string> },
+      _encryptedNotes: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     deposit(
-      _tornado: string,
-      _commitment: BytesLike,
-      _encryptedNote: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _tornado: PromiseOrValue<string>,
+      _commitment: PromiseOrValue<BytesLike>,
+      _encryptedNote: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
 
     withdraw(
-      _tornado: string,
-      _proof: BytesLike,
-      _root: BytesLike,
-      _nullifierHash: BytesLike,
-      _recipient: string,
-      _relayer: string,
-      _fee: BigNumberish,
-      _refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _tornado: PromiseOrValue<string>,
+      _proof: PromiseOrValue<BytesLike>,
+      _root: PromiseOrValue<BytesLike>,
+      _nullifierHash: PromiseOrValue<BytesLike>,
+      _recipient: PromiseOrValue<string>,
+      _relayer: PromiseOrValue<string>,
+      _fee: PromiseOrValue<BigNumberish>,
+      _refund: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<ContractTransaction>;
   };
 
   backupNotes(
-    _encryptedNotes: BytesLike[],
-    overrides?: Overrides & { from?: string | Promise<string> },
+    _encryptedNotes: PromiseOrValue<BytesLike>[],
+    overrides?: Overrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   deposit(
-    _tornado: string,
-    _commitment: BytesLike,
-    _encryptedNote: BytesLike,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
+    _tornado: PromiseOrValue<string>,
+    _commitment: PromiseOrValue<BytesLike>,
+    _encryptedNote: PromiseOrValue<BytesLike>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   withdraw(
-    _tornado: string,
-    _proof: BytesLike,
-    _root: BytesLike,
-    _nullifierHash: BytesLike,
-    _recipient: string,
-    _relayer: string,
-    _fee: BigNumberish,
-    _refund: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> },
+    _tornado: PromiseOrValue<string>,
+    _proof: PromiseOrValue<BytesLike>,
+    _root: PromiseOrValue<BytesLike>,
+    _nullifierHash: PromiseOrValue<BytesLike>,
+    _recipient: PromiseOrValue<string>,
+    _relayer: PromiseOrValue<string>,
+    _fee: PromiseOrValue<BigNumberish>,
+    _refund: PromiseOrValue<BigNumberish>,
+    overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    backupNotes(_encryptedNotes: BytesLike[], overrides?: CallOverrides): Promise<void>;
+    backupNotes(_encryptedNotes: PromiseOrValue<BytesLike>[], overrides?: CallOverrides): Promise<void>;
 
-    deposit(_tornado: string, _commitment: BytesLike, _encryptedNote: BytesLike, overrides?: CallOverrides): Promise<void>;
+    deposit(
+      _tornado: PromiseOrValue<string>,
+      _commitment: PromiseOrValue<BytesLike>,
+      _encryptedNote: PromiseOrValue<BytesLike>,
+      overrides?: CallOverrides,
+    ): Promise<void>;
 
     withdraw(
-      _tornado: string,
-      _proof: BytesLike,
-      _root: BytesLike,
-      _nullifierHash: BytesLike,
-      _recipient: string,
-      _relayer: string,
-      _fee: BigNumberish,
-      _refund: BigNumberish,
+      _tornado: PromiseOrValue<string>,
+      _proof: PromiseOrValue<BytesLike>,
+      _root: PromiseOrValue<BytesLike>,
+      _nullifierHash: PromiseOrValue<BytesLike>,
+      _recipient: PromiseOrValue<string>,
+      _relayer: PromiseOrValue<string>,
+      _fee: PromiseOrValue<BigNumberish>,
+      _refund: PromiseOrValue<BigNumberish>,
       overrides?: CallOverrides,
     ): Promise<void>;
   };
 
   filters: {
-    'EncryptedNote(address,bytes)'(sender?: string | null, encryptedNote?: null): EncryptedNoteEventFilter;
-    EncryptedNote(sender?: string | null, encryptedNote?: null): EncryptedNoteEventFilter;
+    'EncryptedNote(address,bytes)'(sender?: PromiseOrValue<string> | null, encryptedNote?: null): EncryptedNoteEventFilter;
+    EncryptedNote(sender?: PromiseOrValue<string> | null, encryptedNote?: null): EncryptedNoteEventFilter;
   };
 
   estimateGas: {
-    backupNotes(_encryptedNotes: BytesLike[], overrides?: Overrides & { from?: string | Promise<string> }): Promise<BigNumber>;
+    backupNotes(
+      _encryptedNotes: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
+    ): Promise<BigNumber>;
 
     deposit(
-      _tornado: string,
-      _commitment: BytesLike,
-      _encryptedNote: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _tornado: PromiseOrValue<string>,
+      _commitment: PromiseOrValue<BytesLike>,
+      _encryptedNote: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
 
     withdraw(
-      _tornado: string,
-      _proof: BytesLike,
-      _root: BytesLike,
-      _nullifierHash: BytesLike,
-      _recipient: string,
-      _relayer: string,
-      _fee: BigNumberish,
-      _refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _tornado: PromiseOrValue<string>,
+      _proof: PromiseOrValue<BytesLike>,
+      _root: PromiseOrValue<BytesLike>,
+      _nullifierHash: PromiseOrValue<BytesLike>,
+      _recipient: PromiseOrValue<string>,
+      _relayer: PromiseOrValue<string>,
+      _fee: PromiseOrValue<BigNumberish>,
+      _refund: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
     backupNotes(
-      _encryptedNotes: BytesLike[],
-      overrides?: Overrides & { from?: string | Promise<string> },
+      _encryptedNotes: PromiseOrValue<BytesLike>[],
+      overrides?: Overrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     deposit(
-      _tornado: string,
-      _commitment: BytesLike,
-      _encryptedNote: BytesLike,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _tornado: PromiseOrValue<string>,
+      _commitment: PromiseOrValue<BytesLike>,
+      _encryptedNote: PromiseOrValue<BytesLike>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
 
     withdraw(
-      _tornado: string,
-      _proof: BytesLike,
-      _root: BytesLike,
-      _nullifierHash: BytesLike,
-      _recipient: string,
-      _relayer: string,
-      _fee: BigNumberish,
-      _refund: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> },
+      _tornado: PromiseOrValue<string>,
+      _proof: PromiseOrValue<BytesLike>,
+      _root: PromiseOrValue<BytesLike>,
+      _nullifierHash: PromiseOrValue<BytesLike>,
+      _recipient: PromiseOrValue<string>,
+      _relayer: PromiseOrValue<string>,
+      _fee: PromiseOrValue<BigNumberish>,
+      _refund: PromiseOrValue<BigNumberish>,
+      overrides?: PayableOverrides & { from?: PromiseOrValue<string> },
     ): Promise<PopulatedTransaction>;
   };
 }
