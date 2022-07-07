@@ -27,6 +27,7 @@ export const rewardAccount = process.env.REWARD_ACCOUNT;
 export const governanceAddress = '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce';
 export const tornadoGoerliProxy = '0x454d870a72e29d5E5697f635128D18077BD04C60';
 export const ovmGasPriceOracleContract = '0x420000000000000000000000000000000000000F';
+export const txJobAttempts = 3;
 export const gasLimits = {
   [RelayerJobType.TORNADO_WITHDRAW]: 390000,
   [RelayerJobType.WITHDRAW_WITH_EXTRA]: 700000,

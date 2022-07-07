@@ -8,6 +8,7 @@ import { RedisStore } from '../modules/redis';
 import { ConfigService } from '../services/config.service';
 import { relayerProcessor } from './relayer.processor';
 import { healthProcessor } from './health.processor';
+import { txJobAttempts } from '../config';
 
 type PriceJobData = Token[];
 type PriceJobReturn = number;
@@ -92,7 +93,7 @@ export class RelayerQueueHelper {
         connection: this.store.client,
         defaultJobOptions: {
           stackTraceLimit: 100,
-          attempts: 3,
+          attempts: txJobAttempts,
           backoff: 1000,
         },
       });

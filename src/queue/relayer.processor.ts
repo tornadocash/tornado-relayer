@@ -3,6 +3,7 @@ import { getTxService } from '../services';
 import { JobStatus } from '../types';
 import { UnrecoverableError } from 'bullmq';
 import { ExecutionError } from '../services/tx.service';
+import { txJobAttempts } from '../config';
 
 class RevertError extends UnrecoverableError {
   code: string;
@@ -26,7 +27,7 @@ export const relayerProcessor: RelayerProcessor = async (job) => {
     const txData = await txService.prepareTxData(withdrawalData);
     return await txService.sendTx(txData);
   } catch (e) {
-    if (e instanceof ExecutionError && e.code === 'REVERTED') {
+    if ((e instanceof ExecutionError && e.code === 'REVERTED') || job.attemptsMade === txJobAttempts) {
       await job.update({ ...job.data, status: JobStatus.FAILED });
       throw new RevertError(e.message, e.code);
     }
