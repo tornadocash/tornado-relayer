@@ -152,7 +152,11 @@ export class TxService {
     const [fee, refund] = [args[4], args[5]].map(BigNumber.from);
     const gasPrice = await this.getGasPrice();
     // TODO check refund value
-    let operationCost = gasPrice.mul(this.gasLimit);
+    let gasLimit = this.gasLimit;
+    if (!this.config.isLightMode) {
+      gasLimit = gasLimits[RelayerJobType.TORNADO_WITHDRAW];
+    }
+    let operationCost = gasPrice.mul(gasLimit);
 
     if (netId === ChainIds.optimism) {
       const l1Fee = await this.getL1Fee(data, gasPrice);
