@@ -26,11 +26,12 @@ export const tornadoServiceFee = Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE
 export const rewardAccount = process.env.REWARD_ACCOUNT;
 export const governanceAddress = '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce';
 export const tornadoGoerliProxy = '0x454d870a72e29d5E5697f635128D18077BD04C60';
+export const ovmGasPriceOracleContract = '0x420000000000000000000000000000000000000F';
 export const gasLimits = {
   [RelayerJobType.TORNADO_WITHDRAW]: 390000,
-  WITHDRAW_WITH_EXTRA: 700000,
-  [RelayerJobType.MINING_REWARD]: 455000,
-  [RelayerJobType.MINING_WITHDRAW]: 400000,
+  [RelayerJobType.WITHDRAW_WITH_EXTRA]: 700000,
+  [RelayerJobType.OP_TORNADO_WITHDRAW]: 440000,
+  [RelayerJobType.ARB_TORNADO_WITHDRAW]: 1900000,
 };
 // export const minimumBalance = '1000000000000000000';
 // export const minimumTornBalance = '30000000000000000000';

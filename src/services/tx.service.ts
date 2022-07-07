@@ -1,17 +1,19 @@
 import { TransactionData, TxManager } from 'tx-manager';
 import { GasPriceOracle } from 'gas-price-oracle';
 import { Provider } from '@ethersproject/providers';
+import { serialize } from '@ethersproject/transactions';
 import { formatEther, parseUnits } from 'ethers/lib/utils';
 import { BigNumber, BigNumberish, BytesLike } from 'ethers';
 import { ProxyLightABI, TornadoProxyABI } from '../contracts';
-import { BASE_FEE_RESERVE_PERCENTAGE, CONFIRMATIONS, gasLimits, MAX_GAS_PRICE, tornadoServiceFee } from '../config';
-import { JobStatus, RelayerJobType } from '../types';
+import { BASE_FEE_RESERVE_PERCENTAGE, CONFIRMATIONS, gasLimits, MAX_GAS_PRICE, netId, tornadoServiceFee } from '../config';
+import { ChainIds, JobStatus, RelayerJobType } from '../types';
 import { PriceService } from './price.service';
 import { Job } from 'bullmq';
 import { RelayerJobData } from '../queue';
 import { ConfigService } from './config.service';
 import { container, injectable } from 'tsyringe';
 import { parseJSON } from '../modules/utils';
+import { getOvmGasPriceOracle } from '../modules/contracts';
 
 export type WithdrawalData = {
   contract: string;
@@ -34,6 +36,7 @@ export class TxService {
     this._currentJob = value;
   }
 
+  gasLimit: number;
   txManager: TxManager;
   tornadoProxy: TornadoProxyABI | ProxyLightABI;
   oracle: GasPriceOracle;
@@ -44,17 +47,33 @@ export class TxService {
     const { privateKey, rpcUrl, netId } = this.config;
     this.tornadoProxy = this.config.proxyContract;
     this.provider = this.tornadoProxy.provider;
+    const gasPriceOracleConfig = {
+      defaultRpc: rpcUrl,
+      chainId: netId,
+      fallbackGasPrices: this.config?.fallbackGasPrices,
+    };
     this.txManager = new TxManager({
       privateKey,
       rpcUrl,
       config: { THROW_ON_REVERT: true, CONFIRMATIONS, MAX_GAS_PRICE, BASE_FEE_RESERVE_PERCENTAGE },
+      gasPriceOracleConfig,
       provider: this.provider,
     });
-    this.oracle = new GasPriceOracle({
-      defaultRpc: rpcUrl,
-      chainId: netId,
-      fallbackGasPrices: this.config?.fallbackGasPrices,
-    });
+    this.oracle = new GasPriceOracle(gasPriceOracleConfig);
+    switch (netId) {
+      case ChainIds.ethereum:
+      case ChainIds.goerli:
+        this.gasLimit = gasLimits[RelayerJobType.WITHDRAW_WITH_EXTRA];
+        break;
+      case ChainIds.optimism:
+        this.gasLimit = gasLimits[RelayerJobType.OP_TORNADO_WITHDRAW];
+        break;
+      case ChainIds.arbitrum:
+        this.gasLimit = gasLimits[RelayerJobType.ARB_TORNADO_WITHDRAW];
+        break;
+      default:
+        this.gasLimit = gasLimits[RelayerJobType.TORNADO_WITHDRAW];
+    }
   }
 
   async updateJobData(data: Partial<RelayerJobData>) {
@@ -103,18 +122,42 @@ export class TxService {
       value: args[5],
       to: this.tornadoProxy.address,
       data: calldata,
-      gasLimit: gasLimits['WITHDRAW_WITH_EXTRA'],
+      gasLimit: this.gasLimit,
     };
   }
 
-  async checkTornadoFee({ args, contract }: WithdrawalData) {
+  async getL1Fee(data: WithdrawalData, gasPrice: BigNumber) {
+    const { contract, proof, args } = data;
+    const ovmOracle = getOvmGasPriceOracle();
+    const calldata = this.tornadoProxy.interface.encodeFunctionData('withdraw', [contract, proof, ...args]);
+    const nonce = await this.config.wallet.getTransactionCount();
+    const tx = serialize({
+      nonce,
+      type: 0,
+      data: calldata,
+      chainId: netId,
+      value: data.args[5],
+      to: this.tornadoProxy.address,
+      gasLimit: this.gasLimit,
+      gasPrice: BigNumber.from(gasPrice),
+    });
+    return await ovmOracle.getL1Fee(tx);
+  }
+
+  async checkTornadoFee(data: WithdrawalData) {
+    const { contract, args } = data;
     const instance = this.config.getInstance(contract);
     if (!instance) throw new Error('Instance not found');
     const { currency, amount, decimals } = instance;
     const [fee, refund] = [args[4], args[5]].map(BigNumber.from);
     const gasPrice = await this.getGasPrice();
     // TODO check refund value
-    const operationCost = gasPrice.mul(gasLimits[RelayerJobType.TORNADO_WITHDRAW]);
+    let operationCost = gasPrice.mul(this.gasLimit);
+
+    if (netId === ChainIds.optimism) {
+      const l1Fee = await this.getL1Fee(data, gasPrice);
+      operationCost = operationCost.add(l1Fee);
+    }
 
     const serviceFee = parseUnits(amount, decimals)
       .mul(`${tornadoServiceFee * 1e10}`)

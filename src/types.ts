@@ -1,7 +1,8 @@
 export enum RelayerJobType {
   TORNADO_WITHDRAW = 'TORNADO_WITHDRAW',
-  MINING_REWARD = 'MINING_REWARD',
-  MINING_WITHDRAW = 'MINING_WITHDRAW',
+  WITHDRAW_WITH_EXTRA = 'WITHDRAW_WITH_EXTRA',
+  OP_TORNADO_WITHDRAW = 'OP_TORNADO_WITHDRAW',
+  ARB_TORNADO_WITHDRAW = 'ARB_TORNADO_WITHDRAW',
 }
 
 export enum JobStatus {
@@ -19,6 +20,7 @@ export type Token = { address: string; decimals: number; symbol?: string };
 export enum ChainIds {
   'kardia' = 0,
   'ethereum' = 1,
+  'goerli' = 5,
   'ubiq' = 8,
   'optimism' = 10,
   'songbird' = 19,
