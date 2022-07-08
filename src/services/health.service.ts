@@ -80,10 +80,10 @@ export class HealthService {
   }
 
   async saveError(e, jobId?: string) {
-    await this.store.client.zadd('errors:code', 'INCR', 1, e?.code || 'RUNTIME_ERROR');
+    await this.store.client.zadd('errors:code', 'INCR', 1, e.code || 'RUNTIME_ERROR');
     await this.store.client.zadd('errors:log', 'INCR', 1, e.message);
 
-    if (e?.code === 'REVERTED' || e?.code === 'SEND_ERROR') {
+    if (e.code === 'REVERTED' || e.code === 'SEND_ERROR') {
       const jobUrl = `${this.config.host}/v1/jobs/${jobId}`;
       await this.pushAlert({
         message: `${e.message} \n ${jobUrl}`,

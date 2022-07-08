@@ -8,8 +8,9 @@ export const priceWorker = async () => {
   const healthService = getHealthService();
 
   const price = new PriceQueueHelper();
+  console.log(price.queue.name, 'worker started');
+
   price.scheduler.on('stalled', (jobId, prev) => console.log({ jobId, prev }));
-  console.log('price worker', price.queue.name);
   price.worker.on('active', () => console.log('worker active'));
   price.worker.on('completed', async (job, result) => {
     console.log(`Job ${job.name} completed with result: `, result);
@@ -22,6 +23,7 @@ export const relayerWorker = async () => {
   const relayer = new RelayerQueueHelper();
   const healthService = getHealthService();
   console.log(relayer.queue.name, 'worker started');
+
   relayer.worker.on('completed', (job, result) => {
     console.log(`Job ${job.id} completed with result: `, result);
   });
@@ -33,7 +35,6 @@ export const relayerWorker = async () => {
 };
 
 export const healthWorker = async () => {
-  console.log('health worker starting');
   await configService.init();
   const health = new HealthQueueHelper();
   console.log(health.queue.name, 'worker started');

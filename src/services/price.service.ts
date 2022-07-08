@@ -51,15 +51,15 @@ export class PriceService {
   }
 
   async getPrice(currency: string) {
-    return await this.store.client.hget('prices', currency);
+    return this.store.client.hget('prices', currency);
   }
 
   async getPrices() {
-    return await this.store.client.hgetall('prices');
+    return this.store.client.hgetall('prices');
   }
 
   async savePrices(prices: Record<string, string>) {
-    return await this.store.client.hset('prices', prices);
+    return this.store.client.hset('prices', prices);
   }
 }
 

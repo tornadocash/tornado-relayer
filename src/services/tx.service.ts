@@ -60,6 +60,7 @@ export class TxService {
       provider: this.provider,
     });
     this.oracle = new GasPriceOracle(gasPriceOracleConfig);
+
     switch (netId) {
       case ChainIds.ethereum:
       case ChainIds.goerli:

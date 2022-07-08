@@ -12,7 +12,7 @@ import {
   tornadoGoerliProxy,
   tornToken,
 } from '../config';
-import { Token } from '../types';
+import { ChainIds, Token } from '../types';
 import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract, getTornTokenContract } from '../modules/contracts';
 import { resolve } from '../modules';
 import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../contracts';
@@ -56,7 +56,7 @@ export class ConfigService {
   constructor(private store: RedisStore) {
     this.netIdKey = `netId${this.netId}`;
     this.queueName = `relayer_${this.netId}`;
-    this.isLightMode = ![1, 5].includes(netId);
+    this.isLightMode = ![ChainIds.ethereum, ChainIds.goerli].includes(netId);
     this.host = host;
     this.instances = instances[this.netIdKey];
     this.provider = getProvider(false);
@@ -85,7 +85,6 @@ export class ConfigService {
 
   private _fillInstanceMap() {
     if (!this.instances) throw new Error('config mismatch, check your environment variables');
-    // TODO
     for (const [currency, { instanceAddress, symbol, decimals }] of Object.entries(this.instances)) {
       for (const [amount, address] of Object.entries(instanceAddress)) {
         if (address)
@@ -123,23 +122,23 @@ export class ConfigService {
       } else {
         this._proxyAddress = tornadoGoerliProxy;
         this.nativeCurrency = 'eth';
-        if (this.netId === 1) {
+        if (this.netId === ChainIds.ethereum) {
           this._proxyAddress = await resolve(torn.tornadoRouter.address);
         }
         this._proxyContract = getTornadoProxyContract(this._proxyAddress);
+        this.tokens = [tornToken, ...Object.values(torn.instances['netId1'])]
+          .map<Token>(
+            (el) =>
+              el.tokenAddress && {
+                address: getAddress(el.tokenAddress),
+                decimals: el.decimals,
+                symbol: el.symbol,
+              },
+          )
+          .filter(Boolean);
       }
       // TODO get instances from registry
 
-      this.tokens = [tornToken, ...Object.values(torn.instances['netId1'])]
-        .map<Token>(
-          (el) =>
-            el.tokenAddress && {
-              address: getAddress(el.tokenAddress),
-              decimals: el.decimals,
-              symbol: el.symbol,
-            },
-        )
-        .filter(Boolean);
       console.log(
         'Configuration completed\n',
         `-- netId: ${this.netId}\n`,
@@ -156,9 +155,9 @@ export class ConfigService {
   async clearRedisState() {
     const queueKeys = (await this.store.client.keys('bull:*')).filter((s) => s.indexOf('relayer') === -1);
     const errorKeys = await this.store.client.keys('errors:*');
-    // const alertKeys = await this.store.client.keys('alerts:*');
-    const keys = [...queueKeys, ...errorKeys];
-    if (keys.length) await this.store.client.del([...queueKeys, ...errorKeys]);
+    const alertKeys = await this.store.client.keys('alerts:*');
+    const keys = [...queueKeys, ...errorKeys, ...alertKeys];
+    if (keys.length) await this.store.client.del(keys);
   }
 
   getInstance(address: string) {
