@@ -31,6 +31,7 @@ export const relayerProcessor: RelayerProcessor = async (job) => {
       await job.update({ ...job.data, status: JobStatus.FAILED });
       throw new RevertError(e.message, e.code);
     }
+    await job.update({ ...job.data, status: JobStatus.RESUBMITTED });
     throw e;
   }
 };
