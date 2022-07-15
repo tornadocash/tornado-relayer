@@ -2453,9 +2453,10 @@ functions-have-names@^1.2.2:
   resolved "https://registry.yarnpkg.com/functions-have-names/-/functions-have-names-1.2.3.tgz#0404fe4ee2ba2f607f0e0ec3c80bae994133b834"
   integrity sha512-xckBUXyTIqT97tq2x2AMb+g163b5JFysYk0x4qxNFwbfQkmNZoiRHb6sPzI9/QV33WeuvVYBUIiD4NzNIyqaRQ==
 
-"gas-price-oracle@git+https://github.com/peppersec/gas-price-oracle.git#ead2fc80aae67caf20ce6d867018853e601a406d":
+gas-price-oracle@^0.5.0:
   version "0.5.0"
-  resolved "git+https://github.com/peppersec/gas-price-oracle.git#ead2fc80aae67caf20ce6d867018853e601a406d"
+  resolved "https://registry.yarnpkg.com/gas-price-oracle/-/gas-price-oracle-0.5.0.tgz#b29f83c97bb4b091a08da7c10e2d1e5888bbade4"
+  integrity sha512-um0cmd9qxGkDHirV1HcrjQ4vedVxK7u+uMeJIjo2yUMYe6T46ihbMnRncF5tfP9deU5hPHJ8FvVRZY1Y/CKkLQ==
   dependencies:
     axios "^0.21.2"
     bignumber.js "^9.0.0"
@@ -4778,13 +4779,14 @@ tweetnacl@^1.0.3:
   resolved "https://registry.yarnpkg.com/tweetnacl/-/tweetnacl-1.0.3.tgz#ac0af71680458d8a6378d0d0d050ab1407d35596"
   integrity sha512-6rt+RN7aOi1nGMyC4Xa5DdYiukl2UWCbcJft7YhxReBGQD7OAM8Pbxw6YMo4r2diNEA8FEmu32YOn9rhaiE5yw==
 
-"tx-manager@git+https://github.com/tornadocash/tx-manager.git#c67fdbc1b68332f19282c165f917c6e14b0382fd":
-  version "0.4.8"
-  resolved "git+https://github.com/tornadocash/tx-manager.git#c67fdbc1b68332f19282c165f917c6e14b0382fd"
+tx-manager@^0.4.9:
+  version "0.4.9"
+  resolved "https://registry.yarnpkg.com/tx-manager/-/tx-manager-0.4.9.tgz#234a672ae0c5efb00697444896fc5ada3c464462"
+  integrity sha512-sSnLHXD6M8pBi1wqaGRdyAd2ZRMAoB/L5kDXUghJb3WkWx+/T0mM5N4CJ0Uy3FxPG88A8CWnOoaEt0lr/WXkcg==
   dependencies:
     async-mutex "^0.2.4"
     ethers "^5.4.6"
-    gas-price-oracle "git+https://github.com/peppersec/gas-price-oracle.git#ead2fc80aae67caf20ce6d867018853e601a406d"
+    gas-price-oracle "^0.5.0"
     web3-core-promievent "^1.3.0"
 
 type-check@^0.4.0, type-check@~0.4.0:
