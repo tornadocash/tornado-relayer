@@ -13,9 +13,15 @@ import { txJobAttempts } from '../config';
 type PriceJobData = Token[];
 type PriceJobReturn = number;
 
-type HealthJobReturn = void;
-type HealthJobData = null;
+type HealthStatusInfo = { level: 'OK' | 'CRITICAL' | 'WARN'; time: number; type: string; message: string };
 
+type HealthJobReturn =
+  | { tornStatus: HealthStatusInfo; mainStatus: HealthStatusInfo }
+  | { isUpToDate: boolean; lastVersion: string }
+  | { error: string };
+type HealthJobData = null;
+type HealthJobType = 'checkHealth' | 'checkUpdate';
+export type HealthProcessor = Processor<HealthJobData, HealthJobReturn, HealthJobType>;
 export type RelayerJobData = WithdrawalData & {
   id: string;
   status: JobStatus;
@@ -123,8 +129,8 @@ export class RelayerQueueHelper {
 
 @autoInjectable()
 export class HealthQueueHelper {
-  private _queue: Queue<HealthJobData, HealthJobReturn, 'checkHealth'>;
-  private _worker: Worker<HealthJobData, HealthJobReturn, 'checkHealth'>;
+  private _queue: Queue<HealthJobData, HealthJobReturn, HealthJobType>;
+  private _worker: Worker<HealthJobData, HealthJobReturn, HealthJobType>;
   private _scheduler: QueueScheduler;
   interval = 30000;
 
@@ -141,7 +147,7 @@ export class HealthQueueHelper {
 
   get worker() {
     if (!this._worker) {
-      this._worker = new Worker<HealthJobData, HealthJobReturn, 'checkHealth'>('health', healthProcessor, {
+      this._worker = new Worker<HealthJobData, HealthJobReturn, HealthJobType>('health', healthProcessor, {
         connection: this.store.client,
         concurrency: 1,
       });
@@ -151,7 +157,7 @@ export class HealthQueueHelper {
 
   get queue() {
     if (!this._queue) {
-      this._queue = new Queue<HealthJobData, HealthJobReturn, 'checkHealth'>('health', {
+      this._queue = new Queue<HealthJobData, HealthJobReturn, HealthJobType>('health', {
         connection: this.store.client,
         defaultJobOptions: { stackTraceLimit: 100 },
       });
@@ -163,6 +169,12 @@ export class HealthQueueHelper {
     await this.queue.add('checkHealth', null, {
       repeat: {
         every: this.interval,
+        immediately: true,
+      },
+    });
+    await this.queue.add('checkUpdate', null, {
+      repeat: {
+        every: this.interval * 2,
         immediately: true,
       },
     });

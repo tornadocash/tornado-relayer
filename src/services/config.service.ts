@@ -7,13 +7,19 @@ import {
   netId,
   networkConfig,
   privateKey,
+  relayerVersion,
   rpcUrl,
   torn,
   tornadoGoerliProxy,
   tornToken,
 } from '../config';
 import { ChainIds, Token } from '../types';
-import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract, getTornTokenContract } from '../modules/contracts';
+import {
+  getProvider,
+  getTornadoProxyContract,
+  getTornadoProxyLightContract,
+  getTornTokenContract
+} from '../modules/contracts';
 import { resolve } from '../modules';
 import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../contracts';
 import { availableIds, netIds, NetInstances } from 'torn-token';
@@ -56,6 +62,7 @@ export class ConfigService {
   constructor(private store: RedisStore) {
     this.netIdKey = `netId${this.netId}`;
     this.queueName = `relayer_${this.netId}`;
+    this.version = relayerVersion;
     this.isLightMode = ![ChainIds.ethereum, ChainIds.goerli].includes(netId);
     this.host = host;
     this.instances = instances[this.netIdKey];

@@ -1,4 +1,6 @@
 import { autoInjectable, container } from 'tsyringe';
+import compareVersions from 'compare-versions';
+import fetch from 'node-fetch';
 import { ConfigService } from './config.service';
 import { RedisStore } from '../modules/redis';
 import { formatEther } from 'ethers/lib/utils';
@@ -118,6 +120,23 @@ export class HealthService {
     await this.pushAlert(alert);
 
     return alert;
+  }
+
+  async checkUpdate() {
+    console.log('Checking version...');
+    const lastVersion = (
+      await fetch('https://api.github.com/repos/tornadocash/tornado-relayer/releases').then((res) => res.json())
+    )[0]?.tag_name;
+    const isUpToDate = compareVersions(this.config.version, lastVersion) === 0;
+    if (!isUpToDate) {
+      await this.pushAlert({
+        type: 'VERSION_UPDATE_WARN',
+        message: `New version available: ${lastVersion}`,
+        level: 'WARN',
+        time: new Date().getTime(),
+      });
+    }
+    return { isUpToDate, lastVersion };
   }
 
   async check() {
