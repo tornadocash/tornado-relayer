@@ -14,12 +14,7 @@ import {
   tornToken,
 } from '../config';
 import { ChainIds, Token } from '../types';
-import {
-  getProvider,
-  getTornadoProxyContract,
-  getTornadoProxyLightContract,
-  getTornTokenContract
-} from '../modules/contracts';
+import { getProvider, getTornadoProxyContract, getTornadoProxyLightContract, getTornTokenContract } from '../modules/contracts';
 import { resolve } from '../modules';
 import { ERC20Abi, ProxyLightABI, TornadoProxyABI } from '../contracts';
 import { availableIds, netIds, NetInstances } from 'torn-token';

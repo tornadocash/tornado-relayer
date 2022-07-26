@@ -6,7 +6,7 @@ WORKDIR /usr/app
 
 COPY yarn.lock .
 COPY package.json .
-RUN apk update && apk add --no-cache g++ make python3 git openssh && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache g++ make python3 && rm -rf /var/cache/apk/*
 RUN yarn install --network-concurrency 2
 COPY . ./
 
@@ -17,7 +17,7 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 
-RUN apk update && apk add --no-cache g++ make python3 git openssh && rm -rf /var/cache/apk/*
+RUN apk update && apk add --no-cache g++ make python3 && rm -rf /var/cache/apk/*
 
 COPY --from=dev /usr/app/build /app
 COPY --from=dev /usr/app/package.json /app/
