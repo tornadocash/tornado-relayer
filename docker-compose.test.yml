@@ -4,26 +4,26 @@ services:
   server:
     image: tornadocash/relayer:v5.0.0
     restart: always
-    command: 'node app/index.js'
+    command: 'server'
     env_file: .env
     build:
       context: .
       dockerfile: Dockerfile
     ports:
-      - 8000:8000
+      - '8000:8000'
     depends_on: [redis]
 
   txWorker:
     image: tornadocash/relayer:v5.0.0
     restart: unless-stopped
-    command: 'node txWorker.js'
+    command: 'txWorker'
     env_file: .env
     depends_on: [redis]
 
   healthWorker:
     image: tornadocash/relayer:v5.0.0
     restart: unless-stopped
-    command: 'node healthWorker.js'
+    command: 'healthWorker'
     env_file: .env
     depends_on: [redis]
 

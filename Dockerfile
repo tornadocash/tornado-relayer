@@ -19,7 +19,7 @@ WORKDIR /app
 
 RUN apk update && apk add --no-cache g++ make python3 && rm -rf /var/cache/apk/*
 
-COPY --from=dev /usr/app/build /app
+COPY --from=dev /usr/app/ /app
 COPY --from=dev /usr/app/package.json /app/
 COPY --from=dev /usr/app/yarn.lock /app/
 
