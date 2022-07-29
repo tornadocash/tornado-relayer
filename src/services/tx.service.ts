@@ -152,7 +152,6 @@ export class TxService {
     const { currency, amount, decimals } = instance;
     const [fee, refund] = [args[4], args[5]].map(BigNumber.from);
     const gasPrice = await this.getGasPrice();
-    // TODO check refund value
     let gasLimit = this.gasLimit;
     if (!this.config.isLightMode) {
       gasLimit = gasLimits[RelayerJobType.TORNADO_WITHDRAW];

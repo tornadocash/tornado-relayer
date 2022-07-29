@@ -2,8 +2,8 @@ name: build
 
 on:
   push:
-    branches: ['*']
-    tags: ['v[0-9]+.[0-9]+.[0-9]+']
+    branches: [ '*' ]
+    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
   pull_request:
 
 jobs:
@@ -15,85 +15,81 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: 16
-      - run: yarn install --network-concurrency=2
-      #      - run: yarn test
+      - run: yarn install
       - run: yarn lint
-#      - name: Telegram Failure Notification
-#        uses: appleboy/telegram-action@master
-#        if: failure()
-#        with:
-#          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
-#          format: markdown
-#          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-#          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#  TODO: Edit this step
-#  publish:
-#    runs-on: ubuntu-latest
-#    needs: build
-#    if: startsWith(github.ref, 'refs/tags')
-#    steps:
-#      - name: Checkout
-#        uses: actions/checkout@v2
-#
-#      - name: Set vars
-#        id: vars
-#        run: |
-#          echo "::set-output name=version::$(echo ${GITHUB_REF#refs/tags/v})"
-#          echo "::set-output name=repo_name::$(echo ${GITHUB_REPOSITORY#*/})"
-#
-#      - name: Check package.json version vs tag
-#        run: |
-#          [ ${{ steps.vars.outputs.version }} = $(grep '"version":' package.json | grep -o "[0-9.]*") ] || (echo "Git tag doesn't match version in package.json" && false)
-#
-#      - name: Build and push Docker image
-#        uses: docker/build-push-action@v1.1.0
-#        with:
-#          dockerfile: Dockerfile
-#          repository: tornadocash/relayer
-#          tag_with_ref: true
-#          tags: candidate
-#          username: ${{ secrets.DOCKER_USERNAME }}
-#          password: ${{ secrets.DOCKER_TOKEN }}
-#
-#      - name: Telegram Message Notify
-#        uses: appleboy/telegram-action@master
-#        with:
-#          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-#          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#          message: 🚀 Published a [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}) version ${{ steps.vars.outputs.version }} to docker hub
-#          debug: true
-#          format: markdown
-#
-#      - name: Telegram Relayer Channel Notification
-#        uses: appleboy/telegram-action@master
-#        with:
-#          to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
-#          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-#          message: |
-#            🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:mining`.
-#
-#            ❗️Please update your mainnet nodes ❗️
-#            DO NOT TOUCH SIDECHAINS AND NOVA RELAYERS.
-#
-#          debug: true
-#          format: markdown
-#
-#      - name: Discord Relayer Channel Notification
-#        env:
-#          DISCORD_WEBHOOK: ${{ secrets.DISCORD_RELAYER_WEBHOOK }}
-#        uses: Ilshidur/action-discord@master
-#        with:
-#          args: |
-#            🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer:mining`.
-#
-#            ❗️Please update your mainnet nodes ❗️
-#            DO NOT TOUCH SIDECHAINS AND NOVA RELAYERS.
-#
-#      - name: Telegram Failure Notification
-#        uses: appleboy/telegram-action@master
-#        if: failure()
-#        with:
-#          message: ❗ Failed to publish [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}/actions):v${{ steps.vars.outputs.version }} for mainnet because of ${{ github.actor }}
-#          format: markdown
-#          to: ${{ secrets.TELEGRAM_CHAT_ID }}
-#          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      - name: Telegram Failure Notification
+        uses: appleboy/telegram-action@master
+        if: failure()
+        with:
+          message: ❗ Build failed for [${{ github.repository }}](https://github.com/${{ github.repository }}/actions) because of ${{ github.actor }}
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+  publish:
+    runs-on: ubuntu-latest
+    needs: build
+    if: startsWith(github.ref, 'refs/tags')
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set vars
+        id: vars
+        run: |
+          echo "::set-output name=version::$(echo ${GITHUB_REF#refs/tags/v})"
+          echo "::set-output name=repo_name::$(echo ${GITHUB_REPOSITORY#*/})"
+
+      - name: Check package.json version vs tag
+        run: |
+          [ ${{ steps.vars.outputs.version }} = $(grep '"version":' package.json | grep -o "[0-9.]*") ] || (echo "Git tag doesn't match version in package.json" && false)
+
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v1.1.0
+        with:
+          dockerfile: Dockerfile
+          repository: tornadocash/relayer
+          tag_with_ref: true
+          tags: candidate
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Telegram Message Notify
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: 🚀 Published a [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}) version ${{ steps.vars.outputs.version }} to docker hub
+          debug: true
+          format: markdown
+
+      - name: Telegram Relayer Channel Notification
+        uses: appleboy/telegram-action@master
+        with:
+          to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          message: |
+            🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer`.
+
+            ❗️Please update your mainnet nodes ❗️
+
+          debug: true
+          format: markdown
+
+      - name: Discord Relayer Channel Notification
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_RELAYER_WEBHOOK }}
+        uses: Ilshidur/action-discord@master
+        with:
+          args: |
+            🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer`.
+
+            ❗️Please update your mainnet nodes ❗️
+
+      - name: Telegram Failure Notification
+        uses: appleboy/telegram-action@master
+        if: failure()
+        with:
+          message: ❗ Failed to publish [${{ steps.vars.outputs.repo_name }}](https://github.com/${{ github.repository }}/actions):v${{ steps.vars.outputs.version }} for mainnet because of ${{ github.actor }}
+          format: markdown
+          to: ${{ secrets.TELEGRAM_CHAT_ID }}
+          token: ${{ secrets.TELEGRAM_BOT_TOKEN }}

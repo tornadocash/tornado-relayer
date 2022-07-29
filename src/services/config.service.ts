@@ -139,8 +139,6 @@ export class ConfigService {
           )
           .filter(Boolean);
       }
-      // TODO get instances from registry
-
       console.log(
         'Configuration completed\n',
         `-- netId: ${this.netId}\n`,

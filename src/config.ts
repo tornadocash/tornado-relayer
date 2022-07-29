@@ -16,7 +16,6 @@ export const mainnetRpcUrl = process.env.MAINNET_RPC_URL || process.env.ORACLE_R
 export const oracleRpcUrl = process.env.ORACLE_RPC_URL || 'https://mainnet.infura.io/';
 export const offchainOracleAddress = '0x07D91f5fb9Bf7798734C3f606dB065549F6893bb';
 export const multiCallAddress = '0xda3c19c6fe954576707fa24695efb830d9cca1ca';
-export const aggregatorAddress = process.env.AGGREGATOR;
 export const privateKey = process.env.PRIVATE_KEY;
 export const instances = tornConfig.instances;
 export const torn = tornConfig;
@@ -24,7 +23,6 @@ export const port = Number(process.env.APP_PORT) || 8000;
 export const host = isProduction ? 'https://' + process.env.VIRTUAL_HOST : `http://localhost:${port}`;
 export const tornadoServiceFee = Number(process.env.REGULAR_TORNADO_WITHDRAW_FEE);
 export const rewardAccount = process.env.REWARD_ACCOUNT;
-export const governanceAddress = '0x5efda50f22d34F262c29268506C5Fa42cB56A1Ce';
 export const tornadoGoerliProxy = '0x454d870a72e29d5E5697f635128D18077BD04C60';
 export const ovmGasPriceOracleContract = '0x420000000000000000000000000000000000000F';
 export const txJobAttempts = 3;
@@ -34,11 +32,8 @@ export const gasLimits = {
   [RelayerJobType.OP_TORNADO_WITHDRAW]: 440000,
   [RelayerJobType.ARB_TORNADO_WITHDRAW]: 1900000,
 };
-// export const minimumBalance = '1000000000000000000';
-// export const minimumTornBalance = '30000000000000000000';
-// TODO: remove this
-export const minimumBalance = '10000000000000000';
-export const minimumTornBalance = '0';
+export const minimumBalance = '1000000000000000000';
+export const minimumTornBalance = '30000000000000000000';
 export const baseFeeReserve = Number(process.env.BASE_FEE_RESERVE_PERCENTAGE);
 export const tornToken = {
   tokenAddress: '0x77777FeDdddFfC19Ff86DB637967013e6C6A116C',
