@@ -2,8 +2,8 @@ name: build
 
 on:
   push:
-    branches: [ '*' ]
-    tags: [ 'v[0-9]+.[0-9]+.[0-9]+' ]
+    branches: ['*']
+    tags: ['v[0-9]+.[0-9]+.[0-9]+']
   pull_request:
 
 jobs:
@@ -68,9 +68,9 @@ jobs:
           to: ${{ secrets.TELEGRAM_RELAYER_CHAT_ID }}
           token: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           message: |
-            🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer`.
+            🚀 Published a new version of the relayer node service to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer`.
 
-            ❗️Please update your mainnet nodes ❗️
+            ❗️Please update your nodes ❗️
 
           debug: true
           format: markdown
@@ -81,9 +81,9 @@ jobs:
         uses: Ilshidur/action-discord@master
         with:
           args: |
-            🚀 Published a new version of the relayer node service for mainnet to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer`.
+            🚀 Published a new version of the relayer node service to docker hub: `tornadocash/relayer:v${{ steps.vars.outputs.version }}` and `tornadocash/relayer`.
 
-            ❗️Please update your mainnet nodes ❗️
+            ❗️Please update your nodes ❗️
 
       - name: Telegram Failure Notification
         uses: appleboy/telegram-action@master
