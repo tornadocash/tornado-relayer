@@ -81,7 +81,7 @@ tornado.cash UI from submitting your request over http connection
 ## Run geth node
 
 It is strongly recommended that you use your own RPC node. Instruction on how to run full node with `geth` can be
-found [here](https://github.com/feshchenkod/rpc-nodes).
+found [here](https://github.com/tornadocash/rpc-nodes).
 
 ## Monitoring
 
