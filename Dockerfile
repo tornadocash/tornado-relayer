@@ -7,7 +7,7 @@ WORKDIR /usr/app
 COPY yarn.lock .
 COPY package.json .
 RUN apk update && apk add --no-cache g++ make python3 && rm -rf /var/cache/apk/*
-RUN yarn install --network-concurrency 2
+RUN yarn install
 COPY . ./
 
 RUN yarn build
