@@ -66,7 +66,6 @@ const statusResponseSchema = {
     netId: { type: 'integer' },
     version: { type: 'string' },
     tornadoServiceFee: { type: 'number' },
-    miningServiceFee: { type: 'number' },
     currentQueue: { type: 'number' },
     ethPrices: { type: 'object', additionalProperties: true },
     instances: { type: 'object', additionalProperties: true },

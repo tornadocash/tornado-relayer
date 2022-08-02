@@ -23,6 +23,6 @@ COPY --from=dev /usr/app/ /app
 COPY --from=dev /usr/app/package.json /app/
 COPY --from=dev /usr/app/yarn.lock /app/
 
-RUN yarn install --network-concurrency 2 && yarn cache clean -f
+RUN yarn install && yarn cache clean -f
 
 ENTRYPOINT ["yarn"]

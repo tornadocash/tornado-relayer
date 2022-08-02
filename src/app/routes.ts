@@ -30,7 +30,6 @@ export function mainHandler(server: FastifyInstance, options, next) {
       netId: configService.netId,
       ethPrices,
       tornadoServiceFee,
-      miningServiceFee: 0,
       version,
       health,
       currentQueue,

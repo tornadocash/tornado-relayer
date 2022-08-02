@@ -2,7 +2,7 @@ version: '3.7'
 
 services:
   server:
-    image: tornadocash/relayer:v5.0.0
+    image: tornadocash/relayer
     restart: always
     command: 'server'
     env_file: .env
@@ -14,14 +14,14 @@ services:
     depends_on: [redis]
 
   txWorker:
-    image: tornadocash/relayer:v5.0.0
+    image: tornadocash/relayer
     restart: unless-stopped
     command: 'txWorker'
     env_file: .env
     depends_on: [redis]
 
   healthWorker:
-    image: tornadocash/relayer:v5.0.0
+    image: tornadocash/relayer
     restart: unless-stopped
     command: 'healthWorker'
     env_file: .env

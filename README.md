@@ -63,10 +63,9 @@ docker-compose up -d --pull
 1. `yarn`
 2. `cp .env.example .env`
 3. Modify `.env` as needed
-4. `docker-compose up -d redis`
-5. `yarn start`
-6. Go to `http://127.0.0.1:8000`
-7. In order to execute withdraw request, you can run following command
+4. `yarn start`
+5. Go to `http://127.0.0.1:8000`
+6. In order to execute withdraw request, you can run following command
 
 ```bash
 curl -X POST -H 'content-type:application/json' --data '<input data>' http://127.0.0.1:8000/v1/tornadoWithdraw
