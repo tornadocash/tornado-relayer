@@ -7,3 +7,4 @@ kovan.*
 dump.rdb
 .idea
 build
+.nyc_output
