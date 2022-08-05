@@ -124,9 +124,9 @@ export class HealthService {
 
   async checkUpdate() {
     console.log('Checking version...');
-    const lastVersion = (
-      await fetch('https://api.github.com/repos/tornadocash/tornado-relayer/releases').then((res) => res.json())
-    )[0]?.tag_name;
+    const lastVersion =
+      (await fetch('https://api.github.com/repos/tornadocash/tornado-relayer/releases').then((res) => res.json()))[0]?.tag_name ||
+      this.config.version;
     const isUpToDate = compareVersions(this.config.version, lastVersion) === 0;
     if (!isUpToDate) {
       await this.pushAlert({
