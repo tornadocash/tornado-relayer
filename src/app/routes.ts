@@ -1,9 +1,9 @@
 import { FastifyInstance } from 'fastify';
-import { jobsSchema, statusSchema, withdrawBodySchema, withdrawSchema } from './schema';
-import { FromSchema } from 'json-schema-to-ts';
+import { jobsSchema, statusSchema, withdrawSchema } from './schema';
 import { relayerVersion, rewardAccount, tornadoServiceFee } from '../config';
 import { configService, getHealthService, getJobService, getPriceService } from '../services';
 import { RelayerJobType } from '../types';
+import { WithdrawalData } from '../services/tx.service';
 
 export function mainHandler(server: FastifyInstance, options, next) {
   const jobService = getJobService();
@@ -46,14 +46,10 @@ export function relayerHandler(server: FastifyInstance, options, next) {
     res.send({ ...job.data, failedReason: job.failedReason });
   });
 
-  server.post<{ Body: FromSchema<typeof withdrawBodySchema> }>(
-    '/tornadoWithdraw',
-    { schema: withdrawSchema },
-    async (req, res) => {
-      console.log(req.body);
-      const id = await jobService.postJob(RelayerJobType.TORNADO_WITHDRAW, req.body);
-      res.send({ id });
-    },
-  );
+  server.post<{ Body: WithdrawalData }>('/tornadoWithdraw', { schema: withdrawSchema }, async (req, res) => {
+    server.log.info(`Withdrawal request: ${JSON.stringify(req.body)}`);
+    const id = await jobService.postJob(RelayerJobType.TORNADO_WITHDRAW, req.body);
+    res.send({ id });
+  });
   next();
 }

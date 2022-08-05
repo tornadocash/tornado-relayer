@@ -174,7 +174,7 @@ export class HealthQueueHelper {
     });
     await this.queue.add('checkUpdate', null, {
       repeat: {
-        every: this.interval * 2,
+        every: this.interval * 2 * 60, // once per hour
         immediately: true,
       },
     });
